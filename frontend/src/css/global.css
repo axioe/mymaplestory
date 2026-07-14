@@ -1,0 +1,91 @@
+/*
+  메이플스토리 전용 폰트(Maplestory OTF/TTF)를 넥슨에서 받아
+  아래 경로에 넣어주세요: src/assets/fonts/
+  (다운로드: https://maplestory.nexon.com/Media/Font)
+  Light / Bold 두 웨이트를 기본으로 잡아두었습니다. 실제 파일명에 맞게 src 경로만 조정하면 됩니다.
+*/
+@font-face {
+  font-family: 'Maplestory';
+  src: url('../assets/fonts/Maplestory Light.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Maplestory';
+  src: url('../assets/fonts/Maplestory Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  /* ---- 모험 일지(Book UI) 팔레트 ---- */
+  --color-canvas: #f8f4ec;      /* 배경 */
+  --color-page: #fef9f1;        /* 종이 */
+  --color-ink: #4e342e;         /* 다크 브라운 - 본문/외곽선 */
+  --color-accent: #e76f51;      /* 단풍 - 로고/버튼/포인트 */
+  --color-accent-2: #d4a017;    /* 금색 - 보조 강조 */
+  --color-line: #4e342e;
+  --shadow-book: 0 24px 50px rgba(78, 52, 46, 0.22);
+
+  /* 하위 호환용 별칭 */
+  --color-bg: var(--color-canvas);
+  --color-accent-soft: #b85e3c; /* 브라운 - 부드러운 강조 */
+
+  --font-display: 'Maplestory', 'Pretendard', sans-serif;
+  --font-body: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --color-canvas: #211714;
+  --color-page: #2f2420;
+  --color-ink: #f5ecdf;
+  --color-accent: #ef8368;
+  --color-accent-2: #e3b840;
+  --color-line: #f5ecdf;
+  --shadow-book: 0 24px 50px rgba(0, 0, 0, 0.55);
+
+  --color-bg: var(--color-canvas);
+  --color-accent-soft: #c97350;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

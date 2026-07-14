@@ -1,0 +1,46 @@
+.character-card-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 3rem;
+}
+
+.character-card-page__back {
+  margin-bottom: 1.5rem;
+  color: var(--color-accent);
+}
+
+.character-card-page__error {
+  color: #c0392b;
+}
+
+.character-card {
+  width: 300px;
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: var(--color-page);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-book);
+  text-align: center;
+}
+
+.character-card__image {
+  width: 96px;
+  height: 96px;
+}
+
+.character-card__name {
+  margin: 0.5rem 0;
+}
+
+.character-card__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 0.4rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.character-card__stats dt {
+  opacity: 0.7;
+}

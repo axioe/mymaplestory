@@ -1,0 +1,120 @@
+:root {
+  /* 배경/텍스트는 사이트 공통 팔레트를 따르고, 테두리는 새 팔레트의 금색을 사용 */
+  --char-card-bg: var(--color-page);
+  --char-card-border: var(--color-accent-2);
+  --char-card-accent: var(--color-accent);
+  --char-card-text: var(--color-ink);
+  --char-card-portrait-bg: var(--color-canvas);
+}
+
+.char-card {
+  position: relative;
+  width: min(340px, 88vw);
+  padding: 2.8rem 1.8rem 2rem;
+  border-radius: 22px;
+  background: var(--char-card-bg);
+  border: 2px solid var(--char-card-border);
+  box-shadow: var(--shadow-book);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.char-card__badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #eac877, var(--color-accent-2));
+  color: #3a2a0a;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.char-card__portrait {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--char-card-border);
+  background: var(--char-card-portrait-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 0.9rem;
+}
+
+.char-card__portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.char-card__nickname {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--char-card-text);
+}
+
+.char-card__line {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--char-card-accent);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.char-card__line--stats {
+  color: var(--char-card-text);
+  font-weight: 400;
+  margin-top: 0.6rem;
+}
+
+.char-card__line--stats strong {
+  color: var(--char-card-accent);
+  font-weight: 700;
+}
+
+.char-card__dot {
+  color: var(--char-card-border);
+  opacity: 0.6;
+}
+
+.char-card__gap {
+  display: inline-block;
+  width: 1.4rem;
+}
+
+.char-card-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  padding: 4rem 1rem 6rem;
+}
+
+.char-card-page__next {
+  background: transparent;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.char-card-page__reset {
+  background: transparent;
+  border: none;
+  color: var(--color-ink);
+  opacity: 0.6;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
