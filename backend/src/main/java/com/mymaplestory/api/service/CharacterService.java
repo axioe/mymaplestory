@@ -3,6 +3,7 @@ package com.mymaplestory.api.service;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterCardResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
+import com.mymaplestory.api.dto.LevelHistoryResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,5 +24,12 @@ public class CharacterService {
         CharacterBasicDto basic = nexonApiService.getBasicInfo(ocid, apiKey);
         CharacterPopularityDto popularity = nexonApiService.getPopularity(ocid, apiKey);
         return CharacterCardResponse.of(basic, popularity);
+    }
+
+    /**
+     * 아카이브 - 레벨 카테고리용 레벨/경험치 히스토리.
+     */
+    public LevelHistoryResponse getLevelHistory(String characterName, String apiKey, int days) {
+        return nexonApiService.getLevelHistory(characterName, apiKey, days);
     }
 }

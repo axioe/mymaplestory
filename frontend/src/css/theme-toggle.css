@@ -1,0 +1,63 @@
+.theme-toggle {
+  position: fixed;
+  top: 1.5rem;
+  /* 홈 버튼(우측 상단, 56px 폭) 바로 왼쪽에 나란히 배치 */
+  right: calc(1.5rem + 56px + 0.75rem);
+  z-index: 50;
+  width: 52px;
+  height: 28px;
+  align-self: center;
+  margin-top: 14px; /* 56px 홈 버튼과 세로 중앙이 맞도록 */
+  border-radius: 999px;
+  border: 2px solid var(--color-line);
+  background: var(--color-canvas);
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.35s ease;
+}
+
+.theme-toggle__icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-ink);
+  opacity: 0.55;
+  display: flex;
+  transition: opacity 0.3s ease;
+}
+
+.theme-toggle__icon--sun {
+  left: 6px;
+}
+
+.theme-toggle__icon--moon {
+  right: 6px;
+}
+
+.theme-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.35s ease;
+}
+
+.theme-toggle--dark .theme-toggle__thumb {
+  transform: translateX(24px);
+  background: var(--color-accent-2);
+}
+
+.theme-toggle--dark .theme-toggle__icon--sun {
+  opacity: 0.3;
+}
+
+.theme-toggle:not(.theme-toggle--dark) .theme-toggle__icon--moon {
+  opacity: 0.3;
+}
