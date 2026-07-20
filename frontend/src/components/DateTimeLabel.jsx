@@ -6,16 +6,16 @@ function format(date) {
   const yyyy = date.getFullYear()
   const mm = String(date.getMonth() + 1).padStart(2, '0')
   const dd = String(date.getDate()).padStart(2, '0')
-  const hh = String(date.getHours()).padStart(2, '0')
-  const mi = String(date.getMinutes()).padStart(2, '0')
-  return `${yyyy}.${mm}.${dd} ${days[date.getDay()]} ${hh}:${mi}`
+  return `${yyyy}.${mm}.${dd} ${days[date.getDay()]}`
 }
 
 export default function DateTimeLabel() {
   const [now, setNow] = useState(new Date())
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000)
+    // 시간은 더 이상 표시하지 않으므로 자정에 한 번씩만 갱신되면 충분하지만,
+    // 구현을 간단히 하기 위해 10분 간격으로 날짜만 다시 계산한다.
+    const id = setInterval(() => setNow(new Date()), 10 * 60_000)
     return () => clearInterval(id)
   }, [])
 

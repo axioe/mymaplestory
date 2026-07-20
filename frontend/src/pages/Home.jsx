@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import Book from '../components/Book.jsx'
-import MapleLeafIcon from '../components/MapleLeafIcon.jsx'
 import TickDivider from '../components/TickDivider.jsx'
 import DateTimeLabel from '../components/DateTimeLabel.jsx'
 import CategoryPanel from '../components/CategoryPanel.jsx'
@@ -118,7 +117,6 @@ export default function Home() {
       </div>
 
       <div className="home__content">
-        <MapleLeafIcon size={72} />
         <p className="display home__my">MY</p>
 
         <div className="home__divider">
@@ -161,14 +159,14 @@ export default function Home() {
   const resultContent = (
     <>
       <p className="home__result-note">
-        이 페이지에는 메이플스토리가 제공한 메이플스토리 서체가 적용되어 있습니다.
+        이 페이지에는 메이플스토리가 제공한
+        메이플스토리 서체가 적용되어 있습니다.
       </p>
       <div className="home__result-datetime">
         <DateTimeLabel />
       </div>
 
       <div className="home__result-content">
-        <MapleLeafIcon size={56} />
         <p className="display home__result-my">MY</p>
         <div className="home__result-divider">
           <TickDivider width={220} />

@@ -6,7 +6,7 @@
 import '../css/book.css'
 
 const VB_W = 860
-const VB_H = 520
+const VB_H = 640
 
 function bookOutlinePath(x, y, w, h, r, dip, hump) {
   const cx = x + w / 2
