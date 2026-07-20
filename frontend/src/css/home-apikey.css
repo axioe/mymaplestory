@@ -1,0 +1,25 @@
+.home__apikey-form {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.home__apikey-input {
+  padding: 0.75rem 1.2rem;
+  border-radius: 10px;
+  border: 2px solid var(--color-line);
+  background: var(--color-page);
+  color: var(--color-ink);
+  width: 320px;
+  font-size: 0.95rem;
+}
+
+.home__apikey-hint {
+  margin-top: 0.7rem;
+  font-size: 0.8rem;
+  opacity: 0.65;
+  max-width: 380px;
+  text-align: center;
+}

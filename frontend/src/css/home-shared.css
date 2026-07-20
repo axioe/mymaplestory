@@ -1,0 +1,88 @@
+/* start / apikey 페이지 공통 */
+.home__datetime {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.home__content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 콘텐츠 양에 따라 중앙 정렬 위치가 달라지면 페이지 전환 시 MY 로고가 흔들려 보이므로,
+     아래 콘텐츠 길이와 무관하게 항상 같은 높이에서 시작하도록 위쪽에 고정한다. */
+  justify-content: flex-start;
+  padding-top: 10%;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.home__my {
+  margin: 0;
+  font-size: 3.4rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.home__divider {
+  margin: 0.7rem 0;
+}
+
+.home__title {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--color-ink);
+  letter-spacing: 0.02em;
+}
+
+.home__action-spacer {
+  height: 1rem;
+}
+
+.home__caption {
+  margin-top: 1.1rem;
+  font-size: 0.95rem;
+  opacity: 0.8;
+  letter-spacing: 0.03em;
+}
+
+/* start(시작하기)와 apikey(확인) 버튼이 같이 쓰는 기본 버튼 스타일 */
+.home__apikey-submit {
+  padding: 0.75rem 2rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-line);
+  background: var(--color-accent);
+  color: var(--color-page);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.home__apikey-submit:disabled {
+  opacity: 0.5;
+}
+
+/* apikey / select / card 세 페이지 모두에서 에러 메시지에 재사용 */
+.home__apikey-error {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #c0392b;
+}
+
+/* select 페이지 제목과 아카이브(레벨) 제목이 함께 쓰는 스타일 */
+.home__select-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+/* select 페이지 안내문과 아카이브 안내문이 함께 쓰는 스타일 */
+.home__select-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}

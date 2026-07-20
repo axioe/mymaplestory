@@ -393,28 +393,40 @@ export default function Home() {
           {levelHistoryError && <p className="home__apikey-error">{levelHistoryError}</p>}
 
           {!levelHistoryLoading && !levelHistoryError && levelHistory && (
-            levelHistory.levelUps.length > 0 ? (
+            <>
+              {levelHistory.levelUps.length > 0 ? (
+                <div className="home__level-ups">
+                  {levelHistory.levelUps.map((lv) => (
+                    <span key={lv.date} className="home__level-up-chip">
+                      {lv.date} · {lv.fromLevel} → {lv.toLevel}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="home__select-hint">최근 {levelHistory.days}일 동안 레벨업 기록이 없어요.</p>
+              )}
+
               <div className="home__level-table-wrap">
                 <table className="home__level-table">
                   <thead>
                     <tr>
                       <th>날짜</th>
-                      <th>변경된 레벨</th>
+                      <th>레벨</th>
+                      <th>경험치 진행률</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {levelHistory.levelUps.map((lv) => (
-                      <tr key={lv.date}>
-                        <td>{lv.date}</td>
-                        <td>{lv.toLevel}</td>
+                    {levelHistory.daily.map((row) => (
+                      <tr key={row.date}>
+                        <td>{row.date}</td>
+                        <td>{row.level}</td>
+                        <td>{row.expRate ? `${row.expRate}%` : '-'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            ) : (
-              <p className="home__select-hint">최근 {levelHistory.days}일 동안 레벨업 기록이 없어요.</p>
-            )
+            </>
           )}
         </div>
       ) : (

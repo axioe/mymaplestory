@@ -1,0 +1,108 @@
+.home__select-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+.home__server-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.home__server-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.home__server-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  border: 2px solid var(--color-line);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.home__server-button--open {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+.home__server-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.home__select-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  max-width: 520px;
+}
+
+.home__select-chip {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-line);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.home__select-chip:hover {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+.home__select-form {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+
+.home__select-input {
+  padding: 0.7rem 1.1rem;
+  border-radius: 10px;
+  border: 2px solid var(--color-line);
+  background: var(--color-page);
+  color: var(--color-ink);
+  width: 260px;
+  font-size: 0.9rem;
+}
+
+.home__select-submit {
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-line);
+  background: var(--color-accent);
+  color: var(--color-page);
+  font-weight: 700;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,93 @@
+.home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  perspective: 3400px;
+}
+
+.home__flip-stage {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* 처음 진입할 때 "반으로 접혀있다가 펼쳐지는" 인상을 주는 인트로.
+   실제 페이지 넘김(.home__flip-right--turning)과는 별개로, 책 전체를
+   책등을 축으로 살짝 접었다 펴는 느낌으로 한 번만 재생한다. */
+.home__flip-stage--intro {
+  transform-origin: center center;
+  animation: home-book-unfold 1s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes home-book-unfold {
+  0% {
+    transform: perspective(3400px) rotateY(28deg) scaleX(0.55);
+    opacity: 0.3;
+  }
+  100% {
+    transform: perspective(3400px) rotateY(0deg) scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* 맨 아래 레이어: 다음 화면 내용, 항상 완성된 상태로 깔려있고
+   위의 왼쪽/오른쪽 레이어가 정확히 절반씩 덮고 있어 평소엔 안 보인다. */
+.home__flip-base {
+  position: relative;
+  z-index: 1;
+}
+
+.home__flip-left,
+.home__flip-right {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+}
+
+/* 왼쪽 절반: 책등 왼쪽만 보이도록 자르고, 회전하지 않는다 */
+.home__flip-left {
+  clip-path: inset(0 50% 0 0);
+}
+
+/* 오른쪽 절반: 책등 오른쪽만 보이도록 자르고, 책등(가운데)을 축으로 이 부분만 회전한다 */
+.home__flip-right {
+  clip-path: inset(0 0 0 50%);
+  z-index: 3;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+  transition: transform 1.6s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.home__flip-right--turning {
+  transform: rotateY(-178deg);
+}
+
+/* 회전하는 동안 그라데이션 음영이 은은하게 스쳐 지나가며 종이가 넘어가는 입체감을 더한다.
+   납작한 검은 사각형이 아니라 결이 있는 그라데이션 + 완만한 opacity 곡선으로 처리해서
+   더 자연스럽게 사라졌다 나타나도록 했다. */
+.home__flip-right--turning::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0) 70%);
+  animation: home-flip-shade 1.6s cubic-bezier(0.2, 0, 0, 1);
+  pointer-events: none;
+}
+
+@keyframes home-flip-shade {
+  0% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
