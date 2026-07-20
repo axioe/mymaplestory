@@ -2,10 +2,9 @@ import MapleLeafIcon from './MapleLeafIcon.jsx'
 import '../css/character-summary-card.css'
 
 /**
- * API 키 인증 이후 첫 페이지에 표시하는 캐릭터 카드.
- * 지금은 프론트엔드 UI만 먼저 만드는 단계라 mock 데이터를 기본값으로 사용한다.
- * 백엔드 연동 시에는 CharacterCard 응답(basic + popularity)을 이 컴포넌트가 받는
- * `character` prop 형태로 매핑해서 넘겨주면 된다.
+ * 캐릭터 정보 카드.
+ * - bare=false(기본): 어두운 배경 카드 형태 (독립적으로 배치될 때)
+ * - bare=true: 테두리/배경 없이 내용만 표시 (책 페이지 안에 바로 얹을 때)
  */
 const MOCK_CHARACTER = {
   nickname: 'axioe15',
@@ -17,12 +16,12 @@ const MOCK_CHARACTER = {
   imageUrl: null,
 }
 
-export default function CharacterSummaryCard({ character = MOCK_CHARACTER }) {
+export default function CharacterSummaryCard({ character = MOCK_CHARACTER, bare = false }) {
   const { nickname, worldName, level, jobName, popularity, guildName, imageUrl } = character
 
   return (
-    <div className="char-card">
-      <div className="char-card__badge">MY MAPLESTORY</div>
+    <div className={bare ? 'char-card char-card--bare' : 'char-card'}>
+      {!bare && <div className="char-card__badge">MY MAPLESTORY</div>}
 
       <div className="char-card__portrait">
         {imageUrl ? (

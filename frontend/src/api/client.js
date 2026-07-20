@@ -22,6 +22,14 @@ export async function fetchCharacterCard(characterName) {
   return data
 }
 
+export async function fetchLevelHistory(characterName, days = 14) {
+  const { data } = await apiClient.get(
+    `/characters/${encodeURIComponent(characterName)}/level-history`,
+    { params: { days } }
+  )
+  return data
+}
+
 // 아직 localStorage에 저장되지 않은 키를 검증할 때 쓰므로,
 // 인터셉터에 기대지 않고 헤더를 직접 지정한다.
 export async function validateApiKey(apiKey) {
