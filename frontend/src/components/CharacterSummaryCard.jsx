@@ -27,7 +27,7 @@ export default function CharacterSummaryCard({ character = MOCK_CHARACTER, bare 
         {imageUrl ? (
           <img src={imageUrl} alt={nickname} className="char-card__portrait-img" />
         ) : (
-          <MapleLeafIcon size={48} color="var(--char-card-accent)" />
+          <MapleLeafIcon size={80} color="var(--char-card-accent)" />
         )}
       </div>
 
