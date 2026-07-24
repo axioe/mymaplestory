@@ -22,11 +22,26 @@ export async function fetchCharacterCard(characterName) {
   return data
 }
 
-export async function fetchLevelHistory(characterName, days = 14) {
+export async function fetchLevelHistory(characterName, days = 30) {
   const { data } = await apiClient.get(
     `/characters/${encodeURIComponent(characterName)}/level-history`,
     { params: { days } }
   )
+  return data
+}
+
+export async function fetchNotices() {
+  const { data } = await apiClient.get('/notices')
+  return data
+}
+
+export async function fetchEventNotices() {
+  const { data } = await apiClient.get('/notices/events')
+  return data
+}
+
+export async function fetchScheduler(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/scheduler`)
   return data
 }
 

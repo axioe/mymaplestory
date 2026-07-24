@@ -4,7 +4,7 @@ import { fetchLevelHistory } from '../api/client.js'
 /**
  * enabled가 true일 때만(아카이브에서 "레벨" 카테고리를 보고 있을 때) 조회한다.
  */
-export function useLevelHistory(enabled, characterName, days = 14) {
+export function useLevelHistory(enabled, characterName, days = 30) {
   const [levelHistory, setLevelHistory] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)

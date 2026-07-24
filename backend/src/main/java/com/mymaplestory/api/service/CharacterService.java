@@ -4,6 +4,7 @@ import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterCardResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
+import com.mymaplestory.api.dto.SchedulerResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,5 +32,12 @@ public class CharacterService {
      */
     public LevelHistoryResponse getLevelHistory(String characterName, String apiKey, int days) {
         return nexonApiService.getLevelHistory(characterName, apiKey, days);
+    }
+
+    /**
+     * 아카이브 - 스케줄러 카테고리용 달성 현황.
+     */
+    public SchedulerResponse getScheduler(String characterName, String apiKey) {
+        return nexonApiService.getScheduler(characterName, apiKey);
     }
 }

@@ -2,6 +2,7 @@ package com.mymaplestory.api.controller;
 
 import com.mymaplestory.api.dto.CharacterCardResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
+import com.mymaplestory.api.dto.SchedulerResponse;
 import com.mymaplestory.api.service.CharacterService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,18 +35,32 @@ public class CharacterController {
     }
 
     /**
-     * 예: GET /api/characters/체리톡톡/level-history?days=14
-     * 최근 days일간 레벨/경험치 진행률을 하루씩 조회해서 표 + 레벨업 날짜 목록으로 내려준다.
-     * days는 늘어날수록 넥슨 API를 그만큼 여러 번 순차 호출하므로 응답이 느려질 수 있어
-     * 최대 60일로 제한한다.
+     * 예: GET /api/characters/체리톡톡/level-history?days=30
+     * 가장 최근 레벨업이 언제였는지(날짜 + 그날짜로부터 며칠 지났는지)를 찾아서 내려준다.
+     * days는 "몇 일 전까지 거슬러 올라가며 찾아볼지"를 뜻한다. 늘어날수록 넥슨 API를
+     * 그만큼 여러 번 순차 호출하므로 응답이 느려질 수 있어 최대 60일로 제한한다.
+     * 그 범위 안에서 레벨업 기록을 못 찾으면 levelUpDate가 null로 내려간다.
      */
     @GetMapping("/{characterName}/level-history")
     public LevelHistoryResponse getLevelHistory(
             @PathVariable String characterName,
-            @RequestParam(defaultValue = "14") int days,
+            @RequestParam(defaultValue = "30") int days,
             @RequestHeader(value = "X-Nexon-Api-Key", required = false) String apiKey
     ) {
         int safeDays = Math.max(1, Math.min(days, 60));
         return characterService.getLevelHistory(characterName, apiKey, safeDays);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/scheduler
+     * 캐릭터의 메이플 스케줄러 달성 현황 중 daily_contents, boss_contents,
+     * weekly_boss_clear_count, weekly_boss_clear_limit_count만 내려준다.
+     */
+    @GetMapping("/{characterName}/scheduler")
+    public SchedulerResponse getScheduler(
+            @PathVariable String characterName,
+            @RequestHeader(value = "X-Nexon-Api-Key", required = false) String apiKey
+    ) {
+        return characterService.getScheduler(characterName, apiKey);
     }
 }

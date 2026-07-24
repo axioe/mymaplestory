@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymaplestory.api.config.NexonApiProperties;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
-import com.mymaplestory.api.dto.LevelHistoryEntry;
+import com.mymaplestory.api.dto.EventNoticeListResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
-import com.mymaplestory.api.dto.LevelUpEvent;
 import com.mymaplestory.api.dto.NexonErrorResponse;
+import com.mymaplestory.api.dto.NoticeItem;
+import com.mymaplestory.api.dto.NoticeListResponse;
 import com.mymaplestory.api.dto.OcidResponse;
+import com.mymaplestory.api.dto.SchedulerResponse;
 import com.mymaplestory.api.exception.ApiKeyRequiredException;
 import com.mymaplestory.api.exception.InvalidApiKeyException;
 import com.mymaplestory.api.exception.NexonApiException;
@@ -18,7 +20,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -192,34 +194,131 @@ public class NexonApiService {
      * 캐릭터 생성일 이전 날짜는 데이터가 없어 조회 실패하는데, 그런 날짜는 결과에서 건너뛴다.
      * days가 클수록 넥슨 API를 그만큼 여러 번 순차 호출하므로 응답이 느려질 수 있다.
      */
-    public LevelHistoryResponse getLevelHistory(String characterName, String requestApiKey, int days) {
+    /**
+     * "가장 최근 레벨업이 언제였는지"를 찾는다.
+     * 오늘 레벨을 기준으로, 어제부터 하루씩 거슬러 올라가면서 레벨이 달라지는(=아직 그
+     * 레벨이 아니었던) 첫 날짜를 찾는다. 그 다음 날이 바로 레벨업한 날짜가 된다.
+     *
+     * maxLookbackDays를 넘어서도 레벨이 그대로라면(오래 정체 중이거나 만렙 등),
+     * 이 조회 범위 안에서는 레벨업 시점을 못 찾았다는 뜻으로 levelUpDate=null을 반환한다.
+     * maxLookbackDays가 클수록 넥슨 API를 그만큼 여러 번 순차 호출하므로 느려질 수 있다.
+     */
+    public LevelHistoryResponse getLevelHistory(String characterName, String requestApiKey, int maxLookbackDays) {
         String ocid = getOcid(characterName, requestApiKey);
 
-        List<LevelHistoryEntry> daily = new ArrayList<>();
-        LocalDate cursor = LocalDate.now().minusDays(days);
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        CharacterBasicDto today = getBasicInfo(ocid, requestApiKey, null);
+        Integer currentLevel = today != null ? today.characterLevel() : null;
 
-        while (!cursor.isAfter(yesterday)) {
-            try {
-                CharacterBasicDto basic = getBasicInfo(ocid, requestApiKey, cursor);
-                if (basic != null && basic.characterLevel() != null) {
-                    daily.add(new LevelHistoryEntry(cursor.toString(), basic.characterLevel(), basic.characterExpRate()));
+        String levelUpDate = null;
+        Long daysSinceLevelUp = null;
+
+        if (currentLevel != null) {
+            LocalDate cursor = LocalDate.now().minusDays(1);
+            LocalDate earliestAllowed = LocalDate.now().minusDays(maxLookbackDays);
+
+            while (!cursor.isBefore(earliestAllowed)) {
+                Integer levelAtCursor = null;
+                try {
+                    CharacterBasicDto basic = getBasicInfo(ocid, requestApiKey, cursor);
+                    if (basic != null) {
+                        levelAtCursor = basic.characterLevel();
+                    }
+                } catch (NexonApiException ignored) {
+                    // 캐릭터 생성 이전 날짜 등, 데이터가 없는 날짜 - 아직 이 레벨이 아니었던 것으로 간주한다.
                 }
-            } catch (NexonApiException ignored) {
-                // 캐릭터 생성 이전 날짜 등, 데이터가 없는 날짜는 건너뛴다.
-            }
-            cursor = cursor.plusDays(1);
-        }
 
-        List<LevelUpEvent> levelUps = new ArrayList<>();
-        for (int i = 1; i < daily.size(); i++) {
-            Integer prevLevel = daily.get(i - 1).level();
-            Integer currLevel = daily.get(i).level();
-            if (prevLevel != null && currLevel != null && !currLevel.equals(prevLevel)) {
-                levelUps.add(new LevelUpEvent(daily.get(i).date(), prevLevel, currLevel));
+                if (levelAtCursor == null || !levelAtCursor.equals(currentLevel)) {
+                    LocalDate foundDate = cursor.plusDays(1);
+                    levelUpDate = foundDate.toString();
+                    daysSinceLevelUp = ChronoUnit.DAYS.between(foundDate, LocalDate.now());
+                    break;
+                }
+                cursor = cursor.minusDays(1);
             }
         }
 
-        return new LevelHistoryResponse(characterName, days, levelUps);
+        return new LevelHistoryResponse(characterName, currentLevel, levelUpDate, daysSinceLevelUp, maxLookbackDays);
+    }
+
+    private static final String NOTICE_BOARD_URL = "https://maplestory.nexon.com/News/Notice";
+    private static final String EVENT_BOARD_URL = "https://maplestory.nexon.com/News/Event";
+
+    /**
+     * url이 응답에 없을 경우, 최소한 공지/이벤트 게시판으로는 이동할 수 있게 대체 링크를 채워준다.
+     */
+    private List<NoticeItem> fillMissingUrl(List<NoticeItem> items, String fallbackBoardUrl) {
+        if (items == null) return List.of();
+        return items.stream()
+                .map(item -> item.url() != null && !item.url().isBlank()
+                        ? item
+                        : new NoticeItem(item.noticeId(), item.title(), item.date(), fallbackBoardUrl))
+                .toList();
+    }
+
+    /**
+     * 메이플스토리 공지사항 목록.
+     * 주의: /notice 경로는 오프라인 환경이라 넥슨 공식 문서로 재확인하지 못했다.
+     */
+    public List<NoticeItem> getNotices(String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        try {
+            NoticeListResponse response = nexonRestClient.get()
+                    .uri("/notice")
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(NoticeListResponse.class);
+            return fillMissingUrl(response != null ? response.notice() : null, NOTICE_BOARD_URL);
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (notice): " + e.getStatusCode(), e);
+        }
+    }
+
+    /**
+     * 메이플스토리 진행 중 이벤트 목록.
+     * 주의: /notice-event 경로는 오프라인 환경이라 넥슨 공식 문서로 재확인하지 못했다.
+     */
+    public List<NoticeItem> getEventNotices(String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        try {
+            EventNoticeListResponse response = nexonRestClient.get()
+                    .uri("/notice-event")
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(EventNoticeListResponse.class);
+            return fillMissingUrl(response != null ? response.eventNotice() : null, EVENT_BOARD_URL);
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (notice-event): " + e.getStatusCode(), e);
+        }
+    }
+
+    /**
+     * 캐릭터의 메이플 스케줄러 달성 현황 (요청하신 4개 필드만).
+     * 주의: /character/scheduler 경로는 다른 character/* 엔드포인트 명명 규칙을 따른
+     * 추정이다. 실제 경로가 다르면 이 메서드의 .path(...) 값만 고치면 된다.
+     */
+    public SchedulerResponse getScheduler(String characterName, String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        String ocid = getOcid(characterName, requestApiKey);
+        try {
+            return nexonRestClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/character/scheduler")
+                            .queryParam("ocid", ocid)
+                            .build())
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(SchedulerResponse.class);
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (scheduler): " + e.getStatusCode(), e);
+        }
     }
 }

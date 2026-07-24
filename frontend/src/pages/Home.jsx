@@ -5,6 +5,8 @@ import { validateApiKey, fetchCharacterCard } from '../api/client.js'
 import { useBookFlip, PAGE_ORDER } from '../hooks/useBookFlip.js'
 import { useCharacterCardData } from '../hooks/useCharacterCardData.js'
 import { useLevelHistory } from '../hooks/useLevelHistory.js'
+import { useNotices } from '../hooks/useNotices.js'
+import { useScheduler } from '../hooks/useScheduler.js'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/ApiKeyPage.jsx'
@@ -17,6 +19,13 @@ const CATEGORIES = [
   { key: 'loot', label: '전리품' },
   { key: 'level', label: '레벨' },
   { key: 'story', label: '스토리' },
+  { key: 'event', label: '이벤트' },
+  { key: 'notice', label: '공지사항' },
+  // 넥슨 오픈 API의 "스케줄러 정보 조회" 연동 (https://openapi.nexon.com/ko/game/maplestory/?id=57).
+  // 요청받은 4개 필드(daily_contents, boss_contents, weekly_boss_clear_count,
+  // weekly_boss_clear_limit_count)만 사용한다. 경로(/character/scheduler)는
+  // 다른 character/* 엔드포인트 명명 규칙을 따른 추정이라 다를 수 있음 - ArchiveView 참고.
+  { key: 'scheduler', label: '스케줄러' },
 ]
 
 /**
@@ -30,7 +39,8 @@ export default function Home() {
   const location = useLocation()
   const {
     isKeySet,
-    savedCharacters,
+    recentCharacters,
+    maxRecentCharacters,
     selectedCharacter,
     hasSelectedCharacter,
     setApiKey,
@@ -56,6 +66,14 @@ export default function Home() {
   )
   const { levelHistory, loading: levelHistoryLoading, error: levelHistoryError } = useLevelHistory(
     archiveView && active === 'level' && hasSelectedCharacter,
+    selectedCharacter
+  )
+  const { notices, loading: noticesLoading, error: noticesError } = useNotices(
+    archiveView && (active === 'event' || active === 'notice'),
+    active
+  )
+  const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
+    archiveView && active === 'scheduler' && hasSelectedCharacter,
     selectedCharacter
   )
 
@@ -133,7 +151,8 @@ export default function Home() {
     if (p === 'select') {
       return (
         <CharacterSelectPage
-          savedCharacters={savedCharacters}
+          recentCharacters={recentCharacters}
+          maxRecentCharacters={maxRecentCharacters}
           onSelectCharacter={handleSelectCharacter}
           onAddCharacter={handleAddCharacter}
         />
@@ -164,6 +183,12 @@ export default function Home() {
         levelHistory={levelHistory}
         levelHistoryLoading={levelHistoryLoading}
         levelHistoryError={levelHistoryError}
+        notices={notices}
+        noticesLoading={noticesLoading}
+        noticesError={noticesError}
+        scheduler={scheduler}
+        schedulerLoading={schedulerLoading}
+        schedulerError={schedulerError}
       />
     )
   }

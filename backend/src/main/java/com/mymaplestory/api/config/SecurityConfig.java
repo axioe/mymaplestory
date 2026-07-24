@@ -26,7 +26,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // REST API + 별도 프론트엔드이므로 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/characters/**",
+                        .requestMatchers("/api/auth/**", "/api/characters/**", "/api/notices/**",
                                 "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );

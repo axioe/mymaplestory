@@ -1,15 +1,17 @@
 package com.mymaplestory.api.dto;
 
-import java.util.List;
-
 /**
  * GET /api/characters/{name}/level-history 응답.
- * levelUps: 조회 구간 안에서 레벨이 오른 날짜 + 변경된 레벨만 담는다.
- * (일자별 경험치 진행률 표는 더 이상 내려주지 않는다 - 화면에서 필요 없어짐)
+ * "가장 최근 레벨업이 언제였는지"만 알려준다.
+ *
+ * levelUpDate: 레벨업한 날짜 (조회 범위 lookbackDays 안에서 못 찾았으면 null)
+ * daysSinceLevelUp: 그 날짜로부터 오늘까지 며칠 지났는지 (levelUpDate가 null이면 null)
  */
 public record LevelHistoryResponse(
         String characterName,
-        int days,
-        List<LevelUpEvent> levelUps
+        Integer currentLevel,
+        String levelUpDate,
+        Long daysSinceLevelUp,
+        int lookbackDays
 ) {
 }
