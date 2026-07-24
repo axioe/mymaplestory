@@ -42,12 +42,12 @@ export default function BookFlipStage({ pageKeys, flipBookRef, startFlipIndex, o
       <HTMLFlipBook
         ref={flipBookRef}
         width={800}
-        height={600}
+        height={720}
         size="stretch"
         minWidth={320}
         maxWidth={1000}
-        minHeight={420}
-        maxHeight={750}
+        minHeight={480}
+        maxHeight={880}
         showCover={true}
         usePortrait={true}
         maxShadowOpacity={0.35}
