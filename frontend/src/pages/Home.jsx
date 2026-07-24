@@ -51,8 +51,10 @@ export default function Home() {
     clearApiKey,
   } = useApiKey()
 
-  // 이미 키/캐릭터가 저장되어 있다면(재방문) 표지부터 다시 보여줄 필요 없음
-  const initialPage = isKeySet ? (hasSelectedCharacter ? 'card' : 'select') : 'start'
+  // 매번 실행할 때는 항상 표지(시작하기)부터 시작한다. 키/캐릭터가 로컬에 저장돼
+  // 있어도 재사용하지 않고 이 화면부터 다시 거치게 한다 (원래는 재방문 시 건너뛰게
+  // 했었는데, 항상 시작 화면부터 보여달라는 요청으로 변경).
+  const initialPage = 'start'
   const { page, flipBookRef, flipTo, jumpTo, handleFlip, startFlipIndex } = useBookFlip(initialPage)
 
   const [checking, setChecking] = useState(false)

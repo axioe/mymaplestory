@@ -130,8 +130,43 @@
 .home__notice-bookmark-title {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 공지사항 전용 - 페이지 하단에 붙는 한 줄짜리 자동 슬라이드 티커 */
+.home__notice-ticker {
+  margin-top: auto;
+  width: 100%;
+  max-width: 380px;
+  height: 44px;
+  overflow: hidden;
+  border-top: 2px solid var(--color-line);
+  padding-top: 0.7rem;
+}
+
+.home__notice-ticker-item {
+  display: block;
+  text-decoration: none;
+  color: var(--color-ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: home-notice-slide-down 0.5s ease;
+}
+
+@keyframes home-notice-slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* 아카이브 페이지 하단에 고정되는 뒤로가기 링크 */

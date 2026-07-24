@@ -267,7 +267,9 @@ public class NexonApiService {
                     .header(NEXON_AUTH_HEADER, apiKey)
                     .retrieve()
                     .body(NoticeListResponse.class);
-            return fillMissingUrl(response != null ? response.notice() : null, NOTICE_BOARD_URL);
+            List<NoticeItem> notices = fillMissingUrl(response != null ? response.notice() : null, NOTICE_BOARD_URL);
+            // 화면에서는 최근 5개만 보여주므로, 여기서 미리 잘라서 응답 크기도 줄인다.
+            return notices.size() > 5 ? notices.subList(0, 5) : notices;
         } catch (RestClientResponseException e) {
             if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");

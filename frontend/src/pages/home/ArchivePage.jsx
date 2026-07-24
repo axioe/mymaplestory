@@ -1,9 +1,48 @@
+import { useEffect, useState } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import CategorySelector from './CategorySelector.jsx'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 
 const QUEST_STATE_LABEL = { '0': '기타', '1': '진행 중', '2': '완료' }
+
+/**
+ * 공지사항 전용 - 한 줄씩 보여주다가 일정 시간이 지나면 자동으로 다음 항목으로
+ * 슬라이드된다. key를 항목마다 다르게 줘서, 바뀔 때마다 React가 새로 마운트하고
+ * 그 덕분에 CSS 애니메이션(slide-down)이 매번 처음부터 재생된다.
+ */
+function NoticeTicker({ items }) {
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    setIndex(0)
+    if (!items || items.length <= 1) return
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % items.length)
+    }, 3500)
+    return () => clearInterval(timer)
+  }, [items])
+
+  if (!items || items.length === 0) {
+    return <p className="home__select-hint">지금은 표시할 항목이 없어요.</p>
+  }
+
+  const current = items[index % items.length]
+
+  return (
+    <div className="home__notice-ticker">
+      <a
+        key={current.noticeId ?? current.title}
+        href={current.url}
+        target="_blank"
+        rel="noreferrer"
+        className="home__notice-ticker-item"
+      >
+        {current.title}
+      </a>
+    </div>
+  )
+}
 
 function DailyContentList({ items }) {
   if (!items || items.length === 0) {
@@ -75,7 +114,6 @@ export default function ArchivePage({
   schedulerError,
 }) {
   const activeLabel = categories.find((c) => c.key === active)?.label
-  const isNoticeCategory = active === 'event' || active === 'notice'
 
   return (
     <>
@@ -114,9 +152,18 @@ export default function ArchivePage({
             )
           )}
         </div>
-      ) : isNoticeCategory ? (
+      ) : active === 'notice' ? (
         <div className="home__notice-page">
-          <h2 className="display home__select-title">{active === 'event' ? '진행 중 이벤트' : '공지사항'}</h2>
+          <h2 className="display home__select-title">공지사항</h2>
+
+          {noticesLoading && <p>불러오는 중...</p>}
+          {noticesError && <p className="home__apikey-error">{noticesError}</p>}
+
+          {!noticesLoading && !noticesError && notices && <NoticeTicker items={notices} />}
+        </div>
+      ) : active === 'event' ? (
+        <div className="home__notice-page">
+          <h2 className="display home__select-title">진행 중 이벤트</h2>
 
           {noticesLoading && <p>불러오는 중...</p>}
           {noticesError && <p className="home__apikey-error">{noticesError}</p>}
