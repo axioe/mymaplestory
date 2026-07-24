@@ -8,6 +8,32 @@
   gap: 1.2rem;
 }
 
+/* JPG로 캡쳐되는 영역 - 스타일은 안 주고 카드 크기만큼만 감싼다 */
+.home__card-capture {
+  display: inline-block;
+}
+
+.home__card-download {
+  padding: 0.55rem 1.4rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-line);
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.home__card-download:hover {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+.home__card-download:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .home__card-next {
   background: transparent;
   border: none;

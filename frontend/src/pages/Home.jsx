@@ -12,7 +12,7 @@ import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/ApiKeyPage.jsx'
 import CharacterSelectPage from './home/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/CharacterCardPage.jsx'
-import ArchiveView from './home/ArchiveView.jsx'
+import ArchivePage from './home/ArchivePage.jsx'
 
 const CATEGORIES = [
   { key: 'boss', label: '보스' },
@@ -24,16 +24,17 @@ const CATEGORIES = [
   // 넥슨 오픈 API의 "스케줄러 정보 조회" 연동 (https://openapi.nexon.com/ko/game/maplestory/?id=57).
   // 요청받은 4개 필드(daily_contents, boss_contents, weekly_boss_clear_count,
   // weekly_boss_clear_limit_count)만 사용한다. 경로(/character/scheduler)는
-  // 다른 character/* 엔드포인트 명명 규칙을 따른 추정이라 다를 수 있음 - ArchiveView 참고.
+  // 다른 character/* 엔드포인트 명명 규칙을 따른 추정이라 다를 수 있음 - ArchivePage 참고.
   { key: 'scheduler', label: '스케줄러' },
 ]
 
 /**
  * 전체 흐름을 "책 페이지를 넘기는" 하나의 동작으로 통일한다.
- * 페이지 순서: start(표지) -> apikey(키 입력) -> select(캐릭터 선택) -> card(캐릭터 카드)
+ * 페이지 순서: start(표지) -> apikey(키 입력) -> select(캐릭터 선택) -> card(캐릭터 카드) -> archive(아카이브)
+ * 아카이브도 이제 같은 플립 시스템의 한 페이지라서, 캐릭터 선택부터 이어지는 디자인/전환이
+ * 그대로 유지된다 (예전엔 별도 레이아웃으로 분리되어 있었음).
  * 실제 애니메이션/레이아웃은 각 하위 컴포넌트(components/book, pages/home/*)로 분리되어 있고,
  * 이 파일은 그 조각들을 연결하는 오케스트레이션만 담당한다.
- * (아카이브 화면은 레이아웃이 완전히 달라서 이 플립 시스템 밖에서 별도로 전환한다.)
  */
 export default function Home() {
   const location = useLocation()
@@ -58,22 +59,21 @@ export default function Home() {
   const [keyError, setKeyError] = useState(null)
 
   const [active, setActive] = useState('boss')
-  const [archiveView, setArchiveView] = useState(false)
 
   const { cardData, setCardData, cardLoading, cardError } = useCharacterCardData(
     hasSelectedCharacter,
     selectedCharacter
   )
   const { levelHistory, loading: levelHistoryLoading, error: levelHistoryError } = useLevelHistory(
-    archiveView && active === 'level' && hasSelectedCharacter,
+    page === 'archive' && active === 'level' && hasSelectedCharacter,
     selectedCharacter
   )
   const { notices, loading: noticesLoading, error: noticesError } = useNotices(
-    archiveView && (active === 'event' || active === 'notice'),
+    page === 'archive' && (active === 'event' || active === 'notice'),
     active
   )
   const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
-    archiveView && active === 'scheduler' && hasSelectedCharacter,
+    page === 'archive' && active === 'scheduler' && hasSelectedCharacter,
     selectedCharacter
   )
 
@@ -82,7 +82,6 @@ export default function Home() {
   // 화면을 강제로 되돌린다. API 키까지 지우진 않고, 캐릭터 선택 단계로 되돌아간다.
   useEffect(() => {
     if (!location.state?.resetAt) return
-    setArchiveView(false)
     clearSelectedCharacter()
     jumpTo(isKeySet ? 'select' : 'start')
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +126,6 @@ export default function Home() {
   const handleReset = () => {
     clearApiKey()
     jumpTo('start')
-    setArchiveView(false)
   }
 
   // "다른 캐릭터 선택" - 카드 페이지에서 선택 페이지로 되돌아간다.
@@ -164,33 +162,32 @@ export default function Home() {
           cardData={cardData}
           loading={cardLoading}
           error={cardError}
-          onGoArchive={() => setArchiveView(true)}
+          onGoArchive={() => flipTo('archive')}
           onBackToSelect={handleBackToSelect}
           onReset={handleReset}
         />
       )
     }
+    if (p === 'archive') {
+      return (
+        <ArchivePage
+          categories={CATEGORIES}
+          active={active}
+          onSelectCategory={setActive}
+          onBack={() => flipTo('card')}
+          levelHistory={levelHistory}
+          levelHistoryLoading={levelHistoryLoading}
+          levelHistoryError={levelHistoryError}
+          notices={notices}
+          noticesLoading={noticesLoading}
+          noticesError={noticesError}
+          scheduler={scheduler}
+          schedulerLoading={schedulerLoading}
+          schedulerError={schedulerError}
+        />
+      )
+    }
     return null
-  }
-
-  if (archiveView) {
-    return (
-      <ArchiveView
-        categories={CATEGORIES}
-        active={active}
-        onSelectCategory={setActive}
-        onBack={() => setArchiveView(false)}
-        levelHistory={levelHistory}
-        levelHistoryLoading={levelHistoryLoading}
-        levelHistoryError={levelHistoryError}
-        notices={notices}
-        noticesLoading={noticesLoading}
-        noticesError={noticesError}
-        scheduler={scheduler}
-        schedulerLoading={schedulerLoading}
-        schedulerError={schedulerError}
-      />
-    )
   }
 
   return (

@@ -3,28 +3,23 @@ import '../../css/home-shared.css'
 import '../../css/home-select.css'
 
 /**
- * savedCharacters는 정상적으로는 {name, worldName} 객체 배열이지만,
- * 혹시 예전 버전(문자열 배열)이 섞여 있어도 "undefined"가 화면에 뜨지 않도록 방어한다.
+ * recentCharacters는 정상적으로는 {name, worldName} 객체 배열이지만,
+ * 혹시 예전 버전(문자열 배열)이거나 props 자체가 안 넘어와 undefined/null인 경우에도
+ * 화면이 죽지 않도록 방어한다.
  */
-function groupByServer(savedCharacters) {
-  return savedCharacters.reduce((acc, c) => {
-    const name = typeof c === 'string' ? c : c?.name
-    const world = (typeof c === 'string' ? null : c?.worldName) || '미확인'
-    if (!name) return acc
-    if (!acc[world]) acc[world] = []
-    acc[world].push(name)
-    return acc
-  }, {})
+function normalize(recentCharacters) {
+  if (!Array.isArray(recentCharacters)) return []
+  return recentCharacters
+    .map((c) => (typeof c === 'string' ? { name: c, worldName: '미확인' } : c))
+    .filter((c) => c?.name)
 }
 
-export default function CharacterSelectPage({ savedCharacters, onSelectCharacter, onAddCharacter }) {
+export default function CharacterSelectPage({ recentCharacters, maxRecentCharacters, onSelectCharacter, onAddCharacter }) {
   const [nameInput, setNameInput] = useState('')
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState(null)
-  const [expandedServer, setExpandedServer] = useState(null)
 
-  const serverGroups = groupByServer(savedCharacters)
-  const serverNames = Object.keys(serverGroups)
+  const characters = normalize(recentCharacters)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -46,56 +41,42 @@ export default function CharacterSelectPage({ savedCharacters, onSelectCharacter
   return (
     <div className="home__select-content">
       <h2 className="display home__select-title">캐릭터 선택</h2>
-      <p className="home__select-hint">API 키 확인 완료! 서버를 눌러 캐릭터를 골라주세요.</p>
-
-      {serverNames.length > 0 && (
-        <div className="home__server-list">
-          {serverNames.map((world) => {
-            const isOpen = expandedServer === world
-            return (
-              <div key={world} className="home__server-group">
-                <button
-                  onClick={() => setExpandedServer(isOpen ? null : world)}
-                  className={'home__server-button' + (isOpen ? ' home__server-button--open' : '')}
-                >
-                  <span>{world}</span>
-                  <span className="home__server-count">{serverGroups[world].length}</span>
-                </button>
-
-                {isOpen && (
-                  <div className="home__select-list">
-                    {serverGroups[world].map((name) => (
-                      <button
-                        key={name}
-                        onClick={() => onSelectCharacter(name)}
-                        className="home__select-chip"
-                      >
-                        {name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
+      <p className="home__select-hint">
+        API 키 확인 완료! 캐릭터 닉네임을 검색해보세요.
+      </p>
 
       <form onSubmit={handleSubmit} className="home__select-form">
         <input
           type="text"
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
-          placeholder="캐릭터 닉네임 추가"
+          placeholder="캐릭터 닉네임 검색"
           className="home__select-input"
           autoComplete="off"
           disabled={adding}
         />
         <button type="submit" className="home__select-submit" disabled={adding}>
-          {adding ? '조회 중...' : '추가하고 보기'}
+          {adding ? '조회 중...' : '검색하고 보기'}
         </button>
       </form>
       {addError && <p className="home__apikey-error">{addError}</p>}
+
+      {characters.length > 0 && (
+        <div className="home__select-list">
+          {characters.map((c) => (
+            <button
+              key={c.name}
+              onClick={() => onSelectCharacter(c.name)}
+              className="home__select-chip"
+            >
+              {c.name}
+              <span className="home__select-chip-world">{c.worldName}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <p className="home__select-limit">최근 검색한 캐릭터를 최대 {maxRecentCharacters}개까지 기억해요.</p>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 
-export const PAGE_ORDER = ['start', 'apikey', 'select', 'card']
+export const PAGE_ORDER = ['start', 'apikey', 'select', 'card', 'archive']
 
 /**
  * 첫 페이지(start, 표지)만 짝 없이 단독으로 보여주고(HTMLFlipBook의 showCover={true}),
@@ -13,6 +13,7 @@ export const PAGE_ORDER = ['start', 'apikey', 'select', 'card']
  *   1 = 공백, 2 = apikey
  *   3 = 공백, 4 = select
  *   5 = 공백, 6 = card
+ *   7 = 공백, 8 = archive
  */
 const contentToFlipIndex = (contentIndex) => (contentIndex === 0 ? 0 : contentIndex * 2)
 

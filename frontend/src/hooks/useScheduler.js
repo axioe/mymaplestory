@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchScheduler } from '../api/client.js'
+import { describeApiError } from '../utils/apiError.js'
 
 export function useScheduler(enabled, characterName) {
   const [scheduler, setScheduler] = useState(null)
@@ -15,8 +16,8 @@ export function useScheduler(enabled, characterName) {
       .then((data) => {
         if (!cancelled) setScheduler(data)
       })
-      .catch(() => {
-        if (!cancelled) setError('스케줄러 정보를 불러오지 못했습니다.')
+      .catch((err) => {
+        if (!cancelled) setError(describeApiError(err, '스케줄러 정보를 불러오지 못했습니다.'))
       })
       .finally(() => {
         if (!cancelled) setLoading(false)

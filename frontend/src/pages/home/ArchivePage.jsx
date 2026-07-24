@@ -1,11 +1,7 @@
-import Book from '../../components/Book.jsx'
-import TickDivider from '../../components/TickDivider.jsx'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
-import CategoryPanel from '../../components/CategoryPanel.jsx'
+import CategorySelector from './CategorySelector.jsx'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
-
-const COMPACT_BOOK_MAX_WIDTH = 760
 
 const QUEST_STATE_LABEL = { '0': '기타', '1': '진행 중', '2': '완료' }
 
@@ -54,7 +50,16 @@ function BossContentList({ items }) {
   )
 }
 
-export default function ArchiveView({
+/**
+ * 아카이브 페이지 콘텐츠. BookFlipStage 안의 <Page>에 그대로 얹히는
+ * "내용물"이라서, 자기 자신을 감싸는 책 모양이나 레이아웃(section 등)은
+ * 만들지 않는다 - 다른 페이지(ApiKeyPage, CharacterSelectPage 등)와 완전히
+ * 같은 방식이라 캐릭터 선택부터 이어지는 디자인이 자연스럽게 유지된다.
+ *
+ * 카테고리 선택 UI는 홈/다크모드 버튼 바로 아래 고정되는 CategorySelector로 뺐다
+ * (예전의 큰 캡슐형 옆 패널 대신).
+ */
+export default function ArchivePage({
   categories,
   active,
   onSelectCategory,
@@ -72,8 +77,10 @@ export default function ArchiveView({
   const activeLabel = categories.find((c) => c.key === active)?.label
   const isNoticeCategory = active === 'event' || active === 'notice'
 
-  const bookContent = (
+  return (
     <>
+      <CategorySelector categories={categories} active={active} onSelectCategory={onSelectCategory} />
+
       <div className="home__result-datetime">
         <DateTimeLabel />
       </div>
@@ -108,7 +115,7 @@ export default function ArchiveView({
           )}
         </div>
       ) : isNoticeCategory ? (
-        <div className="home__level-content">
+        <div className="home__notice-page">
           <h2 className="display home__select-title">{active === 'event' ? '진행 중 이벤트' : '공지사항'}</h2>
 
           {noticesLoading && <p>불러오는 중...</p>}
@@ -116,17 +123,16 @@ export default function ArchiveView({
 
           {!noticesLoading && !noticesError && notices && (
             notices.length > 0 ? (
-              <div className="home__notice-list">
+              <div className="home__notice-bookmarks">
                 {notices.map((n) => (
                   <a
                     key={n.noticeId ?? n.title}
                     href={n.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="home__notice-item"
+                    className="home__notice-bookmark"
                   >
-                    <span className="home__notice-title">{n.title}</span>
-                    {n.date && <span className="home__notice-date">{n.date}</span>}
+                    <span className="home__notice-bookmark-title">{n.title}</span>
                   </a>
                 ))}
               </div>
@@ -168,26 +174,14 @@ export default function ArchiveView({
       ) : (
         <div className="home__result-content">
           <p className="display home__result-my">MY</p>
-          <div className="home__result-divider">
-            <TickDivider width={220} />
-          </div>
           <h1 className="display home__result-title">MAPLE STORY</h1>
           <p className="home__select-hint">'{activeLabel}' 카테고리는 아직 연동 중이에요.</p>
         </div>
       )}
+
+      <button onClick={onBack} className="home__archive-back">
+        ← 캐릭터 카드로
+      </button>
     </>
-  )
-
-  return (
-    <section className="home__result">
-      <Book maxWidth={COMPACT_BOOK_MAX_WIDTH}>{bookContent}</Book>
-
-      <div className="home__side">
-        <CategoryPanel categories={categories} active={active} onSelect={onSelectCategory} />
-        <button onClick={onBack} className="home__reset-link">
-          ← 캐릭터 카드로
-        </button>
-      </div>
-    </section>
   )
 }

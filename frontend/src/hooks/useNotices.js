@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchNotices, fetchEventNotices } from '../api/client.js'
+import { describeApiError } from '../utils/apiError.js'
 
 /**
  * type: 'event' | 'notice'
@@ -21,8 +22,8 @@ export function useNotices(enabled, type) {
       .then((data) => {
         if (!cancelled) setNotices(data)
       })
-      .catch(() => {
-        if (!cancelled) setError('불러오지 못했습니다. 잠시 후 다시 시도해주세요.')
+      .catch((err) => {
+        if (!cancelled) setError(describeApiError(err, '불러오지 못했습니다. 잠시 후 다시 시도해주세요.'))
       })
       .finally(() => {
         if (!cancelled) setLoading(false)

@@ -1,76 +1,5 @@
-.home__result {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 2.5rem;
-  padding: 3rem 1.5rem 6rem;
-  flex-wrap: wrap;
-  min-height: 100vh;
-}
-
-.home__result-datetime {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-.home__result-content {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  text-align: center;
-}
-
-.home__result-my {
-  margin: 0;
-  font-size: 2.6rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  line-height: 1;
-}
-
-.home__result-divider {
-  margin: 0.6rem 0;
-}
-
-.home__result-title {
-  margin: 0;
-  font-size: 1.6rem;
-  font-weight: 800;
-}
-
-.home__side {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  opacity: 0;
-  transform: translateX(-12px);
-  animation: home-side-in 0.5s ease forwards;
-}
-
-@keyframes home-side-in {
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.home__reset-link {
-  background: transparent;
-  border: none;
-  color: var(--color-ink);
-  opacity: 0.6;
-  font-size: 0.8rem;
-  text-decoration: underline;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
+/* 레벨/스케줄러 카테고리에서 쓰는 콘텐츠 래퍼 - 다른 페이지들과 같은
+   position:absolute + inset:0 패턴이라 캐릭터 선택부터 이어지는 배치가 유지된다. */
 .home__level-content {
   position: absolute;
   inset: 0;
@@ -124,47 +53,100 @@
   color: var(--color-ink);
 }
 
-.home__notice-list {
+/* 아직 연동 안 된 카테고리(보스/전리품/스토리) placeholder */
+.home__result-content {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.home__result-my {
+  margin: 0;
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.home__result-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.home__result-datetime {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* 이벤트/공지사항 - 제목은 위, 북마크 리본은 페이지 하단에 붙는다 */
+.home__notice-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.6rem 1.6rem 1.6rem;
+  gap: 1rem;
+  text-align: center;
+}
+
+.home__notice-bookmarks {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.6rem;
   width: 100%;
-  max-width: 420px;
-  max-height: 280px;
+  max-height: 55%;
   overflow-y: auto;
+  padding-top: 0.5rem;
 }
 
-.home__notice-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  padding: 0.7rem 1rem;
-  border: 2px solid var(--color-line);
-  border-radius: 12px;
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
-.home__notice-item:hover {
+/* 북마크 리본 모양 - 아래쪽이 뾰족하게 잘린 태그 형태 */
+.home__notice-bookmark {
+  flex: 0 0 88px;
+  padding: 0.65rem 0.4rem 1.1rem;
   background: var(--color-accent);
   color: var(--color-page);
-}
-
-.home__notice-title {
-  font-size: 0.85rem;
+  text-decoration: none;
+  font-size: 0.68rem;
   font-weight: 700;
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-align: center;
+  clip-path: polygon(0 0, 100% 0, 100% 76%, 50% 100%, 0 76%);
+  box-shadow: 0 3px 6px rgba(23, 20, 15, 0.2);
 }
 
-.home__notice-date {
-  font-size: 0.72rem;
-  opacity: 0.65;
-  flex-shrink: 0;
+.home__notice-bookmark:nth-child(even) {
+  background: var(--color-accent-2);
+}
+
+.home__notice-bookmark-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 아카이브 페이지 하단에 고정되는 뒤로가기 링크 */
+.home__archive-back {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  border: none;
+  color: var(--color-ink);
+  opacity: 0.55;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .home__scheduler-section {
