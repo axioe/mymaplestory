@@ -63,7 +63,11 @@ export default function Home() {
   const [active, setActive] = useState('boss')
 
   const { cardData, setCardData, cardLoading, cardError } = useCharacterCardData(
-    hasSelectedCharacter,
+    // "항상 표지부터 시작" 하도록 바꾼 뒤로, 화면은 표지에 있는데도 브라우저에
+    // 저장된 예전 selectedCharacter 값 때문에 백그라운드에서 몰래 카드 조회가
+    // 나가서(그 시점엔 키가 없어 API_KEY_REQUIRED로 실패) 버그가 있었다.
+    // 실제로 카드/아카이브 화면을 보고 있을 때만 조회하도록 조건을 추가했다.
+    hasSelectedCharacter && (page === 'card' || page === 'archive'),
     selectedCharacter
   )
   const { levelHistory, loading: levelHistoryLoading, error: levelHistoryError } = useLevelHistory(
