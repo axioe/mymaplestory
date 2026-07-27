@@ -136,8 +136,19 @@
 }
 
 /* 공지사항 전용 - 페이지 하단에 붙는 한 줄짜리 자동 슬라이드 티커 */
+/* 카테고리 선택과 무관하게 페이지 하단에 항상 고정되는 공지사항 티커 래퍼 */
+.home__footer-ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3.4rem;
+  display: flex;
+  justify-content: center;
+  padding: 0 1.6rem;
+  z-index: 2;
+}
+
 .home__notice-ticker {
-  margin-top: auto;
   width: 100%;
   max-width: 380px;
   height: 44px;

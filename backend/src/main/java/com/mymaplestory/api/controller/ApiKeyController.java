@@ -25,14 +25,15 @@ public class ApiKeyController {
 
     /**
      * POST /api/auth/validate-key
-     * 헤더: X-Nexon-Api-Key (필수)
+     * 헤더: X-Nexon-Api-Key
      * 성공: 200 { "valid": true }
      * 키가 잘못된 경우: 401 (GlobalExceptionHandler가 처리)
-     * 헤더 자체가 없는 경우: 400 (GlobalExceptionHandler가 처리)
+     * 헤더 자체가 없는 경우: 400 (NexonApiService.resolveApiKey가 ApiKeyRequiredException을 던지고
+     * GlobalExceptionHandler가 처리 - 다른 엔드포인트(CharacterController)와 동일한 방식으로 통일)
      */
     @PostMapping("/validate-key")
     public ResponseEntity<Map<String, Object>> validateKey(
-            @RequestHeader("X-Nexon-Api-Key") String apiKey
+            @RequestHeader(value = "X-Nexon-Api-Key", required = false) String apiKey
     ) {
         nexonApiService.validateApiKey(apiKey);
         return ResponseEntity.ok(Map.of("valid", true));

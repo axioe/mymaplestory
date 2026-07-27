@@ -20,7 +20,8 @@ const CATEGORIES = [
   { key: 'level', label: '레벨' },
   { key: 'story', label: '스토리' },
   { key: 'event', label: '이벤트' },
-  { key: 'notice', label: '공지사항' },
+  // 공지사항은 카테고리로 따로 안 두고, 아카이브 페이지 하단에 항상 떠 있는
+  // 티커 바(NoticeTicker)로 옮겼다 - 카테고리로도 있으면 중복이라 삭제함.
   // 넥슨 오픈 API의 "스케줄러 정보 조회" 연동 (https://openapi.nexon.com/ko/game/maplestory/?id=57).
   // 요청받은 4개 필드(daily_contents, boss_contents, weekly_boss_clear_count,
   // weekly_boss_clear_limit_count)만 사용한다. 경로(/character/scheduler)는
@@ -74,9 +75,15 @@ export default function Home() {
     page === 'archive' && active === 'level' && hasSelectedCharacter,
     selectedCharacter
   )
-  const { notices, loading: noticesLoading, error: noticesError } = useNotices(
-    page === 'archive' && (active === 'event' || active === 'notice'),
-    active
+  // 이벤트: "이벤트" 카테고리를 선택했을 때만 조회
+  const { notices: eventNotices, loading: eventNoticesLoading, error: eventNoticesError } = useNotices(
+    page === 'archive' && active === 'event',
+    'event'
+  )
+  // 공지사항: 카테고리 선택과 무관하게, 아카이브 페이지에 들어오면 항상 하단 티커용으로 조회
+  const { notices: footerNotices, loading: footerNoticesLoading, error: footerNoticesError } = useNotices(
+    page === 'archive',
+    'notice'
   )
   const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
     page === 'archive' && active === 'scheduler' && hasSelectedCharacter,
@@ -104,12 +111,14 @@ export default function Home() {
       flipTo('select')
     } catch (err) {
       const status = err.response?.status
+      const backendMessage = err.response?.data?.message
       if (status === 401) {
         setKeyError('유효하지 않은 API 키입니다. 다시 확인해주세요.')
       } else if (status === 400) {
-        setKeyError('API 키를 입력해주세요.')
+        // 백엔드가 보낸 실제 사유를 그대로 보여준다 (원인 파악이 쉬워짐).
+        setKeyError(backendMessage || 'API 키를 입력해주세요.')
       } else {
-        setKeyError('키 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+        setKeyError(backendMessage || '키 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
       }
     } finally {
       setChecking(false)
@@ -184,9 +193,12 @@ export default function Home() {
           levelHistory={levelHistory}
           levelHistoryLoading={levelHistoryLoading}
           levelHistoryError={levelHistoryError}
-          notices={notices}
-          noticesLoading={noticesLoading}
-          noticesError={noticesError}
+          eventNotices={eventNotices}
+          eventNoticesLoading={eventNoticesLoading}
+          eventNoticesError={eventNoticesError}
+          footerNotices={footerNotices}
+          footerNoticesLoading={footerNoticesLoading}
+          footerNoticesError={footerNoticesError}
           scheduler={scheduler}
           schedulerLoading={schedulerLoading}
           schedulerError={schedulerError}

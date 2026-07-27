@@ -106,9 +106,12 @@ export default function ArchivePage({
   levelHistory,
   levelHistoryLoading,
   levelHistoryError,
-  notices,
-  noticesLoading,
-  noticesError,
+  eventNotices,
+  eventNoticesLoading,
+  eventNoticesError,
+  footerNotices,
+  footerNoticesLoading,
+  footerNoticesError,
   scheduler,
   schedulerLoading,
   schedulerError,
@@ -152,26 +155,17 @@ export default function ArchivePage({
             )
           )}
         </div>
-      ) : active === 'notice' ? (
-        <div className="home__notice-page">
-          <h2 className="display home__select-title">공지사항</h2>
-
-          {noticesLoading && <p>불러오는 중...</p>}
-          {noticesError && <p className="home__apikey-error">{noticesError}</p>}
-
-          {!noticesLoading && !noticesError && notices && <NoticeTicker items={notices} />}
-        </div>
       ) : active === 'event' ? (
         <div className="home__notice-page">
           <h2 className="display home__select-title">진행 중 이벤트</h2>
 
-          {noticesLoading && <p>불러오는 중...</p>}
-          {noticesError && <p className="home__apikey-error">{noticesError}</p>}
+          {eventNoticesLoading && <p>불러오는 중...</p>}
+          {eventNoticesError && <p className="home__apikey-error">{eventNoticesError}</p>}
 
-          {!noticesLoading && !noticesError && notices && (
-            notices.length > 0 ? (
+          {!eventNoticesLoading && !eventNoticesError && eventNotices && (
+            eventNotices.length > 0 ? (
               <div className="home__notice-bookmarks">
-                {notices.map((n) => (
+                {eventNotices.map((n) => (
                   <a
                     key={n.noticeId ?? n.title}
                     href={n.url}
@@ -225,6 +219,15 @@ export default function ArchivePage({
           <p className="home__select-hint">'{activeLabel}' 카테고리는 아직 연동 중이에요.</p>
         </div>
       )}
+
+      {/* 카테고리 선택과 무관하게 항상 페이지 맨 아래에 떠 있는 공지사항 티커 */}
+      <div className="home__footer-ticker">
+        {footerNoticesLoading && <p className="home__select-hint">공지 불러오는 중...</p>}
+        {footerNoticesError && <p className="home__apikey-error">{footerNoticesError}</p>}
+        {!footerNoticesLoading && !footerNoticesError && footerNotices && (
+          <NoticeTicker items={footerNotices} />
+        )}
+      </div>
 
       <button onClick={onBack} className="home__archive-back">
         ← 캐릭터 카드로
