@@ -152,6 +152,11 @@ export default function ArchivePage({
 
           {!schedulerLoading && !schedulerError && scheduler && (
             <>
+              <p className="home__select-hint">
+                {scheduler.characterName} · {scheduler.worldName} · Lv.{scheduler.characterLevel} ·{' '}
+                {scheduler.characterClass} {scheduler.date && `(${scheduler.date.slice(0, 10)} 기준)`}
+              </p>
+
               <div className="home__level-summary">
                 <div className="home__level-summary-row">
                   <span className="home__level-summary-label">주간 보스 처치</span>
@@ -164,6 +169,11 @@ export default function ArchivePage({
               <div className="home__scheduler-section">
                 <p className="home__select-hint">일일 콘텐츠</p>
                 <DailyContentList items={scheduler.dailyContents} />
+              </div>
+
+              <div className="home__scheduler-section">
+                <p className="home__select-hint">주간 콘텐츠</p>
+                <DailyContentList items={scheduler.weeklyContents} />
               </div>
 
               <div className="home__scheduler-section">
