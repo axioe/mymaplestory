@@ -1,48 +1,9 @@
-import { useEffect, useState } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import CategorySelector from './CategorySelector.jsx'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 
 const QUEST_STATE_LABEL = { '0': '기타', '1': '진행 중', '2': '완료' }
-
-/**
- * 공지사항 전용 - 한 줄씩 보여주다가 일정 시간이 지나면 자동으로 다음 항목으로
- * 슬라이드된다. key를 항목마다 다르게 줘서, 바뀔 때마다 React가 새로 마운트하고
- * 그 덕분에 CSS 애니메이션(slide-down)이 매번 처음부터 재생된다.
- */
-function NoticeTicker({ items }) {
-  const [index, setIndex] = useState(0)
-
-  useEffect(() => {
-    setIndex(0)
-    if (!items || items.length <= 1) return
-    const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % items.length)
-    }, 3500)
-    return () => clearInterval(timer)
-  }, [items])
-
-  if (!items || items.length === 0) {
-    return <p className="home__select-hint">지금은 표시할 항목이 없어요.</p>
-  }
-
-  const current = items[index % items.length]
-
-  return (
-    <div className="home__notice-ticker">
-      <a
-        key={current.noticeId ?? current.title}
-        href={current.url}
-        target="_blank"
-        rel="noreferrer"
-        className="home__notice-ticker-item"
-      >
-        {current.title}
-      </a>
-    </div>
-  )
-}
 
 function DailyContentList({ items }) {
   if (!items || items.length === 0) {
@@ -97,6 +58,9 @@ function BossContentList({ items }) {
  *
  * 카테고리 선택 UI는 홈/다크모드 버튼 바로 아래 고정되는 CategorySelector로 뺐다
  * (예전의 큰 캡슐형 옆 패널 대신).
+ *
+ * 공지사항 티커는 여기 없다 - 책 안에 있으면 다른 콘텐츠와 겹쳐 보이는 문제가
+ * 있어서, 책 바깥(페이지 하단)에 별도로 떠 있도록 Home.jsx에서 렌더링한다.
  */
 export default function ArchivePage({
   categories,
@@ -109,9 +73,6 @@ export default function ArchivePage({
   eventNotices,
   eventNoticesLoading,
   eventNoticesError,
-  footerNotices,
-  footerNoticesLoading,
-  footerNoticesError,
   scheduler,
   schedulerLoading,
   schedulerError,
@@ -219,15 +180,6 @@ export default function ArchivePage({
           <p className="home__select-hint">'{activeLabel}' 카테고리는 아직 연동 중이에요.</p>
         </div>
       )}
-
-      {/* 카테고리 선택과 무관하게 항상 페이지 맨 아래에 떠 있는 공지사항 티커 */}
-      <div className="home__footer-ticker">
-        {footerNoticesLoading && <p className="home__select-hint">공지 불러오는 중...</p>}
-        {footerNoticesError && <p className="home__apikey-error">{footerNoticesError}</p>}
-        {!footerNoticesLoading && !footerNoticesError && footerNotices && (
-          <NoticeTicker items={footerNotices} />
-        )}
-      </div>
 
       <button onClick={onBack} className="home__archive-back">
         ← 캐릭터 카드로

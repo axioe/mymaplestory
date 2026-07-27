@@ -1,5 +1,9 @@
 server:
   port: 8080
+  # 기본값(8KB)보다 넉넉하게 잡아둔다. 이보다 더 커지면 여전히 "Request header is
+  # too large"로 Tomcat이 요청 자체를 거부하니, 근본적으로는 프론트에서
+  # API 키 입력값 길이를 검증하는 게 맞다 (ApiKeyPage.jsx 참고).
+  max-http-header-size: 32768
 
 spring:
   application:

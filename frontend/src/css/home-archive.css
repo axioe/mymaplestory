@@ -137,49 +137,6 @@
 
 /* 공지사항 전용 - 페이지 하단에 붙는 한 줄짜리 자동 슬라이드 티커 */
 /* 카테고리 선택과 무관하게 페이지 하단에 항상 고정되는 공지사항 티커 래퍼 */
-.home__footer-ticker {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 3.4rem;
-  display: flex;
-  justify-content: center;
-  padding: 0 1.6rem;
-  z-index: 2;
-}
-
-.home__notice-ticker {
-  width: 100%;
-  max-width: 380px;
-  height: 44px;
-  overflow: hidden;
-  border-top: 2px solid var(--color-line);
-  padding-top: 0.7rem;
-}
-
-.home__notice-ticker-item {
-  display: block;
-  text-decoration: none;
-  color: var(--color-ink);
-  font-size: 0.85rem;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  animation: home-notice-slide-down 0.5s ease;
-}
-
-@keyframes home-notice-slide-down {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 /* 아카이브 페이지 하단에 고정되는 뒤로가기 링크 */
 .home__archive-back {
   position: absolute;

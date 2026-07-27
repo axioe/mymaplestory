@@ -42,12 +42,16 @@ export function useBookFlip(initialPage) {
 
   const flipTo = (next) => {
     const contentIndex = PAGE_ORDER.indexOf(next)
+    // onFlip 콜백(react-pageflip 라이브러리 이벤트)이 프로그래밍 방식 flip()에는
+    // 확실히 발생한다는 보장이 없어서, 그것만 기다리면 "화면은 넘어갔는데 page
+    // 상태는 그대로"인 경우가 생겨 그 페이지에 딸린 데이터 조회가 영영 시작 안
+    // 되는 버그가 있었다. 그래서 애니메이션 시작과 동시에 낙관적으로 먼저
+    // 갱신한다 (onFlip이 나중에 와도 같은 값이라 문제 없음).
+    setPage(next)
     const pageFlip = getPageFlip()
-    if (contentIndex < 0 || !pageFlip) {
-      setPage(next) // 라이브러리가 아직 준비 안 된 경우를 위한 안전망
-      return
+    if (contentIndex >= 0 && pageFlip) {
+      pageFlip.flip(contentToFlipIndex(contentIndex))
     }
-    pageFlip.flip(contentToFlipIndex(contentIndex))
   }
 
   const jumpTo = (next) => {

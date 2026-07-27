@@ -13,6 +13,8 @@ import ApiKeyPage from './home/ApiKeyPage.jsx'
 import CharacterSelectPage from './home/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
+import NoticeTicker from './home/NoticeTicker.jsx'
+import '../css/notice-ticker.css'
 
 const CATEGORIES = [
   { key: 'boss', label: '보스' },
@@ -111,14 +113,12 @@ export default function Home() {
       flipTo('select')
     } catch (err) {
       const status = err.response?.status
-      const backendMessage = err.response?.data?.message
       if (status === 401) {
         setKeyError('유효하지 않은 API 키입니다. 다시 확인해주세요.')
       } else if (status === 400) {
-        // 백엔드가 보낸 실제 사유를 그대로 보여준다 (원인 파악이 쉬워짐).
-        setKeyError(backendMessage || 'API 키를 입력해주세요.')
+        setKeyError('API 키를 입력해주세요.')
       } else {
-        setKeyError(backendMessage || '키 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+        setKeyError('키 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
       }
     } finally {
       setChecking(false)
@@ -196,9 +196,6 @@ export default function Home() {
           eventNotices={eventNotices}
           eventNoticesLoading={eventNoticesLoading}
           eventNoticesError={eventNoticesError}
-          footerNotices={footerNotices}
-          footerNoticesLoading={footerNoticesLoading}
-          footerNoticesError={footerNoticesError}
           scheduler={scheduler}
           schedulerLoading={schedulerLoading}
           schedulerError={schedulerError}
@@ -209,12 +206,27 @@ export default function Home() {
   }
 
   return (
-    <BookFlipStage
-      pageKeys={PAGE_ORDER}
-      flipBookRef={flipBookRef}
-      startFlipIndex={startFlipIndex}
-      onFlip={handleFlip}
-      renderPageContent={renderPageContent}
-    />
+    <>
+      <BookFlipStage
+        pageKeys={PAGE_ORDER}
+        flipBookRef={flipBookRef}
+        startFlipIndex={startFlipIndex}
+        onFlip={handleFlip}
+        renderPageContent={renderPageContent}
+      />
+
+      {/* 책 바깥, 페이지 하단 - 아카이브를 보고 있을 때만 뜨는 공지사항 티커.
+          책 안에 두면 다른 콘텐츠(북마크, 스케줄러 목록 등)와 겹쳐 보이는
+          문제가 있어서 아예 밖으로 뺐다. */}
+      {page === 'archive' && (
+        <div className="home__footer-ticker-outside">
+          {footerNoticesLoading && <p className="home__select-hint">공지 불러오는 중...</p>}
+          {footerNoticesError && <p className="home__apikey-error">{footerNoticesError}</p>}
+          {!footerNoticesLoading && !footerNoticesError && footerNotices && (
+            <NoticeTicker items={footerNotices} intervalMs={6000} />
+          )}
+        </div>
+      )}
+    </>
   )
 }
