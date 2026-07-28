@@ -25,7 +25,7 @@ public class NoticeController {
     /** GET /api/notices - 일반 공지사항 목록 */
     @GetMapping
     public List<NoticeItem> getNotices(
-            @RequestHeader(value = "X-Nexon-Api-Key", required = false) String apiKey
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
     ) {
         return nexonApiService.getNotices(apiKey);
     }
@@ -33,7 +33,7 @@ public class NoticeController {
     /** GET /api/notices/events - 진행 중인 이벤트 목록 */
     @GetMapping("/events")
     public List<NoticeItem> getEventNotices(
-            @RequestHeader(value = "X-Nexon-Api-Key", required = false) String apiKey
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
     ) {
         return nexonApiService.getEventNotices(apiKey);
     }

@@ -17,18 +17,11 @@ import com.mymaplestory.api.exception.NexonApiException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * 넥슨 메이플스토리 오픈 API 연동 서비스.
@@ -36,24 +29,17 @@ import java.util.concurrent.Executors;
  *
  * 참고: 넥슨 오픈 API는 "회원 로그인(OAuth)"이 아니라 공개 게임 데이터 조회용 API입니다.
  * 이 서비스는 로그인을 제공하지 않는 대신, 사용자가 프론트엔드에 직접 입력한
- * 자신의 넥슨 API 키를 매 요청(X-Nexon-Api-Key 헤더)마다 전달받아 사용한다.
+ * 자신의 넥슨 API 키를 매 요청(x-nxopen-api-key 헤더)마다 전달받아 사용한다.
  *
- * 중요: 넥슨 API에 실제로 보내는 인증 헤더 이름은 "x-nxopen-api-key" 이다.
- * (프론트에서 우리 서버로 보내는 "X-Nexon-Api-Key"와는 별개 - 그건 우리 서비스
- * 내부 규약이고, 넥슨 서버로 나가는 요청에는 반드시 x-nxopen-api-key를 써야 한다.)
- *
- * 에러 처리 방침: 넥슨 서버가 "응답은 했지만 에러 상태코드"인 경우
- * (RestClientResponseException)와, 아예 "연결 자체가 안 되는 경우"
- * (타임아웃/DNS/네트워크 문제 등 - ResourceAccessException 등 다른 RestClientException
- * 하위 타입)를 구분해서 처리한다. 후자를 놓치면 GlobalExceptionHandler의 catch-all에
- * 걸려서 "예상치 못한 오류(INTERNAL_ERROR)"라는, 원인을 전혀 알 수 없는 메시지만 뜨게 된다.
+ * 예전엔 프론트<->우리 백엔드 사이에서는 "X-Nexon-Api-Key"라는 우리 자체 이름을 쓰고,
+ * 백엔드->넥슨 사이에서만 "x-nxopen-api-key"를 쓰면서 헷갈리는 경우가 있었다.
+ * 지금은 프론트<->백엔드<->넥슨 전체 구간에서 전부 "x-nxopen-api-key"로 통일했다.
  */
 @Service
 public class NexonApiService {
 
     private static final String NEXON_AUTH_HEADER = "x-nxopen-api-key";
     private static final String INVALID_KEY_ERROR_CODE = "OPENAPI00005";
-    private static final String CONNECTION_ERROR_MESSAGE = "넥슨 서버에 연결할 수 없습니다. 네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요.";
 
     private final RestClient nexonRestClient;
     private final NexonApiProperties properties;
@@ -77,7 +63,7 @@ public class NexonApiService {
         if (StringUtils.hasText(properties.getKey())) {
             return properties.getKey();
         }
-        throw new ApiKeyRequiredException("넥슨 API 키가 필요합니다. X-Nexon-Api-Key 헤더로 전달해주세요.");
+        throw new ApiKeyRequiredException("넥슨 API 키가 필요합니다. x-nxopen-api-key 헤더로 전달해주세요.");
     }
 
     /**
@@ -120,9 +106,6 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             // 그 외(캐릭터를 찾을 수 없음 등)는 키 자체는 유효하다는 뜻이므로 정상 통과.
-        } catch (RestClientException e) {
-            // 넥슨이 응답을 준 게 아니라, 연결 자체가 실패한 경우 (타임아웃/DNS/네트워크 등)
-            throw new NexonApiException(CONNECTION_ERROR_MESSAGE, e);
         }
     }
 
@@ -150,8 +133,6 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (ocid): " + e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            throw new NexonApiException(CONNECTION_ERROR_MESSAGE, e);
         }
     }
 
@@ -183,8 +164,6 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (basic): " + e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            throw new NexonApiException(CONNECTION_ERROR_MESSAGE, e);
         }
     }
 
@@ -204,23 +183,25 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (popularity): " + e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            throw new NexonApiException(CONNECTION_ERROR_MESSAGE, e);
         }
     }
 
-    // 하루짜리 요청을 최대 이만큼 동시에 날린다. 너무 크면 넥슨 쪽 순간 호출량 제한에
-    // 걸릴 수 있어 적당히 제한해뒀다.
-    private static final ExecutorService LEVEL_HISTORY_EXECUTOR = Executors.newFixedThreadPool(16);
-
+    /**
+     * 최근 days일간의 레벨/경험치 진행률을 하루씩 조회해서 표로 만들고,
+     * 레벨이 오른 날짜들을 뽑아낸다.
+     *
+     * 주의: 넥슨 API는 "오늘" 데이터가 아직 집계되지 않았을 수 있어 어제(D-1)부터 조회한다.
+     * 캐릭터 생성일 이전 날짜는 데이터가 없어 조회 실패하는데, 그런 날짜는 결과에서 건너뛴다.
+     * days가 클수록 넥슨 API를 그만큼 여러 번 순차 호출하므로 응답이 느려질 수 있다.
+     */
     /**
      * "가장 최근 레벨업이 언제였는지"를 찾는다.
-     * 예전엔 어제부터 하루씩 순서대로(최대 maxLookbackDays번) 기다리면서 호출해서,
-     * 조회 범위가 크면 응답이 10초 넘게 걸리는 문제가 있었다. 지금은 그 날짜들을
-     * 전부 동시에(병렬로) 조회한 다음, 결과를 모아서 레벨이 달라지는 지점을 찾는다.
+     * 오늘 레벨을 기준으로, 어제부터 하루씩 거슬러 올라가면서 레벨이 달라지는(=아직 그
+     * 레벨이 아니었던) 첫 날짜를 찾는다. 그 다음 날이 바로 레벨업한 날짜가 된다.
      *
      * maxLookbackDays를 넘어서도 레벨이 그대로라면(오래 정체 중이거나 만렙 등),
      * 이 조회 범위 안에서는 레벨업 시점을 못 찾았다는 뜻으로 levelUpDate=null을 반환한다.
+     * maxLookbackDays가 클수록 넥슨 API를 그만큼 여러 번 순차 호출하므로 느려질 수 있다.
      */
     public LevelHistoryResponse getLevelHistory(String characterName, String requestApiKey, int maxLookbackDays) {
         String ocid = getOcid(characterName, requestApiKey);
@@ -232,33 +213,24 @@ public class NexonApiService {
         Long daysSinceLevelUp = null;
 
         if (currentLevel != null) {
-            LocalDate now = LocalDate.now();
-            Map<LocalDate, Integer> levelByDate = new ConcurrentHashMap<>();
+            LocalDate cursor = LocalDate.now().minusDays(1);
+            LocalDate earliestAllowed = LocalDate.now().minusDays(maxLookbackDays);
 
-            List<CompletableFuture<Void>> futures = new ArrayList<>();
-            for (int i = 1; i <= maxLookbackDays; i++) {
-                LocalDate date = now.minusDays(i);
-                futures.add(CompletableFuture.runAsync(() -> {
-                    try {
-                        CharacterBasicDto basic = getBasicInfo(ocid, requestApiKey, date);
-                        if (basic != null && basic.characterLevel() != null) {
-                            levelByDate.put(date, basic.characterLevel());
-                        }
-                    } catch (NexonApiException ignored) {
-                        // 캐릭터 생성 이전 날짜 등, 데이터가 없는 날짜 - 아직 이 레벨이 아니었던 것으로 간주한다.
-                    }
-                }, LEVEL_HISTORY_EXECUTOR));
-            }
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-            LocalDate cursor = now.minusDays(1);
-            LocalDate earliestAllowed = now.minusDays(maxLookbackDays);
             while (!cursor.isBefore(earliestAllowed)) {
-                Integer levelAtCursor = levelByDate.get(cursor);
+                Integer levelAtCursor = null;
+                try {
+                    CharacterBasicDto basic = getBasicInfo(ocid, requestApiKey, cursor);
+                    if (basic != null) {
+                        levelAtCursor = basic.characterLevel();
+                    }
+                } catch (NexonApiException ignored) {
+                    // 캐릭터 생성 이전 날짜 등, 데이터가 없는 날짜 - 아직 이 레벨이 아니었던 것으로 간주한다.
+                }
+
                 if (levelAtCursor == null || !levelAtCursor.equals(currentLevel)) {
                     LocalDate foundDate = cursor.plusDays(1);
                     levelUpDate = foundDate.toString();
-                    daysSinceLevelUp = ChronoUnit.DAYS.between(foundDate, now);
+                    daysSinceLevelUp = ChronoUnit.DAYS.between(foundDate, LocalDate.now());
                     break;
                 }
                 cursor = cursor.minusDays(1);
@@ -303,8 +275,6 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (notice): " + e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            throw new NexonApiException(CONNECTION_ERROR_MESSAGE, e);
         }
     }
 
@@ -326,15 +296,12 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (notice-event): " + e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            throw new NexonApiException(CONNECTION_ERROR_MESSAGE, e);
         }
     }
 
     /**
      * 캐릭터의 메이플 스케줄러 달성 현황 (요청하신 4개 필드만).
-     * 주의: /character/scheduler 경로는 다른 character/* 엔드포인트 명명 규칙을 따른
-     * 추정이다. 실제 경로가 다르면 이 메서드의 .path(...) 값만 고치면 된다.
+     * 경로: /scheduler/character-state (실제 호출로 확인됨)
      */
     public SchedulerResponse getScheduler(String characterName, String requestApiKey) {
         String apiKey = resolveApiKey(requestApiKey);
@@ -342,7 +309,7 @@ public class NexonApiService {
         try {
             return nexonRestClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/character/scheduler")
+                            .path("/scheduler/character-state")
                             .queryParam("ocid", ocid)
                             .build())
                     .header(NEXON_AUTH_HEADER, apiKey)
@@ -353,8 +320,6 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (scheduler): " + e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            throw new NexonApiException(CONNECTION_ERROR_MESSAGE, e);
         }
     }
 }

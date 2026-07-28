@@ -8,11 +8,13 @@ export const apiClient = axios.create({
 })
 
 // ApiKeyContext가 localStorage에 저장해둔 사용자의 넥슨 API 키를
-// 매 요청마다 X-Nexon-Api-Key 헤더로 자동으로 실어 보낸다.
+// 매 요청마다 x-nxopen-api-key 헤더로 자동으로 실어 보낸다.
+// (예전엔 우리 앱 자체 이름인 "X-Nexon-Api-Key"를 썼는데, 넥슨 서버로 나갈 때 쓰는
+// 진짜 헤더 이름("x-nxopen-api-key")과 이름이 달라서 헷갈리는 일이 많아 통일했다.)
 apiClient.interceptors.request.use((config) => {
   const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY)
   if (apiKey) {
-    config.headers['X-Nexon-Api-Key'] = apiKey
+    config.headers['x-nxopen-api-key'] = apiKey
   }
   return config
 })
@@ -51,7 +53,7 @@ export async function validateApiKey(apiKey) {
   const { data } = await apiClient.post(
     '/auth/validate-key',
     null,
-    { headers: { 'X-Nexon-Api-Key': apiKey } }
+    { headers: { 'x-nxopen-api-key': apiKey } }
   )
   return data
 }

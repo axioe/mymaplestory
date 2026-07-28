@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of(
                 "timestamp", Instant.now().toString(),
                 "error", "API_KEY_REQUIRED",
-                "message", "넥슨 API 키가 필요합니다. X-Nexon-Api-Key 헤더로 전달해주세요."
+                "message", "넥슨 API 키가 필요합니다. x-nxopen-api-key 헤더로 전달해주세요."
         ));
     }
 

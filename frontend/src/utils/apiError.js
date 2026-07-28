@@ -1,6 +1,6 @@
 /**
  * 백엔드(GlobalExceptionHandler)가 내려주는 error 코드를 사람이 이해할 수 있는
- * 문구로 바꿔준다. API_KEY_REQUIRED가 뜬다는 건 X-Nexon-Api-Key 헤더 없이
+ * 문구로 바꿔준다. API_KEY_REQUIRED가 뜬다는 건 x-nxopen-api-key 헤더 없이
  * 요청이 나갔다는 뜻이라, "다시 시도" 대신 "홈에서 키를 다시 입력하라"고
  * 명확하게 안내한다.
  */
