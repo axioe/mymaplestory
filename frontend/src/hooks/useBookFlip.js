@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 
-export const PAGE_ORDER = ['start', 'apikey', 'select', 'card', 'archive']
+export const PAGE_ORDER = ['start', 'apikey', 'select', 'card', 'archive', 'boss-daily', 'boss-weekly', 'boss-monthly']
 
 /**
  * 첫 페이지(start, 표지)만 짝 없이 단독으로 보여주고(HTMLFlipBook의 showCover={true}),
@@ -14,6 +14,9 @@ export const PAGE_ORDER = ['start', 'apikey', 'select', 'card', 'archive']
  *   3 = 공백, 4 = select
  *   5 = 공백, 6 = card
  *   7 = 공백, 8 = archive
+ *   9 = 공백, 10 = boss-daily
+ *   11 = 공백, 12 = boss-weekly
+ *   13 = 공백, 14 = boss-monthly
  */
 const contentToFlipIndex = (contentIndex) => (contentIndex === 0 ? 0 : contentIndex * 2)
 
@@ -50,7 +53,16 @@ export function useBookFlip(initialPage) {
     setPage(next)
     const pageFlip = getPageFlip()
     if (contentIndex >= 0 && pageFlip) {
-      pageFlip.flip(contentToFlipIndex(contentIndex))
+      const targetFlipIndex = contentToFlipIndex(contentIndex)
+      pageFlip.flip(targetFlipIndex)
+      // flip()이 "바로 옆 페이지"가 아니라 여러 장 떨어진 페이지로 건너뛸 때도
+      // 항상 정확히 도착한다는 보장이 없어서(라이브러리 특성상), 애니메이션이
+      // 끝났을 시점에 실제로 도착했는지 확인하고 어긋나 있으면 즉시 보정한다.
+      setTimeout(() => {
+        if (typeof pageFlip.getCurrentPageIndex === 'function' && pageFlip.getCurrentPageIndex() !== targetFlipIndex) {
+          pageFlip.turnToPage(targetFlipIndex)
+        }
+      }, 750)
     }
   }
 

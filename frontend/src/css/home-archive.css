@@ -23,6 +23,13 @@
   padding-right: 6.5rem;
 }
 
+/* 보스 선택 목록이 들어가는 왼쪽 페이지 - 목록 공간을 최대한 확보하도록
+   제목을 위쪽에 가깝게 붙인다 (카테고리 패널이 없는 페이지라 오른쪽 여백도 불필요). */
+.home__level-content--left {
+  padding-top: 8%;
+  padding-right: 1.6rem;
+}
+
 .home__level-current {
   margin: 0;
   font-size: 1.6rem;
@@ -61,6 +68,14 @@
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--color-ink);
+}
+
+.home__level-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  opacity: 0.6;
+  text-align: left;
 }
 
 /* 아직 연동 안 된 카테고리(보스/전리품/스토리) placeholder */
@@ -167,6 +182,14 @@
   font-size: 0.78rem;
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* 보스 상세 페이지처럼 .home__archive-bottom-links 래퍼 없이 단독으로 쓰일 때 */
+.home__archive-back--standalone {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .home__scheduler-list {
@@ -336,6 +359,34 @@
   cursor: pointer;
 }
 
+.home__boss-difficulty-option span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+}
+
+.home__boss-difficulty-price {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+/* 이번 주 보스 선택 초기화 버튼 */
+.home__boss-reset {
+  background: transparent;
+  border: none;
+  color: var(--color-ink);
+  opacity: 0.6;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.home__boss-reset--inline {
+  margin-left: 0.6rem;
+  font-size: 0.72rem;
+}
+
 .home__boss-difficulty-option input {
   accent-color: var(--color-accent);
   cursor: pointer;
@@ -346,4 +397,82 @@
   background: var(--color-accent);
   color: var(--color-page);
   font-weight: 700;
+}
+
+.home__boss-party-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.home__boss-party-label {
+  font-size: 0.72rem;
+  opacity: 0.6;
+}
+
+.home__boss-party-select {
+  padding: 0.2rem 0.5rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-line);
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+/* 오른쪽 메소 합계 통계 패널 */
+.home__boss-stats {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--color-canvas);
+  text-align: left;
+}
+
+.home__boss-stats-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.home__boss-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-bottom: 0.6rem;
+}
+
+.home__boss-stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+}
+
+.home__boss-stats-row-name {
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home__boss-stats-row-value {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.home__boss-stats-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.6rem;
+  border-top: 1.5px solid var(--color-line);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--color-accent);
 }

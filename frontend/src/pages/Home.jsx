@@ -7,12 +7,14 @@ import { useCharacterCardData } from '../hooks/useCharacterCardData.js'
 import { useLevelHistory } from '../hooks/useLevelHistory.js'
 import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
+import { useBossSelection } from '../hooks/useBossSelection.js'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/ApiKeyPage.jsx'
 import CharacterSelectPage from './home/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
+import BossDetailPage, { BossSelectionPage } from './home/BossDetailPage.jsx'
 import NoticeTicker from './home/NoticeTicker.jsx'
 import '../css/notice-ticker.css'
 
@@ -88,10 +90,18 @@ export default function Home() {
     'notice'
   )
   const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
-    // "보스" 카테고리는 별도 API가 아니라 스케줄러 응답의 bossContents를 그대로 쓴다.
-    page === 'archive' && (active === 'scheduler' || active === 'boss') && hasSelectedCharacter,
+    // "보스" 카테고리와 일일/주간/월간 보스 상세 페이지는 별도 API가 아니라
+    // 스케줄러 응답의 bossContents를 그대로 쓴다.
+    (page === 'archive' || page.startsWith('boss-')) &&
+      (active === 'scheduler' || active === 'boss' || page.startsWith('boss-')) &&
+      hasSelectedCharacter,
     selectedCharacter
   )
+  // 보스 선택(난이도/인원수)은 아카이브 페이지(개요)와 boss-daily/weekly/monthly
+  // 페이지가 동시에 마운트되어 있는 상태(react-pageflip은 모든 페이지를 항상
+  // DOM에 갖고 있음)라, 각자 따로 훅을 부르면 상태가 서로 안 맞을 수 있다.
+  // 그래서 여기 딱 한 번만 불러서 두 군데 다 똑같은 값을 내려준다.
+  const bossSelection = useBossSelection(selectedCharacter)
 
   // MenuButton의 "홈으로" 클릭을 처리한다. 이미 "/" 위에 있을 때는 라우트가
   // 안 바뀌어서 아무 반응이 없었던 버그 수정 - state로 전달된 타임스탬프를 감지해서
@@ -150,6 +160,10 @@ export default function Home() {
     jumpTo('select')
   }
 
+  // 보스 개요(아카이브 안)에서 일일/주간/월간 버튼을 누르면, 진짜 책 페이지로
+  // 실제 책장 넘김이 일어난다.
+  const handleGoBossDetail = (cycle) => flipTo(`boss-${cycle}`)
+
   function renderPageContent(p) {
     if (p === 'start') return <StartPage onStart={handleStart} disabled={false} />
     if (p === 'apikey') {
@@ -200,8 +214,31 @@ export default function Home() {
           scheduler={scheduler}
           schedulerLoading={schedulerLoading}
           schedulerError={schedulerError}
+          bossSelection={bossSelection}
+          onGoBossDetail={handleGoBossDetail}
         />
       )
+    }
+    if (p === 'boss-daily' || p === 'boss-weekly' || p === 'boss-monthly') {
+      const cycle = p.replace('boss-', '')
+      return (
+        <BossDetailPage
+          cycle={cycle}
+          scheduler={scheduler}
+          bossSelection={bossSelection}
+          onBack={() => flipTo('archive')}
+        />
+      )
+    }
+    return null
+  }
+
+  // boss-daily/weekly/monthly의 짝(왼쪽) 페이지에는 보스 선택 목록을 넣는다.
+  // 그 외 페이지는 null을 반환해서 기존처럼 빈 페이지로 남긴다.
+  function renderLeftPageContent(p) {
+    if (p === 'boss-daily' || p === 'boss-weekly' || p === 'boss-monthly') {
+      const cycle = p.replace('boss-', '')
+      return <BossSelectionPage cycle={cycle} scheduler={scheduler} bossSelection={bossSelection} />
     }
     return null
   }
@@ -228,6 +265,7 @@ export default function Home() {
         startFlipIndex={startFlipIndex}
         onFlip={handleFlip}
         renderPageContent={renderPageContent}
+        renderLeftPageContent={renderLeftPageContent}
       />
     </section>
   )

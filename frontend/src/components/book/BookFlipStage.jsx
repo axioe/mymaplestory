@@ -29,12 +29,23 @@ const BlankPage = forwardRef(function BlankPage(_, ref) {
  * "왼쪽 = 공백, 오른쪽 = 실제 콘텐츠" 조합만 나오게 하기 위함이다.
  * (pageKeys[0]은 표지로 취급하고, 나머지는 전부 빈 페이지와 짝지어 렌더링한다.)
  *
+ * renderLeftPageContent(key)는 선택적이다 - 기본적으로는 왼쪽이 계속 빈 페이지이지만,
+ * 특정 페이지(예: 보스 상세)에서는 왼쪽에도 실제 콘텐츠(선택 목록)를 넣고 싶을 때
+ * null이 아닌 값을 반환하면 그 페이지가 <BlankPage> 대신 콘텐츠가 담긴 <Page>로 바뀐다.
+ *
  * useMouseEvents는 일부러 껐다 - 캐릭터 선택/카드 페이지는 API 키 검증 같은
  * 실제 데이터 흐름을 거쳐야 의미가 있는 화면이라, 사용자가 손으로 마구 넘겨서
  * 검증 안 된 상태로 건너뛰는 걸 막기 위해서다. 페이지 전환은 항상 버튼 클릭
  * (flipTo 호출)을 통해서만 일어난다.
  */
-export default function BookFlipStage({ pageKeys, flipBookRef, startFlipIndex, onFlip, renderPageContent }) {
+export default function BookFlipStage({
+  pageKeys,
+  flipBookRef,
+  startFlipIndex,
+  onFlip,
+  renderPageContent,
+  renderLeftPageContent,
+}) {
   const [coverKey, ...restKeys] = pageKeys
 
   return (
@@ -58,10 +69,17 @@ export default function BookFlipStage({ pageKeys, flipBookRef, startFlipIndex, o
         onFlip={(e) => onFlip(e.data)}
       >
         <Page key={coverKey}>{renderPageContent(coverKey)}</Page>
-        {restKeys.flatMap((key) => [
-          <BlankPage key={`blank-${key}`} />,
-          <Page key={key}>{renderPageContent(key)}</Page>,
-        ])}
+        {restKeys.flatMap((key) => {
+          const leftContent = renderLeftPageContent ? renderLeftPageContent(key) : null
+          return [
+            leftContent != null ? (
+              <Page key={`blank-${key}`}>{leftContent}</Page>
+            ) : (
+              <BlankPage key={`blank-${key}`} />
+            ),
+            <Page key={key}>{renderPageContent(key)}</Page>,
+          ]
+        })}
       </HTMLFlipBook>
     </div>
   )

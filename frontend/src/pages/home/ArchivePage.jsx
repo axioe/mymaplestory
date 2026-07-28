@@ -2,7 +2,7 @@ import { useState } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import CategorySelector from './CategorySelector.jsx'
 import { useSkipTracker } from '../../hooks/useSkipTracker.js'
-import { useBossSelection } from '../../hooks/useBossSelection.js'
+import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 
@@ -157,103 +157,6 @@ function SchedulerSection({ scheduler, view }) {
 }
 
 /**
- * cycle 필드에 "주"가 들어가면 주간, 그 외는 일일로 취급한다.
- * (정확한 cycle 원문 값 목록을 다 확인하지는 못해서 쓰는 휴리스틱 - 실제로 다르게
- * 나오는 값이 있으면 이 판별식만 고치면 된다.)
- */
-function isWeeklyCycle(cycle) {
-  return (cycle ?? '').includes('주')
-}
-
-/**
- * 보스 목록 - 같은 보스 이름 아래 난이도별로 묶어서, 난이도는 라디오 버튼처럼
- * 하나만 고를 수 있게 한다(같은 보스를 여러 난이도로 중복해서 잡을 일은 없으니까).
- * 전체 선택 개수는 useBossSelection이 주간 처치 가능 횟수(12)로 제한해준다.
- */
-function BossGroupList({ items, isSelected, hasAnySelection, atLimit, onToggle }) {
-  if (!items || items.length === 0) {
-    return <p className="home__select-hint">표시할 항목이 없어요.</p>
-  }
-
-  const groups = new Map()
-  for (const item of items) {
-    if (!groups.has(item.contentName)) groups.set(item.contentName, [])
-    groups.get(item.contentName).push(item)
-  }
-
-  return (
-    <div className="home__scheduler-list">
-      {[...groups.entries()].map(([bossName, difficulties]) => {
-        const selected = hasAnySelection(bossName)
-        const disableNew = atLimit && !selected
-
-        return (
-          <div key={bossName} className="home__boss-group">
-            <p className="home__boss-group-name">{bossName}</p>
-            <div className="home__boss-difficulty-row">
-              {difficulties.map((d) => {
-                const checked = isSelected(bossName, d.difficulty)
-                return (
-                  <label
-                    key={d.difficulty}
-                    className={'home__boss-difficulty-option' + (checked ? ' home__boss-difficulty-option--checked' : '')}
-                  >
-                    <input
-                      type="radio"
-                      name={`boss-${bossName}`}
-                      checked={checked}
-                      onChange={() => {}}
-                      onClick={() => onToggle(bossName, d.difficulty)}
-                      disabled={disableNew && !checked}
-                    />
-                    {d.difficulty}
-                  </label>
-                )
-              })}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-/**
- * 보스 콘텐츠 - 스케줄러 응답의 bossContents를 재사용한다(별도 API 없음).
- * cycle 기준으로 일일/주간 버튼 두 개로 나누고, 각 버튼을 누르면 그 목록만 보여준다.
- */
-function BossSection({ scheduler, view, bossSelection }) {
-  const bossContents = scheduler.bossContents ?? []
-  const dailyBosses = bossContents.filter((b) => !isWeeklyCycle(b.cycle))
-  const weeklyBosses = bossContents.filter((b) => isWeeklyCycle(b.cycle))
-
-  if (view === 'daily' || view === 'weekly') {
-    const isDaily = view === 'daily'
-    return (
-      <>
-        <p className="home__select-hint">
-          {isDaily ? '일일 보스' : '주간 보스'} · 선택 {bossSelection.selectedCount}/{bossSelection.limit}
-        </p>
-        <BossGroupList
-          items={isDaily ? dailyBosses : weeklyBosses}
-          isSelected={bossSelection.isSelected}
-          hasAnySelection={bossSelection.hasAnySelection}
-          atLimit={bossSelection.atLimit}
-          onToggle={bossSelection.toggle}
-        />
-      </>
-    )
-  }
-
-  return (
-    <p className="home__select-hint">
-      {scheduler.characterName} · {scheduler.worldName} · 이번 주 보스 선택 {bossSelection.selectedCount}/
-      {bossSelection.limit}마리
-    </p>
-  )
-}
-
-/**
  * 아카이브 페이지 콘텐츠. BookFlipStage 안의 <Page>에 그대로 얹히는
  * "내용물"이라서, 자기 자신을 감싸는 책 모양이나 레이아웃(section 등)은
  * 만들지 않는다 - 다른 페이지(ApiKeyPage, CharacterSelectPage 등)와 완전히
@@ -264,7 +167,10 @@ function BossSection({ scheduler, view, bossSelection }) {
  *
  * 공지사항 티커는 여기 없다 - 화면 상단에 별도로 떠 있도록 Home.jsx에서 렌더링한다.
  *
- * 보스 콘텐츠는 스케줄러와 같은 API(scheduler.bossContents)를 재사용한다.
+ * 보스 콘텐츠는 스케줄러와 같은 API(scheduler.bossContents)를 재사용하지만, 여기서는
+ * "개요"(요약 + 일일/주간/월간 버튼)만 보여준다. 버튼을 누르면 미니북이 아니라
+ * 진짜 책 페이지(boss-daily 등)로 실제 책장 넘김이 일어난다 - onGoBossDetail이
+ * Home.jsx의 flipTo를 그대로 호출한다.
  */
 export default function ArchivePage({
   categories,
@@ -280,29 +186,32 @@ export default function ArchivePage({
   scheduler,
   schedulerLoading,
   schedulerError,
+  bossSelection,
+  onGoBossDetail,
 }) {
   const activeLabel = categories.find((c) => c.key === active)?.label
-  const bossSelection = useBossSelection(scheduler?.characterName)
 
   // 'overview' | 'daily' | 'weekly' - 다른 카테고리로 갔다가 돌아오면 ArchivePage
   // 자체는 리마운트되지 않으므로, 카테고리 클릭(onSelectCategory) 핸들러 쪽에서
-  // 이 상태들을 초기화해준다 (아래 handleSelectCategory).
+  // 이 상태를 초기화해준다 (아래 handleSelectCategory). 보스는 이제 진짜 페이지라서
+  // 여기서 관리할 view 상태가 따로 없다.
   const [schedulerView, setSchedulerView] = useState('overview')
-  const [bossView, setBossView] = useState('overview')
 
   const handleSelectCategory = (key) => {
     if (key !== 'scheduler') setSchedulerView('overview')
-    if (key !== 'boss') setBossView('overview')
     onSelectCategory(key)
   }
 
   const inSchedulerDetail = active === 'scheduler' && schedulerView !== 'overview'
-  const inBossDetail = active === 'boss' && bossView !== 'overview'
   // 제목을 담는 콘텐츠 박스 자체는 항상 "레벨/스케줄러/보스 공용" 클래스를 쓰는데,
-  // 상세 목록으로 들어가면 제목이 위로 붙고 목록이 커질 공간을 벌어주기 위해
-  // 별도 클래스를 얹어서 padding-top을 CSS 트랜지션으로 부드럽게 줄인다.
-  const levelContentClass =
-    'home__level-content' + (inSchedulerDetail || inBossDetail ? ' home__level-content--compact' : '')
+  // 스케줄러 상세 목록으로 들어가면 제목이 위로 붙고 목록이 커질 공간을 벌어주기
+  // 위해 별도 클래스를 얹어서 padding-top을 CSS 트랜지션으로 부드럽게 줄인다.
+  const levelContentClass = 'home__level-content' + (inSchedulerDetail ? ' home__level-content--compact' : '')
+
+  const validBossContents = scheduler ? getValidBossContents(scheduler) : []
+  const dailyBossCount = validBossContents.filter((b) => resolveBossCycle(b) === 'daily').length
+  const weeklyBossCount = validBossContents.filter((b) => resolveBossCycle(b) === 'weekly').length
+  const monthlyBossCount = validBossContents.filter((b) => resolveBossCycle(b) === 'monthly').length
 
   return (
     <>
@@ -320,25 +229,34 @@ export default function ArchivePage({
           {levelHistoryError && <p className="home__apikey-error">{levelHistoryError}</p>}
 
           {!levelHistoryLoading && !levelHistoryError && levelHistory && (
-            levelHistory.levelUpDate ? (
-              <div className="home__level-summary">
-                <p className="home__level-current">현재 Lv.{levelHistory.currentLevel}</p>
-                <div className="home__level-summary-row">
-                  <span className="home__level-summary-label">최근 레벨업</span>
-                  <span className="home__level-summary-value">{levelHistory.levelUpDate}</span>
-                </div>
-                <div className="home__level-summary-row">
-                  <span className="home__level-summary-label">경과</span>
-                  <span className="home__level-summary-value">
-                    {levelHistory.daysSinceLevelUp === 0 ? '오늘' : `${levelHistory.daysSinceLevelUp}일 지남`}
-                  </span>
-                </div>
+            <div className="home__level-summary">
+              <p className="home__level-current">현재 Lv.{levelHistory.currentLevel}</p>
+              <div className="home__level-summary-row">
+                <span className="home__level-summary-label">경험치</span>
+                <span className="home__level-summary-value">
+                  {levelHistory.expRate != null ? `${Number(levelHistory.expRate).toFixed(2)}%` : '-'}
+                </span>
               </div>
-            ) : (
-              <p className="home__select-hint">
-                최근 {levelHistory.lookbackDays}일 안에서는 레벨업 기록을 찾지 못했어요.
-              </p>
-            )
+              {levelHistory.levelUpDate ? (
+                <>
+                  <div className="home__level-summary-row">
+                    <span className="home__level-summary-label">최근 레벨업</span>
+                    <span className="home__level-summary-value">{levelHistory.levelUpDate}</span>
+                  </div>
+                  <div className="home__level-summary-row">
+                    <span className="home__level-summary-label">경과</span>
+                    <span className="home__level-summary-value">
+                      {levelHistory.daysSinceLevelUp === 0 ? '오늘' : `${levelHistory.daysSinceLevelUp}일 지남`}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <p className="home__level-note">
+                  최근 {levelHistory.lookbackDays}일 안에서는 레벨업 날짜까지는 못 찾았어요
+                  (넥슨이 조회 가능한 과거 기간이 짧아서 최근 경험치%로 대신 확인해주세요).
+                </p>
+              )}
+            </div>
           )}
         </div>
       ) : active === 'event' ? (
@@ -396,34 +314,40 @@ export default function ArchivePage({
           )}
         </div>
       ) : active === 'boss' ? (
-        <div className={levelContentClass}>
+        <div className="home__level-content">
           <h2 className="display home__select-title">보스</h2>
 
           {schedulerLoading && <p>불러오는 중...</p>}
           {schedulerError && <p className="home__apikey-error">{schedulerError}</p>}
 
-          {!schedulerLoading && !schedulerError && scheduler && bossView === 'overview' && (
+          {!schedulerLoading && !schedulerError && scheduler && (
             <>
-              <BossSection scheduler={scheduler} view={bossView} bossSelection={bossSelection} />
+              <p className="home__select-hint">
+                {scheduler.characterName} · {scheduler.worldName} · 이번 주 보스 선택 {bossSelection.weeklySelectedCount}/
+                {bossSelection.limit}마리 (주간 보스 기준)
+              </p>
               <div className="home__scheduler-nav">
-                <button type="button" onClick={() => setBossView('daily')} className="home__scheduler-nav-button">
+                <button type="button" onClick={() => onGoBossDetail('daily')} className="home__scheduler-nav-button">
                   일일 보스
-                  <span className="home__scheduler-nav-count">
-                    {scheduler.bossContents?.filter((b) => !isWeeklyCycle(b.cycle)).length ?? 0}
-                  </span>
+                  <span className="home__scheduler-nav-count">{dailyBossCount}</span>
                 </button>
-                <button type="button" onClick={() => setBossView('weekly')} className="home__scheduler-nav-button">
+                <button type="button" onClick={() => onGoBossDetail('weekly')} className="home__scheduler-nav-button">
                   주간 보스
-                  <span className="home__scheduler-nav-count">
-                    {scheduler.bossContents?.filter((b) => isWeeklyCycle(b.cycle)).length ?? 0}
-                  </span>
+                  <span className="home__scheduler-nav-count">{weeklyBossCount}</span>
                 </button>
+                {monthlyBossCount > 0 && (
+                  <button type="button" onClick={() => onGoBossDetail('monthly')} className="home__scheduler-nav-button">
+                    월간 보스
+                    <span className="home__scheduler-nav-count">{monthlyBossCount}</span>
+                  </button>
+                )}
               </div>
+              {bossSelection.selectedCount > 0 && (
+                <button type="button" onClick={bossSelection.reset} className="home__boss-reset">
+                  선택 초기화
+                </button>
+              )}
             </>
-          )}
-
-          {!schedulerLoading && !schedulerError && scheduler && bossView !== 'overview' && (
-            <BossSection scheduler={scheduler} view={bossView} bossSelection={bossSelection} />
           )}
         </div>
       ) : (
@@ -438,11 +362,6 @@ export default function ArchivePage({
         {inSchedulerDetail && (
           <button onClick={() => setSchedulerView('overview')} className="home__archive-back">
             ← 스케줄러로
-          </button>
-        )}
-        {inBossDetail && (
-          <button onClick={() => setBossView('overview')} className="home__archive-back">
-            ← 보스로
           </button>
         )}
         <button onClick={onBack} className="home__archive-back">

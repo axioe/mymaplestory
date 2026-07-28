@@ -212,6 +212,7 @@ public class NexonApiService {
 
         CharacterBasicDto today = getBasicInfo(ocid, requestApiKey, null);
         Integer currentLevel = today != null ? today.characterLevel() : null;
+        String expRate = today != null ? today.characterExpRate() : null;
 
         String levelUpDate = null;
         Long daysSinceLevelUp = null;
@@ -221,17 +222,27 @@ public class NexonApiService {
             LocalDate earliestAllowed = LocalDate.now().minusDays(maxLookbackDays);
 
             while (!cursor.isBefore(earliestAllowed)) {
-                Integer levelAtCursor = null;
+                CharacterBasicDto basic;
                 try {
-                    CharacterBasicDto basic = getBasicInfo(ocid, requestApiKey, cursor);
-                    if (basic != null) {
-                        levelAtCursor = basic.characterLevel();
-                    }
-                } catch (NexonApiException ignored) {
-                    // 캐릭터 생성 이전 날짜 등, 데이터가 없는 날짜 - 아직 이 레벨이 아니었던 것으로 간주한다.
+                    basic = getBasicInfo(ocid, requestApiKey, cursor);
+                } catch (NexonApiException e) {
+                    // 넥슨이 이 정도로 오래된 날짜는 조회를 지원하지 않는 경우가 있다.
+                    // 이걸 "그 날짜엔 레벨이 달랐다(=레벨업 신호)"로 잘못 해석하면,
+                    // 캐릭터와 무관하게 "넥슨이 조회를 거부하기 시작하는 지점"이 항상
+                    // 레벨업 날짜로 잘못 잡히는 버그가 있었다. 실패한 시점부터는
+                    // 더 과거로 가봐야 신뢰할 수 없으므로 여기서 탐색을 멈춘다
+                    // (지금까지 확인한 범위 안에서 레벨업을 못 찾았으면 levelUpDate는 null로 남는다).
+                    break;
                 }
 
-                if (levelAtCursor == null || !levelAtCursor.equals(currentLevel)) {
+                Integer levelAtCursor = basic != null ? basic.characterLevel() : null;
+                if (levelAtCursor == null) {
+                    // 응답은 왔지만 레벨 정보가 없는 경우도 마찬가지로 신뢰할 수 없어 중단.
+                    break;
+                }
+
+                if (!levelAtCursor.equals(currentLevel)) {
+                    // 실제로 레벨이 달랐던 날을 확인했다 - 이건 진짜 신호다.
                     LocalDate foundDate = cursor.plusDays(1);
                     levelUpDate = foundDate.toString();
                     daysSinceLevelUp = ChronoUnit.DAYS.between(foundDate, LocalDate.now());
@@ -241,7 +252,7 @@ public class NexonApiService {
             }
         }
 
-        return new LevelHistoryResponse(characterName, currentLevel, levelUpDate, daysSinceLevelUp, maxLookbackDays);
+        return new LevelHistoryResponse(characterName, currentLevel, expRate, levelUpDate, daysSinceLevelUp, maxLookbackDays);
     }
 
     private static final String NOTICE_BOARD_URL = "https://maplestory.nexon.com/News/Notice";
