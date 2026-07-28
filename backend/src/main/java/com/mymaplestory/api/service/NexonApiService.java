@@ -2,13 +2,17 @@ package com.mymaplestory.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymaplestory.api.config.NexonApiProperties;
+import com.mymaplestory.api.dto.BossContentItem;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
-import com.mymaplestory.api.dto.EventNoticeListResponse;
+import com.mymaplestory.api.dto.ContentItem;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.NexonErrorResponse;
+import com.mymaplestory.api.dto.NexonEventNoticeListResponse;
+import com.mymaplestory.api.dto.NexonNoticeItem;
+import com.mymaplestory.api.dto.NexonNoticeListResponse;
+import com.mymaplestory.api.dto.NexonSchedulerResponse;
 import com.mymaplestory.api.dto.NoticeItem;
-import com.mymaplestory.api.dto.NoticeListResponse;
 import com.mymaplestory.api.dto.OcidResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
 import com.mymaplestory.api.exception.ApiKeyRequiredException;
@@ -246,12 +250,10 @@ public class NexonApiService {
     /**
      * url이 응답에 없을 경우, 최소한 공지/이벤트 게시판으로는 이동할 수 있게 대체 링크를 채워준다.
      */
-    private List<NoticeItem> fillMissingUrl(List<NoticeItem> items, String fallbackBoardUrl) {
+    private List<NoticeItem> toNoticeItems(List<NexonNoticeItem> items, String fallbackBoardUrl) {
         if (items == null) return List.of();
         return items.stream()
-                .map(item -> item.url() != null && !item.url().isBlank()
-                        ? item
-                        : new NoticeItem(item.noticeId(), item.title(), item.date(), fallbackBoardUrl))
+                .map(item -> NoticeItem.from(item, fallbackBoardUrl))
                 .toList();
     }
 
@@ -262,12 +264,12 @@ public class NexonApiService {
     public List<NoticeItem> getNotices(String requestApiKey) {
         String apiKey = resolveApiKey(requestApiKey);
         try {
-            NoticeListResponse response = nexonRestClient.get()
+            NexonNoticeListResponse response = nexonRestClient.get()
                     .uri("/notice")
                     .header(NEXON_AUTH_HEADER, apiKey)
                     .retrieve()
-                    .body(NoticeListResponse.class);
-            List<NoticeItem> notices = fillMissingUrl(response != null ? response.notice() : null, NOTICE_BOARD_URL);
+                    .body(NexonNoticeListResponse.class);
+            List<NoticeItem> notices = toNoticeItems(response != null ? response.notice() : null, NOTICE_BOARD_URL);
             // 화면에서는 최근 5개만 보여주므로, 여기서 미리 잘라서 응답 크기도 줄인다.
             return notices.size() > 5 ? notices.subList(0, 5) : notices;
         } catch (RestClientResponseException e) {
@@ -285,12 +287,12 @@ public class NexonApiService {
     public List<NoticeItem> getEventNotices(String requestApiKey) {
         String apiKey = resolveApiKey(requestApiKey);
         try {
-            EventNoticeListResponse response = nexonRestClient.get()
+            NexonEventNoticeListResponse response = nexonRestClient.get()
                     .uri("/notice-event")
                     .header(NEXON_AUTH_HEADER, apiKey)
                     .retrieve()
-                    .body(EventNoticeListResponse.class);
-            return fillMissingUrl(response != null ? response.eventNotice() : null, EVENT_BOARD_URL);
+                    .body(NexonEventNoticeListResponse.class);
+            return toNoticeItems(response != null ? response.eventNotice() : null, EVENT_BOARD_URL);
         } catch (RestClientResponseException e) {
             if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
@@ -307,14 +309,41 @@ public class NexonApiService {
         String apiKey = resolveApiKey(requestApiKey);
         String ocid = getOcid(characterName, requestApiKey);
         try {
-            return nexonRestClient.get()
+            NexonSchedulerResponse raw = nexonRestClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/scheduler/character-state")
                             .queryParam("ocid", ocid)
                             .build())
                     .header(NEXON_AUTH_HEADER, apiKey)
                     .retrieve()
-                    .body(SchedulerResponse.class);
+                    .body(NexonSchedulerResponse.class);
+
+            if (raw == null) {
+                return null;
+            }
+
+            List<ContentItem> daily = raw.dailyContents() == null
+                    ? List.of()
+                    : raw.dailyContents().stream().map(ContentItem::from).toList();
+            List<ContentItem> weekly = raw.weeklyContents() == null
+                    ? List.of()
+                    : raw.weeklyContents().stream().map(ContentItem::from).toList();
+            List<BossContentItem> boss = raw.bossContents() == null
+                    ? List.of()
+                    : raw.bossContents().stream().map(BossContentItem::from).toList();
+
+            return new SchedulerResponse(
+                    raw.date(),
+                    raw.characterName(),
+                    raw.worldName(),
+                    raw.characterLevel(),
+                    raw.characterClass(),
+                    daily,
+                    weekly,
+                    boss,
+                    raw.weeklyBossClearCount(),
+                    raw.weeklyBossClearLimitCount()
+            );
         } catch (RestClientResponseException e) {
             if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");

@@ -1,18 +1,18 @@
 package com.mymaplestory.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * 공지/이벤트 공통 항목.
- * 주의: url 필드는 넥슨 응답에 실제로 포함되는지 오프라인 환경이라 확인하지 못했다.
- * 없을 경우 NexonApiService에서 메이플스토리 공식 공지 게시판 링크로 대체한다.
+ * 프론트엔드로 내려가는 공지/이벤트 항목. @JsonProperty를 안 붙인 순수 camelCase라서
+ * Jackson이 필드명 그대로("noticeId") 직렬화한다.
+ * (넥슨 원본 파싱은 NexonNoticeItem이 따로 담당 - NexonApiService에서 변환)
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public record NoticeItem(
-        @JsonProperty("notice_id") Long noticeId,
+        Long noticeId,
         String title,
         String date,
         String url
 ) {
+    public static NoticeItem from(NexonNoticeItem item, String fallbackUrl) {
+        String url = item.url() != null && !item.url().isBlank() ? item.url() : fallbackUrl;
+        return new NoticeItem(item.noticeId(), item.title(), item.date(), url);
+    }
 }

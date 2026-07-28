@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record EventNoticeListResponse(
-        @JsonProperty("event_notice") List<NoticeItem> eventNotice
+public record NexonEventNoticeListResponse(
+        @JsonProperty("event_notice") List<NexonNoticeItem> eventNotice
 ) {
 }
