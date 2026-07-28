@@ -162,14 +162,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  max-height: 130px;
+  max-height: 160px;
   overflow-y: auto;
 }
 
 .home__scheduler-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 0.6rem;
   padding: 0.45rem 0.8rem;
   border: 1.5px solid var(--color-line);
@@ -178,10 +177,30 @@
   font-size: 0.8rem;
 }
 
-.home__scheduler-item-name {
+/* 개인 스킵 표시 체크박스 - 넥슨 데이터와 무관, 브라우저에만 저장됨 */
+.home__scheduler-skip {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+/* 항목 이름 자체가 버튼 - 누르면 완료 여부 배지가 펼쳐진다 */
+.home__scheduler-item-button {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--color-ink);
+  font-size: inherit;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .home__scheduler-item-sub {
@@ -202,5 +221,13 @@
 
 .home__scheduler-item-badge--done {
   background: var(--color-accent);
+  opacity: 1;
+}
+
+/* 퀘스트를 수락했지만 아직 완료 전(quest_state=1) - 완료(초록/단풍색)와는
+   구분되는 진행 중 색상(금색)을 쓴다. 미수락(0)은 기본 회색 그대로. */
+.home__scheduler-item-badge--progress {
+  background: var(--color-accent-2);
+  color: var(--color-ink);
   opacity: 1;
 }

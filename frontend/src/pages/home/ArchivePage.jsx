@@ -1,48 +1,62 @@
+import { useState } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import CategorySelector from './CategorySelector.jsx'
+import { useSkipTracker } from '../../hooks/useSkipTracker.js'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 
-const QUEST_STATE_LABEL = { '0': '기타', '1': '진행 중', '2': '완료' }
+// quest_state: "0"=미수락, "1"=진행 중(수락함), "2"=완료
+const QUEST_STATE_LABEL = { '0': '미수락', '1': '진행 중', '2': '완료' }
+const QUEST_STATE_CLASS = {
+  '0': '',
+  '1': ' home__scheduler-item-badge--progress',
+  '2': ' home__scheduler-item-badge--done',
+}
 
-function DailyContentList({ items }) {
+/**
+ * 일일/주간 콘텐츠 목록 - 항목 이름 자체가 버튼이라 클릭하면 완료 여부가 펼쳐지고,
+ * 왼쪽 체크박스는 "이건 스킵할래"라는 개인 표시(localStorage 저장, 넥슨과 무관).
+ */
+function ContentButtonList({ items, isSkipped, onToggleSkip }) {
+  const [expandedName, setExpandedName] = useState(null)
+
   if (!items || items.length === 0) {
     return <p className="home__select-hint">표시할 항목이 없어요.</p>
   }
+
   return (
     <div className="home__scheduler-list">
       {items.map((item) => {
         const isQuest = item.type === 'quest'
-        const done = isQuest ? item.questState === '2' : item.nowCount >= item.maxCount
+        const done = !isQuest && item.nowCount >= item.maxCount
+        const badgeClass = isQuest
+          ? QUEST_STATE_CLASS[item.questState] ?? ''
+          : done
+            ? ' home__scheduler-item-badge--done'
+            : ''
+        const isExpanded = expandedName === item.contentName
+
         return (
           <div key={item.contentName} className="home__scheduler-item">
-            <span className="home__scheduler-item-name">{item.contentName}</span>
-            <span className={'home__scheduler-item-badge' + (done ? ' home__scheduler-item-badge--done' : '')}>
-              {isQuest ? QUEST_STATE_LABEL[item.questState] ?? '기타' : `${item.nowCount ?? 0}/${item.maxCount ?? 0}`}
-            </span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function BossContentList({ items }) {
-  if (!items || items.length === 0) {
-    return <p className="home__select-hint">표시할 항목이 없어요.</p>
-  }
-  return (
-    <div className="home__scheduler-list">
-      {items.map((item) => {
-        const done = item.completeFlag === 'true'
-        return (
-          <div key={`${item.contentName}-${item.difficulty}`} className="home__scheduler-item">
-            <span className="home__scheduler-item-name">
-              {item.contentName} <span className="home__scheduler-item-sub">({item.difficulty})</span>
-            </span>
-            <span className={'home__scheduler-item-badge' + (done ? ' home__scheduler-item-badge--done' : '')}>
-              {done ? '완료' : '미완료'}
-            </span>
+            <input
+              type="checkbox"
+              className="home__scheduler-skip"
+              checked={isSkipped(item.contentName)}
+              onChange={() => onToggleSkip(item.contentName)}
+              aria-label={`${item.contentName} 스킵`}
+            />
+            <button
+              type="button"
+              className="home__scheduler-item-button"
+              onClick={() => setExpandedName(isExpanded ? null : item.contentName)}
+            >
+              {item.contentName}
+            </button>
+            {isExpanded && (
+              <span className={'home__scheduler-item-badge' + badgeClass}>
+                {isQuest ? QUEST_STATE_LABEL[item.questState] ?? '미수락' : `${item.nowCount ?? 0}/${item.maxCount ?? 0}`}
+              </span>
+            )}
           </div>
         )
       })}
@@ -59,8 +73,11 @@ function BossContentList({ items }) {
  * 카테고리 선택 UI는 홈/다크모드 버튼 바로 아래 고정되는 CategorySelector로 뺐다
  * (예전의 큰 캡슐형 옆 패널 대신).
  *
- * 공지사항 티커는 여기 없다 - 책 안에 있으면 다른 콘텐츠와 겹쳐 보이는 문제가
- * 있어서, 책 바깥(페이지 하단)에 별도로 떠 있도록 Home.jsx에서 렌더링한다.
+ * 공지사항 티커는 여기 없다 - 책 위쪽(페이지 상단)에 별도로 떠 있도록 Home.jsx에서
+ * 렌더링한다.
+ *
+ * 스케줄러의 보스 콘텐츠는 여기서 안 보여준다 - "보스" 카테고리 쪽에 따로
+ * 합쳐질 예정이라 중복을 피했다.
  */
 export default function ArchivePage({
   categories,
@@ -78,6 +95,7 @@ export default function ArchivePage({
   schedulerError,
 }) {
   const activeLabel = categories.find((c) => c.key === active)?.label
+  const { isSkipped, toggleSkip } = useSkipTracker(scheduler?.characterName)
 
   return (
     <>
@@ -157,28 +175,22 @@ export default function ArchivePage({
                 {scheduler.characterClass} {scheduler.date && `(${scheduler.date.slice(0, 10)} 기준)`}
               </p>
 
-              <div className="home__level-summary">
-                <div className="home__level-summary-row">
-                  <span className="home__level-summary-label">주간 보스 처치</span>
-                  <span className="home__level-summary-value">
-                    {scheduler.weeklyBossClearCount ?? '-'} / {scheduler.weeklyBossClearLimitCount ?? '-'}
-                  </span>
-                </div>
-              </div>
-
               <div className="home__scheduler-section">
                 <p className="home__select-hint">일일 콘텐츠</p>
-                <DailyContentList items={scheduler.dailyContents} />
+                <ContentButtonList
+                  items={scheduler.dailyContents}
+                  isSkipped={isSkipped}
+                  onToggleSkip={toggleSkip}
+                />
               </div>
 
               <div className="home__scheduler-section">
                 <p className="home__select-hint">주간 콘텐츠</p>
-                <DailyContentList items={scheduler.weeklyContents} />
-              </div>
-
-              <div className="home__scheduler-section">
-                <p className="home__select-hint">보스 콘텐츠</p>
-                <BossContentList items={scheduler.bossContents} />
+                <ContentButtonList
+                  items={scheduler.weeklyContents}
+                  isSkipped={isSkipped}
+                  onToggleSkip={toggleSkip}
+                />
               </div>
             </>
           )}

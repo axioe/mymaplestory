@@ -1,21 +1,51 @@
-/* 책 바깥, 페이지 하단 여백에 위치하는 공지사항 티커 래퍼 */
+/* 책과 같은 그룹으로 묶여 함께 중앙정렬되는 공지사항 티커 래퍼 (책 위쪽에 위치) */
 .home__footer-ticker-outside {
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 1.6rem 1.6rem 0;
+  padding: 0 1.6rem;
 }
 
 .home__notice-ticker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   width: 100%;
   max-width: 420px;
   height: 44px;
-  overflow: hidden;
-  border-top: 2px solid var(--color-line);
-  padding-top: 0.7rem;
+  padding: 0.5rem 0.8rem;
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-page);
+  box-shadow: var(--shadow-book);
+}
+
+.home__notice-ticker-nav {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.home__notice-ticker-nav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.home__notice-ticker-nav:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-page);
 }
 
 .home__notice-ticker-item {
+  flex: 1;
+  min-width: 0;
   display: block;
   text-decoration: none;
   color: var(--color-ink);
@@ -24,12 +54,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  animation: home-notice-slide-down 0.6s ease;
+  animation: home-notice-slide-down 0.5s ease;
 }
 
 @keyframes home-notice-slide-down {
   from {
-    transform: translateY(-100%);
+    transform: translateY(-60%);
     opacity: 0;
   }
   to {

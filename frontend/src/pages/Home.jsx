@@ -206,18 +206,11 @@ export default function Home() {
   }
 
   return (
-    <>
-      <BookFlipStage
-        pageKeys={PAGE_ORDER}
-        flipBookRef={flipBookRef}
-        startFlipIndex={startFlipIndex}
-        onFlip={handleFlip}
-        renderPageContent={renderPageContent}
-      />
-
-      {/* 책 바깥, 페이지 하단 - 아카이브를 보고 있을 때만 뜨는 공지사항 티커.
+    <section className="home">
+      {/* 책 바로 위 - 아카이브를 보고 있을 때만 뜨는 공지사항 티커.
           책 안에 두면 다른 콘텐츠(북마크, 스케줄러 목록 등)와 겹쳐 보이는
-          문제가 있어서 아예 밖으로 뺐다. */}
+          문제가 있어서 밖으로 뺐고, 책과 같은 그룹으로 묶어서 화면 가운데
+          위쪽에 위치하도록 했다. */}
       {page === 'archive' && (
         <div className="home__footer-ticker-outside">
           {footerNoticesLoading && <p className="home__select-hint">공지 불러오는 중...</p>}
@@ -227,6 +220,14 @@ export default function Home() {
           )}
         </div>
       )}
-    </>
+
+      <BookFlipStage
+        pageKeys={PAGE_ORDER}
+        flipBookRef={flipBookRef}
+        startFlipIndex={startFlipIndex}
+        onFlip={handleFlip}
+        renderPageContent={renderPageContent}
+      />
+    </section>
   )
 }
