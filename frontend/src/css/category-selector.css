@@ -1,7 +1,10 @@
+/* 뷰포트 기준 고정(position: fixed) 대신, 책 페이지(.flip-page, position:relative)
+   기준 절대 위치로 붙인다. 이렇게 해야 책 크기/위치가 반응형으로 바뀌어도
+   항상 책 안의 날짜(top:0; right:0) 바로 아래에 붙어있는다. */
 .category-selector {
-  position: fixed;
-  top: calc(1.5rem + 56px + 0.6rem);
-  right: 1.5rem;
+  position: absolute;
+  top: 2.6rem;
+  right: 0;
   z-index: 45;
   display: flex;
   flex-direction: column;
@@ -12,6 +15,8 @@
   padding: 0.5rem;
   box-shadow: var(--shadow-book);
   max-width: 140px;
+  max-height: calc(100% - 3rem);
+  overflow-y: auto;
 }
 
 .category-selector__item {

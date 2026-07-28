@@ -1,16 +1,26 @@
 /* 레벨/스케줄러 카테고리에서 쓰는 콘텐츠 래퍼 - 다른 페이지들과 같은
-   position:absolute + inset:0 패턴이라 캐릭터 선택부터 이어지는 배치가 유지된다. */
+   position:absolute + inset:0 패턴이라 캐릭터 선택부터 이어지는 배치가 유지된다.
+   justify-content 대신 padding-top으로 위치를 잡아서, 상세 화면으로 들어갈 때
+   제목이 CSS 트랜지션으로 부드럽게 위로 올라가도록 했다(--compact 참고). */
 .home__level-content {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem 1.6rem;
+  justify-content: flex-start;
+  padding: 20% 1.6rem 2rem;
   gap: 1.2rem;
   text-align: center;
   overflow: hidden;
+  transition: padding-top 0.35s ease;
+}
+
+/* 스케줄러 일일/주간 상세 목록으로 들어가면 제목을 위로 붙여서
+   목록이 표시될 공간을 넉넉하게 확보한다. */
+.home__level-content--compact {
+  padding-top: 6%;
+  padding-right: 6.5rem;
 }
 
 .home__level-current {
@@ -137,12 +147,19 @@
 
 /* 공지사항 전용 - 페이지 하단에 붙는 한 줄짜리 자동 슬라이드 티커 */
 /* 카테고리 선택과 무관하게 페이지 하단에 항상 고정되는 공지사항 티커 래퍼 */
-/* 아카이브 페이지 하단에 고정되는 뒤로가기 링크 */
-.home__archive-back {
+/* 아카이브 페이지 하단에 고정되는 뒤로가기 링크 묶음 - "← 스케줄러로"(있을 때만)와
+   "← 캐릭터 카드로"를 나란히 보여준다 */
+.home__archive-bottom-links {
   position: absolute;
   bottom: 1rem;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.home__archive-back {
   background: transparent;
   border: none;
   color: var(--color-ink);
@@ -152,38 +169,80 @@
   cursor: pointer;
 }
 
-.home__scheduler-section {
-  width: 100%;
-  max-width: 400px;
-  text-align: left;
-}
-
 .home__scheduler-list {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  max-height: 160px;
+  gap: 0.55rem;
+  width: 100%;
+  max-width: 380px;
+  max-height: 320px;
   overflow-y: auto;
+  padding-right: 0.2rem;
 }
 
 .home__scheduler-item {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.45rem 0.8rem;
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
   border: 1.5px solid var(--color-line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--color-canvas);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
 }
 
 /* 개인 스킵 표시 체크박스 - 넥슨 데이터와 무관, 브라우저에만 저장됨 */
 .home__scheduler-skip {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   accent-color: var(--color-accent);
   cursor: pointer;
+}
+
+/* 체크박스로 스킵 표시된 항목 - 줄 전체가 흐려지고 이름에 취소선이 그어진다 */
+.home__scheduler-item--skipped {
+  opacity: 0.5;
+}
+
+.home__scheduler-item--skipped .home__scheduler-item-button {
+  text-decoration: line-through;
+}
+
+/* 스케줄러 첫 화면의 "일일/주간 콘텐츠" 진입 버튼 2개 */
+.home__scheduler-nav {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.home__scheduler-nav-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: 14px;
+  border: 2px solid var(--color-line);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.home__scheduler-nav-button:hover {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+.home__scheduler-nav-count {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.home__scheduler-nav-button:hover .home__scheduler-nav-count {
+  color: var(--color-page);
 }
 
 /* 항목 이름 자체가 버튼 - 누르면 완료 여부 배지가 펼쳐진다 */
@@ -210,9 +269,9 @@
 
 .home__scheduler-item-badge {
   flex-shrink: 0;
-  padding: 0.15rem 0.5rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 700;
   background: var(--color-line);
   color: var(--color-page);

@@ -14,8 +14,52 @@ const QUEST_STATE_CLASS = {
 }
 
 /**
+ * 항목마다 배지에 뭘 어떻게 보여줄지 결정한다.
+ * - 퀘스트: 미수락/진행 중/완료
+ * - "에픽던전"으로 시작하는 항목: contents 타입이라도 진행률(n/m) 대신 완료/미완료로 표시
+ * - max_count가 0인 항목(예: [길드] 지하 수로): "n/0"처럼 분수로 표시하면 이상해서
+ *   그냥 "n점"으로 표시
+ * - 그 외 일반 contents: 기존처럼 n/m 진행률 표시
+ */
+function getContentDisplay(item) {
+  const isQuest = item.type === 'quest'
+  const isEpicDungeon = item.contentName?.startsWith('에픽던전')
+  const now = item.nowCount ?? 0
+  const max = item.maxCount ?? 0
+  const cleared = now >= max && max > 0
+
+  if (isQuest) {
+    return {
+      done: item.questState === '2',
+      badgeClass: QUEST_STATE_CLASS[item.questState] ?? '',
+      text: QUEST_STATE_LABEL[item.questState] ?? '미수락',
+    }
+  }
+  if (isEpicDungeon) {
+    return {
+      done: cleared,
+      badgeClass: cleared ? ' home__scheduler-item-badge--done' : '',
+      text: cleared ? '완료' : '미완료',
+    }
+  }
+  if (max === 0) {
+    return {
+      done: now > 0,
+      badgeClass: now > 0 ? ' home__scheduler-item-badge--done' : '',
+      text: `${now}점`,
+    }
+  }
+  return {
+    done: cleared,
+    badgeClass: cleared ? ' home__scheduler-item-badge--done' : '',
+    text: `${now}/${max}`,
+  }
+}
+
+/**
  * 일일/주간 콘텐츠 목록 - 항목 이름 자체가 버튼이라 클릭하면 완료 여부가 펼쳐지고,
  * 왼쪽 체크박스는 "이건 스킵할래"라는 개인 표시(localStorage 저장, 넥슨과 무관).
+ * 체크하면 그 줄 전체가 흐려지고 이름에 취소선이 그어져서 스킵 상태가 바로 보인다.
  */
 function ContentButtonList({ items, isSkipped, onToggleSkip }) {
   const [expandedName, setExpandedName] = useState(null)
@@ -27,21 +71,19 @@ function ContentButtonList({ items, isSkipped, onToggleSkip }) {
   return (
     <div className="home__scheduler-list">
       {items.map((item) => {
-        const isQuest = item.type === 'quest'
-        const done = !isQuest && item.nowCount >= item.maxCount
-        const badgeClass = isQuest
-          ? QUEST_STATE_CLASS[item.questState] ?? ''
-          : done
-            ? ' home__scheduler-item-badge--done'
-            : ''
+        const { badgeClass, text } = getContentDisplay(item)
         const isExpanded = expandedName === item.contentName
+        const skipped = isSkipped(item.contentName)
 
         return (
-          <div key={item.contentName} className="home__scheduler-item">
+          <div
+            key={item.contentName}
+            className={'home__scheduler-item' + (skipped ? ' home__scheduler-item--skipped' : '')}
+          >
             <input
               type="checkbox"
               className="home__scheduler-skip"
-              checked={isSkipped(item.contentName)}
+              checked={skipped}
               onChange={() => onToggleSkip(item.contentName)}
               aria-label={`${item.contentName} 스킵`}
             />
@@ -53,14 +95,47 @@ function ContentButtonList({ items, isSkipped, onToggleSkip }) {
               {item.contentName}
             </button>
             {isExpanded && (
-              <span className={'home__scheduler-item-badge' + badgeClass}>
-                {isQuest ? QUEST_STATE_LABEL[item.questState] ?? '미수락' : `${item.nowCount ?? 0}/${item.maxCount ?? 0}`}
-              </span>
+              <span className={'home__scheduler-item-badge' + badgeClass}>{text}</span>
             )}
           </div>
         )
       })}
     </div>
+  )
+}
+
+/**
+ * 스케줄러 콘텐츠 - 일일/주간을 동시에 다 펼쳐서 보여주면 너무 길어서,
+ * "일일 콘텐츠"/"주간 콘텐츠" 버튼 두 개만 먼저 보여주고, 누른 것만 목록으로
+ * 들어가는 서브 페이지 형식으로 만들었다.
+ * view 상태는 부모(ArchivePage)가 들고 있다 - 하단의 "← 스케줄러로" 링크를
+ * "← 캐릭터 카드로"와 나란히 보여주려면 부모가 지금 view를 알아야 하기 때문.
+ */
+function SchedulerSection({ scheduler, view, isSkipped, toggleSkip }) {
+  const dailyCount = scheduler.dailyContents?.length ?? 0
+  const weeklyCount = scheduler.weeklyContents?.length ?? 0
+
+  if (view === 'daily' || view === 'weekly') {
+    const isDaily = view === 'daily'
+    return (
+      <>
+        <p className="home__select-hint">{isDaily ? '일일 콘텐츠' : '주간 콘텐츠'}</p>
+        <ContentButtonList
+          items={isDaily ? scheduler.dailyContents : scheduler.weeklyContents}
+          isSkipped={isSkipped}
+          onToggleSkip={toggleSkip}
+        />
+      </>
+    )
+  }
+
+  return (
+    <>
+      <p className="home__select-hint">
+        {scheduler.characterName} · {scheduler.worldName} · Lv.{scheduler.characterLevel} ·{' '}
+        {scheduler.characterClass} {scheduler.date && `(${scheduler.date.slice(0, 10)} 기준)`}
+      </p>
+    </>
   )
 }
 
@@ -73,8 +148,7 @@ function ContentButtonList({ items, isSkipped, onToggleSkip }) {
  * 카테고리 선택 UI는 홈/다크모드 버튼 바로 아래 고정되는 CategorySelector로 뺐다
  * (예전의 큰 캡슐형 옆 패널 대신).
  *
- * 공지사항 티커는 여기 없다 - 책 위쪽(페이지 상단)에 별도로 떠 있도록 Home.jsx에서
- * 렌더링한다.
+ * 공지사항 티커는 여기 없다 - 화면 상단에 별도로 떠 있도록 Home.jsx에서 렌더링한다.
  *
  * 스케줄러의 보스 콘텐츠는 여기서 안 보여준다 - "보스" 카테고리 쪽에 따로
  * 합쳐질 예정이라 중복을 피했다.
@@ -97,9 +171,25 @@ export default function ArchivePage({
   const activeLabel = categories.find((c) => c.key === active)?.label
   const { isSkipped, toggleSkip } = useSkipTracker(scheduler?.characterName)
 
+  // 'overview' | 'daily' | 'weekly' - 다른 카테고리로 갔다가 스케줄러로 돌아오면
+  // ArchivePage 자체는 리마운트되지 않으므로, 카테고리 클릭(onSelectCategory)
+  // 핸들러 쪽에서 이 상태를 초기화해준다 (아래 handleSelectCategory).
+  const [schedulerView, setSchedulerView] = useState('overview')
+
+  const handleSelectCategory = (key) => {
+    if (key !== 'scheduler') setSchedulerView('overview')
+    onSelectCategory(key)
+  }
+
+  const inSchedulerDetail = active === 'scheduler' && schedulerView !== 'overview'
+  // 제목을 담는 콘텐츠 박스 자체는 항상 "레벨/스케줄러 공용" 클래스를 쓰는데,
+  // 상세 목록으로 들어가면 제목이 위로 붙고 목록이 커질 공간을 벌어주기 위해
+  // 별도 클래스를 얹어서 padding-top을 CSS 트랜지션으로 부드럽게 줄인다.
+  const levelContentClass = 'home__level-content' + (inSchedulerDetail ? ' home__level-content--compact' : '')
+
   return (
     <>
-      <CategorySelector categories={categories} active={active} onSelectCategory={onSelectCategory} />
+      <CategorySelector categories={categories} active={active} onSelectCategory={handleSelectCategory} />
 
       <div className="home__result-datetime">
         <DateTimeLabel />
@@ -162,37 +252,30 @@ export default function ArchivePage({
           )}
         </div>
       ) : active === 'scheduler' ? (
-        <div className="home__level-content">
+        <div className={levelContentClass}>
           <h2 className="display home__select-title">스케줄러</h2>
 
           {schedulerLoading && <p>불러오는 중...</p>}
           {schedulerError && <p className="home__apikey-error">{schedulerError}</p>}
 
-          {!schedulerLoading && !schedulerError && scheduler && (
+          {!schedulerLoading && !schedulerError && scheduler && schedulerView === 'overview' && (
             <>
-              <p className="home__select-hint">
-                {scheduler.characterName} · {scheduler.worldName} · Lv.{scheduler.characterLevel} ·{' '}
-                {scheduler.characterClass} {scheduler.date && `(${scheduler.date.slice(0, 10)} 기준)`}
-              </p>
-
-              <div className="home__scheduler-section">
-                <p className="home__select-hint">일일 콘텐츠</p>
-                <ContentButtonList
-                  items={scheduler.dailyContents}
-                  isSkipped={isSkipped}
-                  onToggleSkip={toggleSkip}
-                />
-              </div>
-
-              <div className="home__scheduler-section">
-                <p className="home__select-hint">주간 콘텐츠</p>
-                <ContentButtonList
-                  items={scheduler.weeklyContents}
-                  isSkipped={isSkipped}
-                  onToggleSkip={toggleSkip}
-                />
+              <SchedulerSection scheduler={scheduler} view={schedulerView} isSkipped={isSkipped} toggleSkip={toggleSkip} />
+              <div className="home__scheduler-nav">
+                <button type="button" onClick={() => setSchedulerView('daily')} className="home__scheduler-nav-button">
+                  일일 콘텐츠
+                  <span className="home__scheduler-nav-count">{scheduler.dailyContents?.length ?? 0}</span>
+                </button>
+                <button type="button" onClick={() => setSchedulerView('weekly')} className="home__scheduler-nav-button">
+                  주간 콘텐츠
+                  <span className="home__scheduler-nav-count">{scheduler.weeklyContents?.length ?? 0}</span>
+                </button>
               </div>
             </>
+          )}
+
+          {!schedulerLoading && !schedulerError && scheduler && schedulerView !== 'overview' && (
+            <SchedulerSection scheduler={scheduler} view={schedulerView} isSkipped={isSkipped} toggleSkip={toggleSkip} />
           )}
         </div>
       ) : (
@@ -203,9 +286,16 @@ export default function ArchivePage({
         </div>
       )}
 
-      <button onClick={onBack} className="home__archive-back">
-        ← 캐릭터 카드로
-      </button>
+      <div className="home__archive-bottom-links">
+        {inSchedulerDetail && (
+          <button onClick={() => setSchedulerView('overview')} className="home__archive-back">
+            ← 스케줄러로
+          </button>
+        )}
+        <button onClick={onBack} className="home__archive-back">
+          ← 캐릭터 카드로
+        </button>
+      </div>
     </>
   )
 }
