@@ -88,7 +88,8 @@ export default function Home() {
     'notice'
   )
   const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
-    page === 'archive' && active === 'scheduler' && hasSelectedCharacter,
+    // "보스" 카테고리는 별도 API가 아니라 스케줄러 응답의 bossContents를 그대로 쓴다.
+    page === 'archive' && (active === 'scheduler' || active === 'boss') && hasSelectedCharacter,
     selectedCharacter
   )
 
