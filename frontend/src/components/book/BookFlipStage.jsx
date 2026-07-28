@@ -38,7 +38,7 @@ export default function BookFlipStage({ pageKeys, flipBookRef, startFlipIndex, o
   const [coverKey, ...restKeys] = pageKeys
 
   return (
-    <section className="home">
+    <div className="book-flip-wrapper">
       <HTMLFlipBook
         ref={flipBookRef}
         width={800}
@@ -63,6 +63,6 @@ export default function BookFlipStage({ pageKeys, flipBookRef, startFlipIndex, o
           <Page key={key}>{renderPageContent(key)}</Page>,
         ])}
       </HTMLFlipBook>
-    </section>
+    </div>
   )
 }

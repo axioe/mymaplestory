@@ -1,17 +1,18 @@
-/* 책과 같은 그룹으로 묶여 함께 중앙정렬되는 공지사항 티커 래퍼 (책 위쪽에 위치) */
+/* 좌상단 폰트 안내 문구와 우상단 홈/다크모드 버튼 사이, 상단 중앙에 고정되는
+   공지사항 티커. 책의 레이아웃과는 완전히 무관하게 화면 기준으로 고정한다. */
 .home__footer-ticker-outside {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 0 1.6rem;
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
 }
 
 .home__notice-ticker {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  width: 100%;
-  max-width: 420px;
+  width: min(360px, 46vw);
   height: 44px;
   padding: 0.5rem 0.8rem;
   border: 2px solid var(--color-line);
