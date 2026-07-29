@@ -47,6 +47,43 @@ export async function fetchScheduler(characterName) {
   return data
 }
 
+// ---- 보스 선택 (DB 저장) ----
+export async function fetchBossSelections(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/boss-selections`)
+  return data
+}
+
+export async function upsertBossSelection(characterName, selection) {
+  const { data } = await apiClient.put(
+    `/characters/${encodeURIComponent(characterName)}/boss-selections`,
+    selection
+  )
+  return data
+}
+
+export async function deleteBossSelection(characterName, bossName) {
+  await apiClient.delete(
+    `/characters/${encodeURIComponent(characterName)}/boss-selections/${encodeURIComponent(bossName)}`
+  )
+}
+
+export async function resetBossSelections(characterName) {
+  await apiClient.delete(`/characters/${encodeURIComponent(characterName)}/boss-selections`)
+}
+
+// ---- 스킵 체크 (DB 저장) ----
+export async function fetchSkips(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/skips`)
+  return data
+}
+
+export async function setSkip(characterName, contentName, skipped) {
+  await apiClient.put(
+    `/characters/${encodeURIComponent(characterName)}/skips/${encodeURIComponent(contentName)}`,
+    { contentName, skipped }
+  )
+}
+
 // 아직 localStorage에 저장되지 않은 키를 검증할 때 쓰므로,
 // 인터셉터에 기대지 않고 헤더를 직접 지정한다.
 export async function validateApiKey(apiKey) {
