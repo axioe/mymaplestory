@@ -3,8 +3,10 @@ package com.mymaplestory.api.service;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterCardResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
+import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
+import com.mymaplestory.api.dto.SetEffectResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,5 +41,19 @@ public class CharacterService {
      */
     public SchedulerResponse getScheduler(String characterName, String apiKey) {
         return nexonApiService.getScheduler(characterName, apiKey);
+    }
+
+    /**
+     * 아카이브 - 전리품 카테고리용 장착장비(프리셋 1/2/3 포함).
+     */
+    public EquipmentPresetResponse getItemEquipment(String characterName, String apiKey) {
+        return nexonApiService.getItemEquipment(characterName, apiKey);
+    }
+
+    /**
+     * 아카이브 - 전리품 카테고리용 적용 세트효과.
+     */
+    public SetEffectResponse getSetEffect(String characterName, String apiKey) {
+        return nexonApiService.getSetEffect(characterName, apiKey);
     }
 }

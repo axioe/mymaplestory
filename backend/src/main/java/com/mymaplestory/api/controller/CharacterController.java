@@ -1,8 +1,10 @@
 package com.mymaplestory.api.controller;
 
 import com.mymaplestory.api.dto.CharacterCardResponse;
+import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
+import com.mymaplestory.api.dto.SetEffectResponse;
 import com.mymaplestory.api.service.CharacterService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,5 +64,30 @@ public class CharacterController {
             @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
     ) {
         return characterService.getScheduler(characterName, apiKey);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/equipment
+     * 장착장비 조회 (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14).
+     * 프리셋 1/2/3이 한 번에 다 내려오므로, 프론트는 이 응답 하나로 버튼 3개를 다 구현한다.
+     */
+    @GetMapping("/{characterName}/equipment")
+    public EquipmentPresetResponse getItemEquipment(
+            @PathVariable String characterName,
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return characterService.getItemEquipment(characterName, apiKey);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/set-effect
+     * 적용 세트효과 조회 (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14).
+     */
+    @GetMapping("/{characterName}/set-effect")
+    public SetEffectResponse getSetEffect(
+            @PathVariable String characterName,
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return characterService.getSetEffect(characterName, apiKey);
     }
 }

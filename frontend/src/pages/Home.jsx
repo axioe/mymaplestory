@@ -7,6 +7,8 @@ import { useCharacterCardData } from '../hooks/useCharacterCardData.js'
 import { useLevelHistory } from '../hooks/useLevelHistory.js'
 import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
+import { useEquipment } from '../hooks/useEquipment.js'
+import { useSetEffect } from '../hooks/useSetEffect.js'
 import { useBossSelection } from '../hooks/useBossSelection.js'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
@@ -96,6 +98,15 @@ export default function Home() {
     (page === 'archive' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
       (active === 'scheduler' || active === 'boss' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
       hasSelectedCharacter,
+    selectedCharacter
+  )
+  // 전리품: "전리품" 카테고리를 선택했을 때만 조회 (장착장비 + 적용 세트효과)
+  const { equipment, loading: equipmentLoading, error: equipmentError } = useEquipment(
+    page === 'archive' && active === 'loot' && hasSelectedCharacter,
+    selectedCharacter
+  )
+  const { setEffect, loading: setEffectLoading, error: setEffectError } = useSetEffect(
+    page === 'archive' && active === 'loot' && hasSelectedCharacter,
     selectedCharacter
   )
   // 보스 선택(난이도/인원수)은 아카이브 페이지(개요)와 boss-daily/weekly/monthly
@@ -224,6 +235,12 @@ export default function Home() {
           onGoSchedulerDetail={handleGoSchedulerDetail}
           bossSelection={bossSelection}
           onGoBossDetail={handleGoBossDetail}
+          equipment={equipment}
+          equipmentLoading={equipmentLoading}
+          equipmentError={equipmentError}
+          setEffect={setEffect}
+          setEffectLoading={setEffectLoading}
+          setEffectError={setEffectError}
         />
       )
     }

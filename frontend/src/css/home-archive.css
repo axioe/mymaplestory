@@ -10,7 +10,11 @@
   padding: 20% 1.6rem 2rem;
   gap: 1.2rem;
   text-align: center;
-  overflow: hidden;
+  /* 내용이 페이지 높이보다 길어지면 (전리품 - 프리셋 버튼 + 장비 목록 + 세트효과 등)
+     예전엔 overflow: hidden 때문에 아래가 그냥 잘려 보였다. 세로 스크롤을
+     허용해서 항상 끝까지 다 볼 수 있게 한다. */
+  overflow-x: hidden;
+  overflow-y: auto;
   transition: padding-top 0.35s ease;
 }
 
@@ -204,6 +208,17 @@
   font-size: 0.95rem;
 }
 
+/* 전리품 장비 목록의 아이콘 이미지 */
+.home__equipment-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--color-page);
+  border: 1px solid var(--color-line);
+  object-fit: contain;
+}
+
 /* 개인 스킵 표시 체크박스 - 넥슨 데이터와 무관, 브라우저에만 저장됨 */
 .home__scheduler-skip {
   flex-shrink: 0;
@@ -248,6 +263,12 @@
   color: var(--color-page);
 }
 
+/* 지금 보고 있는 프리셋 버튼 강조 (전리품 카테고리) */
+.home__scheduler-nav-button--active {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
 .home__scheduler-nav-count {
   font-size: 1.1rem;
   font-weight: 800;
@@ -256,6 +277,89 @@
 
 .home__scheduler-nav-button:hover .home__scheduler-nav-count {
   color: var(--color-page);
+}
+
+/* 인게임에서 지금 실제로 활성화된 프리셋 표시 */
+.home__equipment-active-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--color-line);
+  color: var(--color-page);
+}
+
+.home__scheduler-nav-button--active .home__equipment-active-badge {
+  background: var(--color-page);
+  color: var(--color-accent);
+}
+
+/* 장비 목록의 스타포스 표시 */
+.home__equipment-starforce {
+  margin-left: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-accent-2);
+}
+
+/* 장비를 클릭해서 펼쳤을 때 나오는 잠재능력 상세 */
+.home__equipment-detail {
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  background: var(--color-canvas);
+  text-align: left;
+}
+
+.home__equipment-detail-slot {
+  margin: 0 0 0.3rem;
+  font-size: 0.68rem;
+  opacity: 0.55;
+}
+
+.home__equipment-potential {
+  margin-bottom: 0.3rem;
+}
+
+.home__equipment-potential-label {
+  margin: 0 0 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+.home__equipment-potential-line {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* 세트효과 섹션 */
+.home__equipment-set-effects {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.home__equipment-set-effects .home__boss-group {
+  padding: 0.5rem 0.7rem;
+}
+
+.home__equipment-set-effects .home__boss-group-name {
+  font-size: 0.78rem;
+  margin: 0 0 0.3rem;
+}
+
+.home__equipment-set-effects .home__equipment-potential-line {
+  font-size: 0.68rem;
+  line-height: 1.4;
 }
 
 /* 항목 이름 자체가 버튼 - 누르면 완료 여부 배지가 펼쳐진다 */

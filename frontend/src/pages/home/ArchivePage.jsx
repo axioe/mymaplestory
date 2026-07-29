@@ -1,8 +1,73 @@
+import { useState } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import CategorySelector from './CategorySelector.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
+
+/**
+ * 장비 한 칸을 눌러서 잠재능력/에디셔널 잠재능력을 펼쳐보는 목록.
+ * 스케줄러/보스 목록과 같은 "클릭해서 펼치기" 상호작용을 그대로 재사용한다.
+ */
+function EquipmentList({ items }) {
+  const [expandedSlot, setExpandedSlot] = useState(null)
+
+  if (!items || items.length === 0) {
+    return <p className="home__select-hint">장착된 장비가 없어요.</p>
+  }
+
+  return (
+    <div className="home__scheduler-list">
+      {items.map((item) => {
+        const key = `${item.slot}-${item.itemName}`
+        const isExpanded = expandedSlot === key
+        const hasPotential = item.potentialLines?.length > 0 || item.additionalPotentialLines?.length > 0
+
+        return (
+          <div key={key} className="home__scheduler-item">
+            {item.itemIcon && (
+              <img src={item.itemIcon} alt="" className="home__equipment-icon" loading="lazy" />
+            )}
+            <button
+              type="button"
+              className="home__scheduler-item-button"
+              onClick={() => setExpandedSlot(isExpanded ? null : key)}
+            >
+              {item.itemName}
+              {item.starforce && Number(item.starforce) > 0 && (
+                <span className="home__equipment-starforce">★{item.starforce}</span>
+              )}
+            </button>
+            {isExpanded && (
+              <div className="home__equipment-detail">
+                <p className="home__equipment-detail-slot">{item.slot}</p>
+                {item.potentialLines?.length > 0 && (
+                  <div className="home__equipment-potential">
+                    <p className="home__equipment-potential-label">잠재능력 ({item.potentialGrade || '-'})</p>
+                    {item.potentialLines.map((line) => (
+                      <p key={line} className="home__equipment-potential-line">{line}</p>
+                    ))}
+                  </div>
+                )}
+                {item.additionalPotentialLines?.length > 0 && (
+                  <div className="home__equipment-potential">
+                    <p className="home__equipment-potential-label">
+                      에디셔널 잠재능력 ({item.additionalPotentialGrade || '-'})
+                    </p>
+                    {item.additionalPotentialLines.map((line) => (
+                      <p key={line} className="home__equipment-potential-line">{line}</p>
+                    ))}
+                  </div>
+                )}
+                {!hasPotential && <p className="home__select-hint">잠재능력이 없어요.</p>}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 /**
  * 아카이브 페이지 콘텐츠. BookFlipStage 안의 <Page>에 그대로 얹히는
@@ -38,8 +103,15 @@ export default function ArchivePage({
   onGoSchedulerDetail,
   bossSelection,
   onGoBossDetail,
+  equipment,
+  equipmentLoading,
+  equipmentError,
+  setEffect,
+  setEffectLoading,
+  setEffectError,
 }) {
   const activeLabel = categories.find((c) => c.key === active)?.label
+  const [selectedPreset, setSelectedPreset] = useState(null)
 
   const validBossContents = scheduler ? getValidBossContents(scheduler) : []
   const dailyBossCount = validBossContents.filter((b) => resolveBossCycle(b) === 'daily').length
@@ -175,6 +247,70 @@ export default function ArchivePage({
               )}
             </>
           )}
+        </div>
+      ) : active === 'loot' ? (
+        <div className="home__level-content">
+          <h2 className="display home__select-title">전리품</h2>
+
+          {(equipmentLoading || setEffectLoading) && <p>불러오는 중...</p>}
+          {equipmentError && <p className="home__apikey-error">{equipmentError}</p>}
+          {setEffectError && <p className="home__apikey-error">{setEffectError}</p>}
+
+          {!equipmentLoading && !equipmentError && equipment && (() => {
+            const effectivePreset = selectedPreset ?? equipment.activePresetNo ?? 1
+            // 프리셋을 아예 안 써본 캐릭터는 preset1/2/3이 전부 비어있을 수 있는데,
+            // 그럴 때만 기본 장비(defaultEquipment)로 통일해서 보여준다. 프리셋을
+            // 하나라도 쓰고 있다면(하나라도 데이터가 있으면) 각 버튼은 그 프리셋
+            // 고유의 장비만 정직하게 보여준다 - 비어있으면 비어있는 대로.
+            const hasAnyPresetData =
+              (equipment.preset1?.length ?? 0) > 0 ||
+              (equipment.preset2?.length ?? 0) > 0 ||
+              (equipment.preset3?.length ?? 0) > 0
+            const presetItems = { 1: equipment.preset1, 2: equipment.preset2, 3: equipment.preset3 }[effectivePreset]
+            const items = hasAnyPresetData ? presetItems ?? [] : equipment.defaultEquipment ?? []
+
+            return (
+              <>
+                <p className="home__select-hint">{equipment.characterClass}</p>
+                <div className="home__scheduler-nav">
+                  {[1, 2, 3].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setSelectedPreset(n)}
+                      className={
+                        'home__scheduler-nav-button' +
+                        (effectivePreset === n ? ' home__scheduler-nav-button--active' : '')
+                      }
+                    >
+                      프리셋 {n}
+                      {equipment.activePresetNo === n && <span className="home__equipment-active-badge">사용 중</span>}
+                    </button>
+                  ))}
+                </div>
+
+                <EquipmentList items={items} />
+
+                {!setEffectLoading && !setEffectError && setEffect && setEffect.setEffects?.length > 0 && (
+                  <div className="home__equipment-set-effects">
+                    <p className="home__select-hint">적용 세트효과</p>
+                    {setEffect.setEffects.map((set) => (
+                      <div key={set.setName} className="home__boss-group">
+                        <p className="home__boss-group-name">
+                          {set.setName} ({set.totalSetCount}세트)
+                        </p>
+                        {set.setEffectInfo?.map((info) => (
+                          <p key={info.setCount} className="home__equipment-potential-line">
+                            {info.setCount}세트: {info.setOption}
+                          </p>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )
+          })()}
         </div>
       ) : (
         <div className="home__result-content">

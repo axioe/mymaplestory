@@ -47,6 +47,16 @@ export async function fetchScheduler(characterName) {
   return data
 }
 
+export async function fetchEquipment(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/equipment`)
+  return data
+}
+
+export async function fetchSetEffect(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/set-effect`)
+  return data
+}
+
 // ---- 보스 선택 (DB 저장) ----
 export async function fetchBossSelections(characterName) {
   const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/boss-selections`)

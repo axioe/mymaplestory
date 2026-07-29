@@ -6,15 +6,22 @@ import com.mymaplestory.api.dto.BossContentItem;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
 import com.mymaplestory.api.dto.ContentItem;
+import com.mymaplestory.api.dto.EquipmentItem;
+import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.NexonErrorResponse;
+import com.mymaplestory.api.dto.NexonEquipmentItem;
 import com.mymaplestory.api.dto.NexonEventNoticeListResponse;
+import com.mymaplestory.api.dto.NexonItemEquipmentResponse;
 import com.mymaplestory.api.dto.NexonNoticeItem;
 import com.mymaplestory.api.dto.NexonNoticeListResponse;
 import com.mymaplestory.api.dto.NexonSchedulerResponse;
+import com.mymaplestory.api.dto.NexonSetEffectResponse;
 import com.mymaplestory.api.dto.NoticeItem;
 import com.mymaplestory.api.dto.OcidResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
+import com.mymaplestory.api.dto.SetEffectItem;
+import com.mymaplestory.api.dto.SetEffectResponse;
 import com.mymaplestory.api.exception.ApiKeyRequiredException;
 import com.mymaplestory.api.exception.InvalidApiKeyException;
 import com.mymaplestory.api.exception.NexonApiException;
@@ -360,6 +367,79 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (scheduler): " + e.getStatusCode(), e);
+        }
+    }
+
+    /**
+     * 장착장비 조회. 경로: /character/item-equipment
+     * (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14)
+     * 프리셋(1/2/3)이 한 번의 호출에 다 같이 내려오므로, 프론트에서 버튼으로
+     * 프리셋을 바꿀 때 추가 호출 없이 그대로 화면만 바꿔 보여주면 된다.
+     */
+    public EquipmentPresetResponse getItemEquipment(String characterName, String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        String ocid = getOcid(characterName, requestApiKey);
+        try {
+            NexonItemEquipmentResponse raw = nexonRestClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/character/item-equipment")
+                            .queryParam("ocid", ocid)
+                            .build())
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(NexonItemEquipmentResponse.class);
+
+            if (raw == null) {
+                return null;
+            }
+
+            return new EquipmentPresetResponse(
+                    raw.characterClass(),
+                    raw.presetNo(),
+                    toEquipmentItems(raw.itemEquipment()),
+                    toEquipmentItems(raw.itemEquipmentPreset1()),
+                    toEquipmentItems(raw.itemEquipmentPreset2()),
+                    toEquipmentItems(raw.itemEquipmentPreset3())
+            );
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (item-equipment): " + e.getStatusCode(), e);
+        }
+    }
+
+    private List<EquipmentItem> toEquipmentItems(List<NexonEquipmentItem> items) {
+        if (items == null) return List.of();
+        return items.stream().map(EquipmentItem::from).toList();
+    }
+
+    /**
+     * 적용 세트효과 조회. 경로: /character/set-effect
+     * (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14)
+     */
+    public SetEffectResponse getSetEffect(String characterName, String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        String ocid = getOcid(characterName, requestApiKey);
+        try {
+            NexonSetEffectResponse raw = nexonRestClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/character/set-effect")
+                            .queryParam("ocid", ocid)
+                            .build())
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(NexonSetEffectResponse.class);
+
+            List<SetEffectItem> items = raw == null || raw.setEffect() == null
+                    ? List.of()
+                    : raw.setEffect().stream().map(SetEffectItem::from).toList();
+            return new SetEffectResponse(items);
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (set-effect): " + e.getStatusCode(), e);
         }
     }
 }
