@@ -21,6 +21,14 @@
   padding-right: 1.6rem;
 }
 
+/* 보스 통계 페이지 - 선택한 보스가 많아지면 내용이 길어질 수 있어서
+   제목/통계를 위쪽에 붙여 하단의 "← 보스로" 버튼과 안 겹치게 한다. */
+.home__level-content--stats {
+  padding-top: 8%;
+  padding-bottom: 3.5rem;
+  justify-content: flex-start;
+}
+
 .home__level-current {
   margin: 0;
   font-size: 1.6rem;

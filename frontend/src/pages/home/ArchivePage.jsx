@@ -16,7 +16,7 @@ import '../../css/home-archive.css'
  * 공지사항 티커는 여기 없다 - 화면 상단에 별도로 떠 있도록 Home.jsx에서 렌더링한다.
  *
  * 스케줄러와 보스는 여기서는 "개요"(요약 + 버튼)만 보여준다. 버튼을 누르면
- * (일일/주간 콘텐츠, 일일/주간/월간 보스) 전부 진짜 책 페이지로 실제 책장
+ * (일일/주간 콘텐츠, 일일/주간 보스 - 월간 보스는 주간 보스 페이지에 통합됨) 전부 진짜 책 페이지로 실제 책장
  * 넘김이 일어난다 - onGoSchedulerDetail/onGoBossDetail이 Home.jsx의 flipTo를
  * 그대로 호출한다. 두 카테고리가 완전히 같은 방식이라 한 책이 자연스럽게
  * 이어지는 느낌을 준다.
@@ -165,14 +165,8 @@ export default function ArchivePage({
                 </button>
                 <button type="button" onClick={() => onGoBossDetail('weekly')} className="home__scheduler-nav-button">
                   주간 보스
-                  <span className="home__scheduler-nav-count">{weeklyBossCount}</span>
+                  <span className="home__scheduler-nav-count">{weeklyBossCount + monthlyBossCount}</span>
                 </button>
-                {monthlyBossCount > 0 && (
-                  <button type="button" onClick={() => onGoBossDetail('monthly')} className="home__scheduler-nav-button">
-                    월간 보스
-                    <span className="home__scheduler-nav-count">{monthlyBossCount}</span>
-                  </button>
-                )}
               </div>
               {bossSelection.selectedCount > 0 && (
                 <button type="button" onClick={bossSelection.reset} className="home__boss-reset">

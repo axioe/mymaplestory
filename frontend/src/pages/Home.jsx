@@ -234,7 +234,7 @@ export default function Home() {
         />
       )
     }
-    if (p === 'boss-daily' || p === 'boss-weekly' || p === 'boss-monthly') {
+    if (p === 'boss-daily' || p === 'boss-weekly') {
       const cycle = p.replace('boss-', '')
       return (
         <BossDetailPage
@@ -251,7 +251,7 @@ export default function Home() {
   // boss-daily/weekly/monthly의 짝(왼쪽) 페이지에는 보스 선택 목록을 넣는다.
   // 그 외 페이지는 null을 반환해서 기존처럼 빈 페이지로 남긴다.
   function renderLeftPageContent(p) {
-    if (p === 'boss-daily' || p === 'boss-weekly' || p === 'boss-monthly') {
+    if (p === 'boss-daily' || p === 'boss-weekly') {
       const cycle = p.replace('boss-', '')
       return <BossSelectionPage cycle={cycle} scheduler={scheduler} bossSelection={bossSelection} />
     }

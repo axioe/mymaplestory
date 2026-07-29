@@ -10,7 +10,6 @@ export const PAGE_ORDER = [
   'scheduler-weekly',
   'boss-daily',
   'boss-weekly',
-  'boss-monthly',
 ]
 
 /**
@@ -28,8 +27,7 @@ export const PAGE_ORDER = [
  *   9 = 공백, 10 = scheduler-daily
  *   11 = 공백, 12 = scheduler-weekly
  *   13 = 공백, 14 = boss-daily
- *   15 = 공백, 16 = boss-weekly
- *   17 = 공백, 18 = boss-monthly
+ *   15 = 공백, 16 = boss-weekly (월간 보스도 여기 통합됨)
  */
 const contentToFlipIndex = (contentIndex) => (contentIndex === 0 ? 0 : contentIndex * 2)
 

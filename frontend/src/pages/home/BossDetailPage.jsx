@@ -3,7 +3,7 @@ import { resolveBossCycle, resolveBossPrice, formatMeso, getValidBossContents } 
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 
-const CYCLE_LABEL = { daily: '일일 보스', weekly: '주간 보스', monthly: '월간 보스' }
+const CYCLE_LABEL = { daily: '일일 보스', weekly: '주간 보스' }
 
 /**
  * 보스 목록 - 같은 보스 이름 아래 난이도별로 묶어서, 난이도는 라디오 버튼처럼
@@ -11,10 +11,12 @@ const CYCLE_LABEL = { daily: '일일 보스', weekly: '주간 보스', monthly: 
  * 선택된 난이도 옆에는 인원수(1~6명) 선택이 나타나고, 결정석 가격은 인원수만큼
  * 나눠서 받으므로(가격/인원수) 그 기준으로 계산해서 보여준다.
  *
- * 주간 처치 가능 횟수(12) 제한은 "주간 보스"에만 적용된다 - 일일/월간 보스는
- * 몇 개를 고르든 제한이 없다. cycle을 넘겨서 bossSelection이 알맞게 판단하게 한다.
+ * "주간 보스" 페이지에는 월간 보스(검은 마법사 등)도 같이 섞여서 나온다 - 월간
+ * 보스만 따로 페이지/버튼을 두기엔 너무 적어서 주간 쪽에 통합했다. 다만 주간
+ * 처치 가능 횟수(12) 제한은 실제로 주간인 항목에만 적용돼야 하므로, 페이지
+ * 단위가 아니라 항목 하나하나의 실제 cycle(resolveBossCycle)로 판단한다.
  */
-function BossGroupList({ items, cycle, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
+function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
   if (!items || items.length === 0) {
     return <p className="home__select-hint">표시할 항목이 없어요.</p>
   }
@@ -29,7 +31,6 @@ function BossGroupList({ items, cycle, isSelected, hasAnySelection, isAtLimitFor
     <div className="home__scheduler-list">
       {[...groups.entries()].map(([bossName, difficulties]) => {
         const selected = hasAnySelection(bossName)
-        const disableNew = isAtLimitFor(cycle) && !selected
         const partySize = getPartySize(bossName)
 
         return (
@@ -37,7 +38,9 @@ function BossGroupList({ items, cycle, isSelected, hasAnySelection, isAtLimitFor
             <p className="home__boss-group-name">{bossName}</p>
             <div className="home__boss-difficulty-row">
               {difficulties.map((d) => {
+                const itemCycle = resolveBossCycle(d)
                 const checked = isSelected(bossName, d.difficulty)
+                const disableNew = isAtLimitFor(itemCycle) && !selected
                 const price = resolveBossPrice(d)
                 const perPersonLabel = checked && price != null ? formatMeso(price / partySize) : formatMeso(price)
                 return (
@@ -50,7 +53,7 @@ function BossGroupList({ items, cycle, isSelected, hasAnySelection, isAtLimitFor
                       name={`boss-${bossName}`}
                       checked={checked}
                       onChange={() => {}}
-                      onClick={() => onToggle(bossName, d.difficulty, cycle)}
+                      onClick={() => onToggle(bossName, d.difficulty, itemCycle)}
                       disabled={disableNew && !checked}
                     />
                     <span>
@@ -134,27 +137,35 @@ function BossStatsPanel({ items, bossSelection }) {
   )
 }
 
+/**
+ * cycle이 'weekly'면 월간 보스(검은 마법사 등)도 같이 포함한다 (통합 요청 반영).
+ * 'daily'면 그대로 일일 보스만.
+ */
 function getCycleItems(cycle, scheduler) {
   const bossContents = getValidBossContents(scheduler)
+  if (cycle === 'weekly') {
+    return bossContents.filter((b) => {
+      const c = resolveBossCycle(b)
+      return c === 'weekly' || c === 'monthly'
+    })
+  }
   return bossContents.filter((b) => resolveBossCycle(b) === cycle)
 }
 
 /**
- * 일일/주간/월간에 따라 다른 선택 현황 문구를 만든다.
- * 주간 보스만 12마리 한도가 있어서, 그 경우에만 "X/12" 형태로 보여주고
- * 일일/월간은 한도가 없으니 그냥 선택한 개수만 보여준다.
+ * 일일/주간에 따라 다른 선택 현황 문구를 만든다. 주간 페이지는 월간 보스도 같이
+ * 보여주지만, 12마리 한도는 그중 진짜 "주간" 항목에만 적용된다는 걸 알려준다.
  */
 function selectionSummaryText(cycle, bossSelection) {
   if (cycle === 'weekly') {
-    return `주간 선택 ${bossSelection.weeklySelectedCount}/${bossSelection.limit}`
+    return `주간 선택 ${bossSelection.weeklySelectedCount}/${bossSelection.limit} (월간 보스는 한도 제외)`
   }
-  const cycleLabel = cycle === 'daily' ? '일일' : '월간'
-  return `${cycleLabel} 보스는 선택 개수 제한이 없어요`
+  return '일일 보스는 선택 개수 제한이 없어요'
 }
 
 /**
  * 왼쪽 페이지 - 보스 선택 목록. BookFlipStage의 renderLeftPageContent가
- * boss-daily/weekly/monthly 페이지의 "짝(왼쪽) 페이지"에 이 내용을 얹어준다
+ * boss-daily/weekly 페이지의 "짝(왼쪽) 페이지"에 이 내용을 얹어준다
  * (다른 페이지들처럼 빈 페이지로 두지 않고).
  */
 export function BossSelectionPage({ cycle, scheduler, bossSelection }) {
@@ -165,7 +176,6 @@ export function BossSelectionPage({ cycle, scheduler, bossSelection }) {
       <p className="home__select-hint">{selectionSummaryText(cycle, bossSelection)}</p>
       <BossGroupList
         items={items}
-        cycle={cycle}
         isSelected={bossSelection.isSelected}
         hasAnySelection={bossSelection.hasAnySelection}
         isAtLimitFor={bossSelection.isAtLimitFor}
@@ -182,6 +192,9 @@ export function BossSelectionPage({ cycle, scheduler, bossSelection }) {
  * 오른쪽 페이지 - 메소 합계 통계 + 뒤로가기. BookFlipStage 안의 <Page>에
  * 그대로 얹히는 "내용물"이다. 아카이브 페이지(보스 개요)에서 버튼을 누르면
  * 여기로 실제 책장 넘김을 통해 들어온다 (Home.jsx의 flipTo('boss-daily') 등).
+ *
+ * 제목/통계를 위쪽에 붙여서(--stats 수식자) 내용이 길어져도 하단의
+ * "← 보스로" 뒤로가기 버튼과 겹치지 않도록 했다.
  */
 export default function BossDetailPage({ cycle, scheduler, bossSelection, onBack }) {
   const items = getCycleItems(cycle, scheduler)
@@ -192,7 +205,7 @@ export default function BossDetailPage({ cycle, scheduler, bossSelection, onBack
         <DateTimeLabel />
       </div>
 
-      <div className="home__level-content">
+      <div className="home__level-content home__level-content--stats">
         <h2 className="display home__select-title">{CYCLE_LABEL[cycle]} 통계</h2>
 
         <p className="home__select-hint">
