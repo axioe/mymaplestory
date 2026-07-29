@@ -1,7 +1,5 @@
-/* 레벨/스케줄러 카테고리에서 쓰는 콘텐츠 래퍼 - 다른 페이지들과 같은
-   position:absolute + inset:0 패턴이라 캐릭터 선택부터 이어지는 배치가 유지된다.
-   justify-content 대신 padding-top으로 위치를 잡아서, 상세 화면으로 들어갈 때
-   제목이 CSS 트랜지션으로 부드럽게 위로 올라가도록 했다(--compact 참고). */
+/* 레벨/스케줄러/보스 카테고리 개요에서 쓰는 콘텐츠 래퍼 - 다른 페이지들과 같은
+   position:absolute + inset:0 패턴이라 캐릭터 선택부터 이어지는 배치가 유지된다. */
 .home__level-content {
   position: absolute;
   inset: 0;
@@ -14,13 +12,6 @@
   text-align: center;
   overflow: hidden;
   transition: padding-top 0.35s ease;
-}
-
-/* 스케줄러 일일/주간 상세 목록으로 들어가면 제목을 위로 붙여서
-   목록이 표시될 공간을 넉넉하게 확보한다. */
-.home__level-content--compact {
-  padding-top: 6%;
-  padding-right: 6.5rem;
 }
 
 /* 보스 선택 목록이 들어가는 왼쪽 페이지 - 목록 공간을 최대한 확보하도록
@@ -162,18 +153,6 @@
 
 /* 공지사항 전용 - 페이지 하단에 붙는 한 줄짜리 자동 슬라이드 티커 */
 /* 카테고리 선택과 무관하게 페이지 하단에 항상 고정되는 공지사항 티커 래퍼 */
-/* 아카이브 페이지 하단에 고정되는 뒤로가기 링크 묶음 - "← 스케줄러로"(있을 때만)와
-   "← 캐릭터 카드로"를 나란히 보여준다 */
-.home__archive-bottom-links {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-}
-
 .home__archive-back {
   background: transparent;
   border: none;
@@ -184,7 +163,7 @@
   cursor: pointer;
 }
 
-/* 보스 상세 페이지처럼 .home__archive-bottom-links 래퍼 없이 단독으로 쓰일 때 */
+/* 스케줄러/보스 상세 페이지 등, 페이지마다 단독으로 쓰이는 뒤로가기 링크 위치 */
 .home__archive-back--standalone {
   position: absolute;
   bottom: 1rem;

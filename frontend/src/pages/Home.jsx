@@ -14,6 +14,7 @@ import ApiKeyPage from './home/ApiKeyPage.jsx'
 import CharacterSelectPage from './home/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
+import SchedulerDetailPage from './home/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage } from './home/BossDetailPage.jsx'
 import NoticeTicker from './home/NoticeTicker.jsx'
 import '../css/notice-ticker.css'
@@ -90,10 +91,10 @@ export default function Home() {
     'notice'
   )
   const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
-    // "보스" 카테고리와 일일/주간/월간 보스 상세 페이지는 별도 API가 아니라
-    // 스케줄러 응답의 bossContents를 그대로 쓴다.
-    (page === 'archive' || page.startsWith('boss-')) &&
-      (active === 'scheduler' || active === 'boss' || page.startsWith('boss-')) &&
+    // "스케줄러"/"보스" 카테고리와 그 상세 페이지들은 전부 같은 API(scheduler
+    // 응답)를 재사용한다.
+    (page === 'archive' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
+      (active === 'scheduler' || active === 'boss' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
       hasSelectedCharacter,
     selectedCharacter
   )
@@ -164,6 +165,9 @@ export default function Home() {
   // 실제 책장 넘김이 일어난다.
   const handleGoBossDetail = (cycle) => flipTo(`boss-${cycle}`)
 
+  // 스케줄러 개요에서 일일/주간 버튼을 누르면 마찬가지로 진짜 책 페이지로 넘어간다.
+  const handleGoSchedulerDetail = (cycle) => flipTo(`scheduler-${cycle}`)
+
   function renderPageContent(p) {
     if (p === 'start') return <StartPage onStart={handleStart} disabled={false} />
     if (p === 'apikey') {
@@ -214,8 +218,19 @@ export default function Home() {
           scheduler={scheduler}
           schedulerLoading={schedulerLoading}
           schedulerError={schedulerError}
+          onGoSchedulerDetail={handleGoSchedulerDetail}
           bossSelection={bossSelection}
           onGoBossDetail={handleGoBossDetail}
+        />
+      )
+    }
+    if (p === 'scheduler-daily' || p === 'scheduler-weekly') {
+      const cycle = p.replace('scheduler-', '')
+      return (
+        <SchedulerDetailPage
+          cycle={cycle}
+          scheduler={scheduler}
+          onBack={() => flipTo('archive')}
         />
       )
     }
