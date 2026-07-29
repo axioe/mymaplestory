@@ -1,4 +1,4 @@
-import { Fragment, useLayoutEffect, useRef } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import { resolveBossCycle, resolveBossPrice, formatMeso, getValidBossContents } from '../../utils/bossHelpers.js'
 import '../../css/home-shared.css'
@@ -20,16 +20,30 @@ const CYCLE_LABEL = { daily: '일일 보스', weekly: '주간 보스' }
 function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
   const listRef = useRef(null)
   const scrollTopRef = useRef(0)
+  const windowScrollRef = useRef(0)
 
   // 원인이 뭐든(포커스, 레이아웃 변화 등) 렌더링 이후에 스크롤 위치가 흐트러지면
   // 매번 마지막으로 기억해둔 위치로 강제 복원한다. onScroll에서 사용자가 실제로
   // 스크롤한 위치를 계속 기록해두고, 렌더링이 끝날 때마다(useLayoutEffect) 그
   // 위치를 다시 적용하는 방식이라 원인을 몰라도 확실하게 막을 수 있다.
+  // 목록 안쪽 스크롤만 붙잡아서는 안 고쳐졌던 걸 보면, 실제로 움직이는 게
+  // 브라우저 창 전체(window) 스크롤일 가능성이 높아서 그것도 같이 붙잡는다.
   useLayoutEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = scrollTopRef.current
     }
+    if (window.scrollY !== windowScrollRef.current) {
+      window.scrollTo(0, windowScrollRef.current)
+    }
   })
+
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      windowScrollRef.current = window.scrollY
+    }
+    window.addEventListener('scroll', handleWindowScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleWindowScroll)
+  }, [])
 
   const handleScroll = (e) => {
     scrollTopRef.current = e.currentTarget.scrollTop

@@ -1,0 +1,20 @@
+# 저장소 루트용 - backend/.gitignore, frontend/.gitignore가 각 폴더 안의
+# 대부분을 이미 처리하고 있고, 이건 그 바깥(루트에 실수로 생기는 파일들)을
+# 대비한 최소한의 보완용이다.
+
+# OS 잡파일
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# 환경변수 - 실수로 비밀번호/키가 커밋되는 걸 막기 위함
+.env
+.env.local
+.env.*.local
+
+# 압축파일로 통째로 주고받을 때 실수로 같이 커밋되는 걸 방지
+*.zip
