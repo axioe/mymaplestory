@@ -1,10 +1,16 @@
-import { Fragment, useEffect, useLayoutEffect, useRef } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
-import { resolveBossCycle, resolveBossPrice, formatMeso, getValidBossContents } from '../../utils/bossHelpers.js'
+import {
+  resolveBossCycle,
+  resolveBossPrice,
+  formatMeso,
+  getValidBossContents,
+  getDailyBossItems,
+  getRegionBossItems,
+  WEEKLY_REGIONS,
+} from '../../utils/bossHelpers.js'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
-
-const CYCLE_LABEL = { daily: '일일 보스', weekly: '주간 보스' }
 
 /**
  * 보스 목록 - 같은 보스 이름 아래 난이도별로 묶어서, 난이도는 라디오 버튼처럼
@@ -12,10 +18,10 @@ const CYCLE_LABEL = { daily: '일일 보스', weekly: '주간 보스' }
  * 선택된 난이도 옆에는 인원수(1~6명) 선택이 나타나고, 결정석 가격은 인원수만큼
  * 나눠서 받으므로(가격/인원수) 그 기준으로 계산해서 보여준다.
  *
- * "주간 보스" 페이지에는 월간 보스(검은 마법사 등)도 같이 섞여서 나온다 - 월간
- * 보스만 따로 페이지/버튼을 두기엔 너무 적어서 주간 쪽에 통합했다. 다만 주간
- * 처치 가능 횟수(12) 제한은 실제로 주간인 항목에만 적용돼야 하므로, 페이지
- * 단위가 아니라 항목 하나하나의 실제 cycle(resolveBossCycle)로 판단한다.
+ * 지역(메이플월드/아케인/그란디스) 페이지에는 월간 보스(검은 마법사 등)도 그
+ * 지역에 속하면 같이 섞여서 나온다. 다만 주간 처치 가능 횟수(12) 제한은
+ * 실제로 "주간" 항목에만 적용돼야 하므로, 페이지 단위가 아니라 항목 하나하나의
+ * 실제 cycle(resolveBossCycle)로 판단한다.
  */
 function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
   const listRef = useRef(null)
@@ -23,11 +29,8 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
   const windowScrollRef = useRef(0)
 
   // 원인이 뭐든(포커스, 레이아웃 변화 등) 렌더링 이후에 스크롤 위치가 흐트러지면
-  // 매번 마지막으로 기억해둔 위치로 강제 복원한다. onScroll에서 사용자가 실제로
-  // 스크롤한 위치를 계속 기록해두고, 렌더링이 끝날 때마다(useLayoutEffect) 그
-  // 위치를 다시 적용하는 방식이라 원인을 몰라도 확실하게 막을 수 있다.
-  // 목록 안쪽 스크롤만 붙잡아서는 안 고쳐졌던 걸 보면, 실제로 움직이는 게
-  // 브라우저 창 전체(window) 스크롤일 가능성이 높아서 그것도 같이 붙잡는다.
+  // 매번 마지막으로 기억해둔 위치로 강제 복원한다. 목록 안쪽 스크롤과 브라우저
+  // 창(window) 스크롤 둘 다 붙잡는다.
   useLayoutEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = scrollTopRef.current
@@ -100,14 +103,8 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
                         name={`boss-${bossName}`}
                         checked={checked}
                         onChange={() => {}}
-                        // 클릭할 때 라디오가 포커스를 받으면서 브라우저가 "포커스된
-                        // 요소를 화면에 보이게" 스크롤을 자동으로 올려버리는 문제가
-                        // 있었다. 커스텀 클릭 처리만 쓰고 네이티브 포커스는 막는다.
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={(e) => {
-                          // 클릭 자체로도 포커스가 걸릴 수 있는 브라우저가 있어서
-                          // (mousedown 방지만으로는 부족했다), 클릭 직후 바로
-                          // blur시켜서 포커스에 딸려오는 자동 스크롤을 확실히 막는다.
                           e.currentTarget.blur()
                           onToggle(bossName, d.difficulty, itemCycle)
                         }}
@@ -147,47 +144,89 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
 }
 
 /**
- * 선택한 보스들의 (가격/인원수) 합계를 보여주는 통계 패널.
+ * 일일/주간 보스 통계 한 그룹 - 기본은 접혀있고, 옆의 세모(▸/▾)를 누르면
+ * 보스별 상세 목록이 펼쳐진다. 항목이 없으면 펼쳐도 보여줄 게 없으니 세모
+ * 버튼을 비활성화한다.
+ */
+function BossStatsGroup({ title, entries, subtotal }) {
+  const [expanded, setExpanded] = useState(false)
+  const hasEntries = entries.length > 0
+
+  return (
+    <div className="home__boss-stats-group">
+      <button
+        type="button"
+        className="home__boss-stats-group-title"
+        onClick={() => hasEntries && setExpanded((v) => !v)}
+        disabled={!hasEntries}
+      >
+        <span className="home__boss-stats-group-title-left">
+          {hasEntries && (
+            <span className={'home__boss-stats-caret' + (expanded ? ' home__boss-stats-caret--open' : '')}>▸</span>
+          )}
+          {title}
+        </span>
+        <span className="home__boss-stats-group-subtotal">{formatMeso(subtotal)}</span>
+      </button>
+      {!hasEntries && <p className="home__select-hint">선택한 보스가 없어요.</p>}
+      {hasEntries && expanded && (
+        <div className="home__boss-stats-list">
+          {entries.map((e) => (
+            <div key={e.bossName} className="home__boss-stats-row">
+              <span className="home__boss-stats-row-name">
+                {e.bossName} ({e.difficulty}) · {e.partySize}명
+              </span>
+              <span className="home__boss-stats-row-value">
+                {e.perPerson != null ? formatMeso(e.perPerson) : '-'}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * 선택한 보스들의 (가격/인원수) 합계를 일일/주간(+월간)으로 나눠서 보여준다.
+ * items에는 항상 "전체" 보스 목록을 넘긴다 - 지금 어느 페이지(일일/지역별)를
+ * 보고 있든 상관없이 지금까지 선택한 모든 보스의 합계를 보여줘야 하기 때문이다.
  */
 function BossStatsPanel({ items, bossSelection }) {
-  const entries = []
+  const dailyEntries = []
+  const weeklyEntries = [] // 주간 + 월간(검은 마법사 등)을 같이 묶어서 보여준다.
+
   for (const item of items) {
     if (bossSelection.isSelected(item.contentName, item.difficulty)) {
       const price = resolveBossPrice(item)
       const partySize = bossSelection.getPartySize(item.contentName)
       const perPerson = price != null ? price / partySize : null
-      entries.push({
-        bossName: item.contentName,
-        difficulty: item.difficulty,
-        partySize,
-        perPerson,
-      })
+      const entry = { bossName: item.contentName, difficulty: item.difficulty, partySize, perPerson }
+      if (resolveBossCycle(item) === 'daily') {
+        dailyEntries.push(entry)
+      } else {
+        weeklyEntries.push(entry)
+      }
     }
   }
-  const total = entries.reduce((sum, e) => sum + (e.perPerson ?? 0), 0)
+
+  const dailyTotal = dailyEntries.reduce((sum, e) => sum + (e.perPerson ?? 0), 0)
+  const weeklyTotal = weeklyEntries.reduce((sum, e) => sum + (e.perPerson ?? 0), 0)
+  const grandTotal = dailyTotal + weeklyTotal
+  const isEmpty = dailyEntries.length === 0 && weeklyEntries.length === 0
 
   return (
     <div className="home__boss-stats">
       <p className="home__boss-stats-title">선택한 보스 메소 합계</p>
-      {entries.length === 0 ? (
+      {isEmpty ? (
         <p className="home__select-hint">아직 선택한 보스가 없어요.</p>
       ) : (
         <>
-          <div className="home__boss-stats-list">
-            {entries.map((e) => (
-              <div key={e.bossName} className="home__boss-stats-row">
-                <span className="home__boss-stats-row-name">
-                  {e.bossName} ({e.difficulty}) · {e.partySize}명
-                </span>
-                <span className="home__boss-stats-row-value">
-                  {e.perPerson != null ? formatMeso(e.perPerson) : '-'}
-                </span>
-              </div>
-            ))}
-          </div>
+          <BossStatsGroup title="일일 보스" entries={dailyEntries} subtotal={dailyTotal} />
+          <BossStatsGroup title="주간 보스" entries={weeklyEntries} subtotal={weeklyTotal} />
           <div className="home__boss-stats-total">
-            <span>합계</span>
-            <span>{formatMeso(total)}</span>
+            <span>전체 합계</span>
+            <span>{formatMeso(grandTotal)}</span>
           </div>
         </>
       )}
@@ -196,42 +235,89 @@ function BossStatsPanel({ items, bossSelection }) {
 }
 
 /**
- * cycle이 'weekly'면 월간 보스(검은 마법사 등)도 같이 포함한다 (통합 요청 반영).
- * 'daily'면 그대로 일일 보스만.
+ * pageKind: 'daily' | 'maple' | 'arcane' | 'grandis'
+ * 각 pageKind에 맞는 보스 목록과 제목을 계산해준다.
  */
-function getCycleItems(cycle, scheduler) {
-  const bossContents = getValidBossContents(scheduler)
-  if (cycle === 'weekly') {
-    return bossContents.filter((b) => {
-      const c = resolveBossCycle(b)
-      return c === 'weekly' || c === 'monthly'
-    })
+function resolvePageItemsAndLabel(pageKind, scheduler) {
+  if (pageKind === 'daily') {
+    return { items: getDailyBossItems(scheduler), label: '일일 보스' }
   }
-  return bossContents.filter((b) => resolveBossCycle(b) === cycle)
+  const region = WEEKLY_REGIONS.find((r) => r.key === pageKind)
+  return { items: getRegionBossItems(scheduler, pageKind), label: region?.label ?? '주간 보스' }
 }
 
 /**
- * 일일/주간에 따라 다른 선택 현황 문구를 만든다. 주간 페이지는 월간 보스도 같이
- * 보여주지만, 12마리 한도는 그중 진짜 "주간" 항목에만 적용된다는 걸 알려준다.
+ * 일일/지역별 선택 현황 문구. 주간(지역) 페이지는 전체 주간 선택 개수 기준으로
+ * 12마리 한도를 보여주고(지역별로 따로 세지 않음), 일일은 한도가 없다.
  */
-function selectionSummaryText(cycle, bossSelection) {
-  if (cycle === 'weekly') {
-    return `주간 선택 ${bossSelection.weeklySelectedCount}/${bossSelection.limit} (월간 보스는 한도 제외)`
+function selectionSummaryText(pageKind, bossSelection) {
+  if (pageKind === 'daily') {
+    return '일일 보스는 선택 개수 제한이 없어요'
   }
-  return '일일 보스는 선택 개수 제한이 없어요'
+  return `주간 선택 ${bossSelection.weeklySelectedCount}/${bossSelection.limit} (전체 지역 합산, 월간 보스 제외)`
+}
+
+/**
+ * "주간 보스" 개요 페이지 - 예전엔 여기서 바로 보스 목록을 보여줬는데, 이제는
+ * 지역(메이플월드/아케인/그란디스) 버튼 3개만 보여주고, 버튼을 누르면 그
+ * 지역의 선택/통계 페이지로 진짜 책장 넘김을 통해 들어간다.
+ */
+export function BossWeeklyOverviewPage({ scheduler, bossSelection, onNavigateRegion, onBack }) {
+  const regionCounts = WEEKLY_REGIONS.map((r) => ({
+    ...r,
+    count: getRegionBossItems(scheduler, r.key).length,
+  }))
+
+  return (
+    <>
+      <div className="home__result-datetime">
+        <DateTimeLabel />
+      </div>
+
+      <div className="home__level-content">
+        <h2 className="display home__select-title">주간 보스</h2>
+        <p className="home__select-hint">
+          {scheduler?.characterName} · {scheduler?.worldName} · 주간 선택 {bossSelection.weeklySelectedCount}/
+          {bossSelection.limit}마리
+        </p>
+        <div className="home__scheduler-nav">
+          {regionCounts.map((r) => (
+            <button
+              key={r.key}
+              type="button"
+              onClick={() => onNavigateRegion(r.key)}
+              className="home__scheduler-nav-button"
+            >
+              {r.label}
+              <span className="home__scheduler-nav-count">{r.count}</span>
+            </button>
+          ))}
+        </div>
+        {bossSelection.selectedCount > 0 && (
+          <button type="button" onClick={bossSelection.reset} className="home__boss-reset">
+            선택 초기화
+          </button>
+        )}
+      </div>
+
+      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+        ← 보스로
+      </button>
+    </>
+  )
 }
 
 /**
  * 왼쪽 페이지 - 보스 선택 목록. BookFlipStage의 renderLeftPageContent가
- * boss-daily/weekly 페이지의 "짝(왼쪽) 페이지"에 이 내용을 얹어준다
- * (다른 페이지들처럼 빈 페이지로 두지 않고).
+ * boss-daily / boss-weekly-maple 등 페이지의 "짝(왼쪽) 페이지"에 이 내용을
+ * 얹어준다 (다른 페이지들처럼 빈 페이지로 두지 않고).
  */
-export function BossSelectionPage({ cycle, scheduler, bossSelection }) {
-  const items = getCycleItems(cycle, scheduler)
+export function BossSelectionPage({ pageKind, scheduler, bossSelection }) {
+  const { items, label } = resolvePageItemsAndLabel(pageKind, scheduler)
   return (
     <div className="home__level-content home__level-content--left">
-      <h2 className="display home__select-title">{CYCLE_LABEL[cycle]}</h2>
-      <p className="home__select-hint">{selectionSummaryText(cycle, bossSelection)}</p>
+      <h2 className="display home__select-title">{label}</h2>
+      <p className="home__select-hint">{selectionSummaryText(pageKind, bossSelection)}</p>
       <BossGroupList
         items={items}
         isSelected={bossSelection.isSelected}
@@ -247,15 +333,15 @@ export function BossSelectionPage({ cycle, scheduler, bossSelection }) {
 }
 
 /**
- * 오른쪽 페이지 - 메소 합계 통계 + 뒤로가기. BookFlipStage 안의 <Page>에
- * 그대로 얹히는 "내용물"이다. 아카이브 페이지(보스 개요)에서 버튼을 누르면
- * 여기로 실제 책장 넘김을 통해 들어온다 (Home.jsx의 flipTo('boss-daily') 등).
- *
- * 제목/통계를 위쪽에 붙여서(--stats 수식자) 내용이 길어져도 하단의
- * "← 보스로" 뒤로가기 버튼과 겹치지 않도록 했다.
+ * 오른쪽 페이지 - 메소 합계 통계(전체 합산) + 뒤로가기. BookFlipStage 안의
+ * <Page>에 그대로 얹히는 "내용물"이다. 아카이브/개요 페이지에서 버튼을 누르면
+ * 여기로 실제 책장 넘김을 통해 들어온다.
+ * onBack의 목적지는 pageKind에 따라 다르다 - 일일은 아카이브(보스 개요)로,
+ * 지역 페이지는 "주간 보스" 개요 페이지로 돌아간다 (Home.jsx에서 결정).
  */
-export default function BossDetailPage({ cycle, scheduler, bossSelection, onBack }) {
-  const items = getCycleItems(cycle, scheduler)
+export default function BossDetailPage({ pageKind, scheduler, bossSelection, onBack, backLabel }) {
+  const { label } = resolvePageItemsAndLabel(pageKind, scheduler)
+  const allItems = getValidBossContents(scheduler)
 
   return (
     <>
@@ -264,10 +350,10 @@ export default function BossDetailPage({ cycle, scheduler, bossSelection, onBack
       </div>
 
       <div className="home__level-content home__level-content--stats">
-        <h2 className="display home__select-title">{CYCLE_LABEL[cycle]} 통계</h2>
+        <h2 className="display home__select-title">{label} 통계</h2>
 
         <p className="home__select-hint">
-          {selectionSummaryText(cycle, bossSelection)}
+          {selectionSummaryText(pageKind, bossSelection)}
           {bossSelection.selectedCount > 0 && (
             <button type="button" onClick={bossSelection.reset} className="home__boss-reset home__boss-reset--inline">
               초기화
@@ -275,11 +361,13 @@ export default function BossDetailPage({ cycle, scheduler, bossSelection, onBack
           )}
         </p>
 
-        <BossStatsPanel items={items} bossSelection={bossSelection} />
+        {/* 지금 보고 있는 페이지의 항목이 아니라 전체(allItems)를 넘겨서,
+            어느 페이지에서 선택했든 항상 전체 합계가 보이도록 한다. */}
+        <BossStatsPanel items={allItems} bossSelection={bossSelection} />
       </div>
 
       <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
-        ← 보스로
+        {backLabel ?? '← 보스로'}
       </button>
     </>
   )

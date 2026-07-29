@@ -19,8 +19,40 @@ export function resolveBossPrice(item) {
   return item.price ?? null
 }
 
+export function resolveBossRegion(item) {
+  return item.region ?? null
+}
+
 export function formatMeso(price) {
   return price == null ? null : `${Math.floor(price).toLocaleString('ko-KR')}메소`
+}
+
+/**
+ * 주간 보스를 세부적으로 나누는 지역 카테고리. 검은 마법사 같은 월간 보스도
+ * region이 있으면 해당 지역 페이지에 같이 섞여서 나온다.
+ * region 값은 bossCycleData.js에 영문 slug로 저장되어 있다(cycle과 같은 표기 방식).
+ */
+export const WEEKLY_REGIONS = [
+  { key: 'maple', label: '메이플월드' },
+  { key: 'arcane', label: '아케인' },
+  { key: 'grandis', label: '그란디스' },
+]
+
+export function getDailyBossItems(scheduler) {
+  return getValidBossContents(scheduler).filter((b) => resolveBossCycle(b) === 'daily')
+}
+
+/** cycle이 주간이거나 월간인 항목 전체 (일일 제외) - 지역 구분 없이. */
+export function getWeeklyLikeBossItems(scheduler) {
+  return getValidBossContents(scheduler).filter((b) => {
+    const c = resolveBossCycle(b)
+    return c === 'weekly' || c === 'monthly'
+  })
+}
+
+/** 특정 지역(regionKey: 'mapleworld'|'arcane'|'grandis')에 속하는 주간/월간 보스만. */
+export function getRegionBossItems(scheduler, regionKey) {
+  return getWeeklyLikeBossItems(scheduler).filter((b) => resolveBossRegion(b) === regionKey)
 }
 
 // 챌린저스 월드(챌린저스1~4)에서만 등장하는 시즌 전용 보스.

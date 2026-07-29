@@ -10,6 +10,9 @@ export const PAGE_ORDER = [
   'scheduler-weekly',
   'boss-daily',
   'boss-weekly',
+  'boss-weekly-maple',
+  'boss-weekly-arcane',
+  'boss-weekly-grandis',
 ]
 
 /**
@@ -27,7 +30,10 @@ export const PAGE_ORDER = [
  *   9 = 공백, 10 = scheduler-daily
  *   11 = 공백, 12 = scheduler-weekly
  *   13 = 공백, 14 = boss-daily
- *   15 = 공백, 16 = boss-weekly (월간 보스도 여기 통합됨)
+ *   15 = 공백, 16 = boss-weekly (지역 3개 버튼만 있는 개요 페이지)
+ *   17 = 공백, 18 = boss-weekly-maple (메이플월드)
+ *   19 = 공백, 20 = boss-weekly-arcane (아케인)
+ *   21 = 공백, 22 = boss-weekly-grandis (그란디스, 검은 마법사 등 월간 보스도 여기 통합됨)
  */
 const contentToFlipIndex = (contentIndex) => (contentIndex === 0 ? 0 : contentIndex * 2)
 
@@ -55,7 +61,7 @@ export function useBookFlip(initialPage) {
   const getPageFlip = () => flipBookRef.current?.pageFlip?.()
 
   const flipTo = (next) => {
-    const contentIndex = PAGE_ORDER.indexOf(next)
+    const nextIndex = PAGE_ORDER.indexOf(next)
     // onFlip 콜백(react-pageflip 라이브러리 이벤트)이 프로그래밍 방식 flip()에는
     // 확실히 발생한다는 보장이 없어서, 그것만 기다리면 "화면은 넘어갔는데 page
     // 상태는 그대로"인 경우가 생겨 그 페이지에 딸린 데이터 조회가 영영 시작 안
@@ -63,18 +69,21 @@ export function useBookFlip(initialPage) {
     // 갱신한다 (onFlip이 나중에 와도 같은 값이라 문제 없음).
     setPage(next)
     const pageFlip = getPageFlip()
-    if (contentIndex >= 0 && pageFlip) {
-      const targetFlipIndex = contentToFlipIndex(contentIndex)
-      pageFlip.flip(targetFlipIndex)
-      // flip()이 "바로 옆 페이지"가 아니라 여러 장 떨어진 페이지로 건너뛸 때도
-      // 항상 정확히 도착한다는 보장이 없어서(라이브러리 특성상), 애니메이션이
-      // 끝났을 시점에 실제로 도착했는지 확인하고 어긋나 있으면 즉시 보정한다.
-      setTimeout(() => {
-        if (typeof pageFlip.getCurrentPageIndex === 'function' && pageFlip.getCurrentPageIndex() !== targetFlipIndex) {
-          pageFlip.turnToPage(targetFlipIndex)
-        }
-      }, 750)
-    }
+    if (nextIndex < 0 || !pageFlip) return
+
+    const targetFlipIndex = contentToFlipIndex(nextIndex)
+    // 목표 페이지가 몇 장 떨어져 있든 flip()은 한 번만 호출한다 - 예전에
+    // 한 장씩 순서대로 여러 번 호출했더니 오히려 너무 부산스럽고 부담스러웠다.
+    pageFlip.flip(targetFlipIndex)
+
+    // flip()이 멀리 떨어진 페이지에서는 라이브러리 특성상 안 움직이는 경우가
+    // 있어서, 애니메이션이 끝났을 시점에 실제로 도착했는지 확인하고
+    // 어긋나 있으면 그때만 즉시 이동으로 보정한다.
+    setTimeout(() => {
+      if (typeof pageFlip.getCurrentPageIndex === 'function' && pageFlip.getCurrentPageIndex() !== targetFlipIndex) {
+        pageFlip.turnToPage(targetFlipIndex)
+      }
+    }, 750)
   }
 
   const jumpTo = (next) => {

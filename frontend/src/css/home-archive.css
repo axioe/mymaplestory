@@ -27,6 +27,9 @@
   padding-top: 8%;
   padding-bottom: 3.5rem;
   justify-content: flex-start;
+  /* 부모(.home__level-content)의 overflow: hidden 때문에 내용이 길어지면
+     아래가 잘려 보이던 문제 - 이 페이지만 세로 스크롤을 허용한다. */
+  overflow-y: auto;
 }
 
 .home__level-current {
@@ -451,6 +454,65 @@
   font-size: 0.8rem;
   font-weight: 700;
   opacity: 0.75;
+}
+
+/* 일일/주간 통계를 나누는 그룹 */
+.home__boss-stats-group {
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed var(--color-line);
+}
+
+.home__boss-stats-group:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.home__boss-stats-group-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  opacity: 0.7;
+  cursor: pointer;
+  text-align: left;
+}
+
+.home__boss-stats-group-title:disabled {
+  cursor: default;
+}
+
+.home__boss-stats-group-title-left {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* 접혀있을 때는 오른쪽(▸), 펼치면 아래쪽(▾)을 향하도록 회전만 시킨다 */
+.home__boss-stats-caret {
+  display: inline-block;
+  font-size: 0.65rem;
+  transition: transform 0.15s ease;
+}
+
+.home__boss-stats-caret--open {
+  transform: rotate(90deg);
+}
+
+.home__boss-stats-group-subtotal {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  opacity: 1;
 }
 
 .home__boss-stats-list {
