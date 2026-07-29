@@ -44,6 +44,10 @@ export const BOSS_CYCLE_DATA = {
   '데미안|hard': { cycle: 'weekly', price: 48900000 },
   '가디언 엔젤 슬라임|normal': { cycle: 'weekly', price: 25500000 },
   '가디언 엔젤 슬라임|hard': { cycle: 'weekly', price: 75100000 },
+  // chaos는 표에 없어서 API의 cycle 값으로 대체되며 daily로 잘못 분류되고 있었다.
+  // 실제로는 주간 콘텐츠라 여기 추가했다 - 정확한 가격은 아직 확인 못 해서 null로
+  // 둔다(화면엔 가격 없이 난이도만 표시됨). 확인되면 숫자만 채우면 된다.
+  '가디언 엔젤 슬라임|chaos': { cycle: 'weekly', price: null },
   '루시드|easy': { cycle: 'weekly', price: 29800000 },
   '루시드|normal': { cycle: 'weekly', price: 35600000 },
   '루시드|hard': { cycle: 'weekly', price: 62900000 },
@@ -88,4 +92,17 @@ export const BOSS_CYCLE_DATA = {
 export function lookupBossCycle(bossName, difficulty) {
   const key = `${bossName}|${(difficulty ?? '').toLowerCase()}`
   return BOSS_CYCLE_DATA[key] ?? null
+}
+
+/**
+ * 표 전체를 {contentName, difficulty, cycle, price} 배열로 펼쳐준다.
+ * 넥슨 스케줄러 API의 bossContents는 캐릭터별로 "주간 결정석 대상"만 내려주고
+ * 저난이도(일일로 반복 가능한) 보스는 아예 안 담아서 주는 것으로 보여서,
+ * 이제 보스 목록 자체는 API가 아니라 이 표를 기준으로 만든다.
+ */
+export function getBossListFromTable() {
+  return Object.entries(BOSS_CYCLE_DATA).map(([key, value]) => {
+    const [contentName, difficulty] = key.split('|')
+    return { contentName, difficulty, cycle: value.cycle, price: value.price }
+  })
 }

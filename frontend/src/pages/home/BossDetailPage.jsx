@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import { resolveBossCycle, resolveBossPrice, formatMeso, getValidBossContents } from '../../utils/bossHelpers.js'
 import '../../css/home-shared.css'
@@ -27,61 +28,87 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
     groups.get(item.contentName).push(item)
   }
 
+  // 월간 보스(검은 마법사 등) 그룹은 맨 아래로 보내고, 그 경계에 구분선을 넣는다.
+  const groupEntries = [...groups.entries()]
+  const isMonthlyGroup = (difficulties) => difficulties.every((d) => resolveBossCycle(d) === 'monthly')
+  const sortedEntries = [
+    ...groupEntries.filter(([, difficulties]) => !isMonthlyGroup(difficulties)),
+    ...groupEntries.filter(([, difficulties]) => isMonthlyGroup(difficulties)),
+  ]
+  const firstMonthlyIndex = sortedEntries.findIndex(([, difficulties]) => isMonthlyGroup(difficulties))
+
   return (
     <div className="home__scheduler-list">
-      {[...groups.entries()].map(([bossName, difficulties]) => {
+      {sortedEntries.map(([bossName, difficulties], index) => {
         const selected = hasAnySelection(bossName)
         const partySize = getPartySize(bossName)
 
         return (
-          <div key={bossName} className="home__boss-group">
-            <p className="home__boss-group-name">{bossName}</p>
-            <div className="home__boss-difficulty-row">
-              {difficulties.map((d) => {
-                const itemCycle = resolveBossCycle(d)
-                const checked = isSelected(bossName, d.difficulty)
-                const disableNew = isAtLimitFor(itemCycle) && !selected
-                const price = resolveBossPrice(d)
-                const perPersonLabel = checked && price != null ? formatMeso(price / partySize) : formatMeso(price)
-                return (
-                  <label
-                    key={d.difficulty}
-                    className={'home__boss-difficulty-option' + (checked ? ' home__boss-difficulty-option--checked' : '')}
-                  >
-                    <input
-                      type="radio"
-                      name={`boss-${bossName}`}
-                      checked={checked}
-                      onChange={() => {}}
-                      onClick={() => onToggle(bossName, d.difficulty, itemCycle)}
-                      disabled={disableNew && !checked}
-                    />
-                    <span>
-                      {d.difficulty}
-                      {perPersonLabel && <span className="home__boss-difficulty-price">{perPersonLabel}</span>}
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-
-            {selected && (
-              <div className="home__boss-party-row">
-                <span className="home__boss-party-label">인원수</span>
-                <select
-                  value={partySize}
-                  onChange={(e) => onSetPartySize(bossName, Number(e.target.value))}
-                  className="home__boss-party-select"
-                >
-                  {Array.from({ length: maxPartySize }, (_, i) => i + 1).map((n) => (
-                    <option key={n} value={n}>
-                      {n}명
-                    </option>
-                  ))}
-                </select>
+          <Fragment key={bossName}>
+            {index === firstMonthlyIndex && (
+              <div className="home__boss-monthly-divider">
+                <span>월간 보스</span>
               </div>
             )}
-          </div>
+            <div className="home__boss-group">
+              <p className="home__boss-group-name">{bossName}</p>
+              <div className="home__boss-difficulty-row">
+                {difficulties.map((d) => {
+                  const itemCycle = resolveBossCycle(d)
+                  const checked = isSelected(bossName, d.difficulty)
+                  const disableNew = isAtLimitFor(itemCycle) && !selected
+                  const price = resolveBossPrice(d)
+                  const perPersonLabel = checked && price != null ? formatMeso(price / partySize) : formatMeso(price)
+                  return (
+                    <label
+                      key={d.difficulty}
+                      className={'home__boss-difficulty-option' + (checked ? ' home__boss-difficulty-option--checked' : '')}
+                    >
+                      <input
+                        type="radio"
+                        name={`boss-${bossName}`}
+                        checked={checked}
+                        onChange={() => {}}
+                        // 클릭할 때 라디오가 포커스를 받으면서 브라우저가 "포커스된
+                        // 요소를 화면에 보이게" 스크롤을 자동으로 올려버리는 문제가
+                        // 있었다. 커스텀 클릭 처리만 쓰고 네이티브 포커스는 막는다.
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          // 클릭 자체로도 포커스가 걸릴 수 있는 브라우저가 있어서
+                          // (mousedown 방지만으로는 부족했다), 클릭 직후 바로
+                          // blur시켜서 포커스에 딸려오는 자동 스크롤을 확실히 막는다.
+                          e.currentTarget.blur()
+                          onToggle(bossName, d.difficulty, itemCycle)
+                        }}
+                        disabled={disableNew && !checked}
+                      />
+                      <span>
+                        {d.difficulty}
+                        {perPersonLabel && <span className="home__boss-difficulty-price">{perPersonLabel}</span>}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+
+              {selected && (
+                <div className="home__boss-party-row">
+                  <span className="home__boss-party-label">인원수</span>
+                  <select
+                    value={partySize}
+                    onChange={(e) => onSetPartySize(bossName, Number(e.target.value))}
+                    className="home__boss-party-select"
+                  >
+                    {Array.from({ length: maxPartySize }, (_, i) => i + 1).map((n) => (
+                      <option key={n} value={n}>
+                        {n}명
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </Fragment>
         )
       })}
     </div>
