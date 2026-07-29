@@ -77,7 +77,7 @@ function getContentDisplay(item, epicDungeonDoneCount) {
  * 왼쪽 체크박스는 "이건 스킵할래"라는 개인 표시(localStorage 저장, 넥슨과 무관).
  * 체크하면 그 줄 전체가 흐려지고 이름에 취소선이 그어져서 스킵 상태가 바로 보인다.
  */
-function ContentButtonList({ items, isSkipped, onToggleSkip }) {
+function ContentButtonList({ items, worldName, isSkipped, onToggleSkip }) {
   const [expandedName, setExpandedName] = useState(null)
 
   if (!items || items.length === 0) {
@@ -92,6 +92,9 @@ function ContentButtonList({ items, isSkipped, onToggleSkip }) {
         const { badgeClass, text } = getContentDisplay(item, epicDungeonDoneCount)
         const isExpanded = expandedName === item.contentName
         const skipped = isSkipped(item.contentName)
+        // 몬스터파크는 월드당 14번까지 진행 가능해서, 지금 보고 있는 캐릭터가
+        // 어느 월드인지 같이 보여준다 (다른 월드 캐릭터랑 헷갈리지 않도록).
+        const isMonsterPark = item.contentName === '몬스터파크'
 
         return (
           <div
@@ -111,6 +114,7 @@ function ContentButtonList({ items, isSkipped, onToggleSkip }) {
               onClick={() => setExpandedName(isExpanded ? null : item.contentName)}
             >
               {item.contentName}
+              {isMonsterPark && worldName && <span className="home__scheduler-item-world">({worldName})</span>}
             </button>
             {isExpanded && (
               <span className={'home__scheduler-item-badge' + badgeClass}>{text}</span>
@@ -142,7 +146,12 @@ export default function SchedulerDetailPage({ cycle, scheduler, onBack }) {
 
       <div className="home__level-content">
         <h2 className="display home__select-title">{CYCLE_LABEL[cycle]}</h2>
-        <ContentButtonList items={items} isSkipped={isSkipped} onToggleSkip={toggleSkip} />
+        <ContentButtonList
+          items={items}
+          worldName={scheduler?.worldName}
+          isSkipped={isSkipped}
+          onToggleSkip={toggleSkip}
+        />
       </div>
 
       <button onClick={onBack} className="home__archive-back home__archive-back--standalone">

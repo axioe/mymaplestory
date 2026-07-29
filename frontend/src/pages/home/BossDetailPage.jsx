@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useLayoutEffect, useRef } from 'react'
 import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import { resolveBossCycle, resolveBossPrice, formatMeso, getValidBossContents } from '../../utils/bossHelpers.js'
 import '../../css/home-shared.css'
@@ -18,6 +18,23 @@ const CYCLE_LABEL = { daily: '일일 보스', weekly: '주간 보스' }
  * 단위가 아니라 항목 하나하나의 실제 cycle(resolveBossCycle)로 판단한다.
  */
 function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
+  const listRef = useRef(null)
+  const scrollTopRef = useRef(0)
+
+  // 원인이 뭐든(포커스, 레이아웃 변화 등) 렌더링 이후에 스크롤 위치가 흐트러지면
+  // 매번 마지막으로 기억해둔 위치로 강제 복원한다. onScroll에서 사용자가 실제로
+  // 스크롤한 위치를 계속 기록해두고, 렌더링이 끝날 때마다(useLayoutEffect) 그
+  // 위치를 다시 적용하는 방식이라 원인을 몰라도 확실하게 막을 수 있다.
+  useLayoutEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollTop = scrollTopRef.current
+    }
+  })
+
+  const handleScroll = (e) => {
+    scrollTopRef.current = e.currentTarget.scrollTop
+  }
+
   if (!items || items.length === 0) {
     return <p className="home__select-hint">표시할 항목이 없어요.</p>
   }
@@ -38,7 +55,7 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
   const firstMonthlyIndex = sortedEntries.findIndex(([, difficulties]) => isMonthlyGroup(difficulties))
 
   return (
-    <div className="home__scheduler-list">
+    <div className="home__scheduler-list" ref={listRef} onScroll={handleScroll}>
       {sortedEntries.map(([bossName, difficulties], index) => {
         const selected = hasAnySelection(bossName)
         const partySize = getPartySize(bossName)
