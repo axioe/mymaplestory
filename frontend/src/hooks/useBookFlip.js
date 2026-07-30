@@ -4,6 +4,7 @@ export const PAGE_ORDER = [
   'start',
   'apikey',
   'select',
+  'select-detail',
   'card',
   'archive',
   'scheduler-daily',
@@ -76,14 +77,19 @@ export function useBookFlip(initialPage) {
     // 한 장씩 순서대로 여러 번 호출했더니 오히려 너무 부산스럽고 부담스러웠다.
     pageFlip.flip(targetFlipIndex)
 
-    // flip()이 멀리 떨어진 페이지에서는 라이브러리 특성상 안 움직이는 경우가
-    // 있어서, 애니메이션이 끝났을 시점에 실제로 도착했는지 확인하고
-    // 어긋나 있으면 그때만 즉시 이동으로 보정한다.
+    // flip()이 라이브러리 특성상 안 움직이는 경우가 있어서, 애니메이션이 끝났을
+    // 시점에 실제로 도착했는지 확인하고 어긋나 있을 때만 보정한다.
+    // (한때 "확인 없이 무조건 보정"으로 바꿔봤는데, 그러면 이미 잘 도착한
+    // 경우에도 매번 라이브러리가 DOM을 한 번 더 건드리게 되고, 마침 그 타이밍에
+    // React가 그 페이지 콘텐츠를 렌더링 중이면 "insertBefore/removeChild - not a
+    // child of this node" 충돌이 났다. getCurrentPageIndex()는 라이브러리
+    // 공식 문서에 있는 정식 메서드라 확인 자체는 안전하니, 진짜 필요할 때만
+    // 최소한으로 보정하는 쪽이 훨씬 안전하다.)
     setTimeout(() => {
       if (typeof pageFlip.getCurrentPageIndex === 'function' && pageFlip.getCurrentPageIndex() !== targetFlipIndex) {
         pageFlip.turnToPage(targetFlipIndex)
       }
-    }, 750)
+    }, 900)
   }
 
   const jumpTo = (next) => {
