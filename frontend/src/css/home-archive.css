@@ -10,7 +10,7 @@
   padding: 20% 1.6rem 2rem;
   gap: 1.2rem;
   text-align: center;
-  /* 내용이 페이지 높이보다 길어지면 (전리품 - 프리셋 버튼 + 장비 목록 + 세트효과 등)
+  /* 내용이 페이지 높이보다 길어지면 (장비 - 프리셋 버튼 + 장비 목록 + 세트효과 등)
      예전엔 overflow: hidden 때문에 아래가 그냥 잘려 보였다. 세로 스크롤을
      허용해서 항상 끝까지 다 볼 수 있게 한다. */
   overflow-x: hidden;
@@ -84,7 +84,7 @@
   text-align: left;
 }
 
-/* 아직 연동 안 된 카테고리(보스/전리품/스토리) placeholder */
+/* 아직 연동 안 된 카테고리(보스/장비/스토리) placeholder */
 .home__result-content {
   position: absolute;
   inset: 0;
@@ -202,7 +202,7 @@
   font-size: 0.95rem;
 }
 
-/* 전리품 - 인게임 장비창처럼 생긴 그리드. 6칸(반지/얼굴장식류 | 캐릭터 |
+/* 장비 - 인게임 장비창처럼 생긴 그리드. 6칸(반지/얼굴장식류 | 캐릭터 |
    방어구류)로 나누고, 캐릭터 이미지가 가운데 2칸x4행을 차지한다. */
 .home__equipment-grid {
   display: grid;
@@ -358,7 +358,7 @@
   color: var(--color-page);
 }
 
-/* 지금 보고 있는 프리셋 버튼 강조 (전리품 카테고리) */
+/* 지금 보고 있는 프리셋 버튼 강조 (장비 카테고리) */
 .home__scheduler-nav-button--active {
   background: var(--color-accent);
   color: var(--color-page);
@@ -418,33 +418,6 @@
   margin: 0;
   font-size: 0.75rem;
   line-height: 1.5;
-}
-
-/* 세트효과 섹션 */
-.home__equipment-set-effects {
-  width: 100%;
-  max-width: 340px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-top: 0.5rem;
-  max-height: 160px;
-  overflow-y: auto;
-  padding-right: 0.2rem;
-}
-
-.home__equipment-set-effects .home__boss-group {
-  padding: 0.5rem 0.7rem;
-}
-
-.home__equipment-set-effects .home__boss-group-name {
-  font-size: 0.78rem;
-  margin: 0 0 0.3rem;
-}
-
-.home__equipment-set-effects .home__equipment-potential-line {
-  font-size: 0.68rem;
-  line-height: 1.4;
 }
 
 /* 항목 이름 자체가 버튼 - 누르면 완료 여부 배지가 펼쳐진다 */

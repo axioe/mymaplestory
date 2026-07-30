@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymaplestory.api.config.NexonApiProperties;
 import com.mymaplestory.api.dto.BossContentItem;
 import com.mymaplestory.api.dto.CharacterBasicDto;
+import com.mymaplestory.api.dto.CharacterListResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
+import com.mymaplestory.api.dto.CharacterSummary;
 import com.mymaplestory.api.dto.ContentItem;
 import com.mymaplestory.api.dto.EquipmentItem;
 import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
+import com.mymaplestory.api.dto.NexonAccountListResponse;
 import com.mymaplestory.api.dto.NexonErrorResponse;
 import com.mymaplestory.api.dto.NexonEquipmentItem;
 import com.mymaplestory.api.dto.NexonEventNoticeListResponse;
@@ -440,6 +443,42 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (set-effect): " + e.getStatusCode(), e);
+        }
+    }
+
+    /**
+     * 이 API 키가 연결된 계정의 전체 캐릭터 목록 조회. 경로: /character/list
+     * (실제 응답을 사용자가 확인해줘서 경로/구조가 확정됨 - character_name 같은
+     * 개별 조회 파라미터가 필요 없고, API 키 하나로 그 키에 연결된 계정의
+     * 캐릭터를 전부 내려준다. 넥슨ID(계정)가 여러 개일 수 있어서
+     * account_list 배열로 오는데, 우리는 그냥 캐릭터만 모아서 하나의
+     * 리스트로 합쳐 내려준다.)
+     */
+    public CharacterListResponse getAccountCharacterList(String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        try {
+            NexonAccountListResponse raw = nexonRestClient.get()
+                    .uri("/character/list")
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(NexonAccountListResponse.class);
+
+            if (raw == null || raw.accountList() == null) {
+                return new CharacterListResponse(List.of());
+            }
+
+            List<CharacterSummary> characters = raw.accountList().stream()
+                    .filter(account -> account.characterList() != null)
+                    .flatMap(account -> account.characterList().stream())
+                    .map(CharacterSummary::from)
+                    .toList();
+
+            return new CharacterListResponse(characters);
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (character/list): " + e.getStatusCode(), e);
         }
     }
 }

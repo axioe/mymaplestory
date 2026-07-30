@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useApiKey } from '../ApiKeyContext.jsx'
-import { validateApiKey, fetchCharacterCard } from '../api/client.js'
+import { validateApiKey } from '../api/client.js'
 import { useBookFlip, PAGE_ORDER } from '../hooks/useBookFlip.js'
+import { useAccountCharacters } from '../hooks/useAccountCharacters.js'
 import { useCharacterCardData } from '../hooks/useCharacterCardData.js'
 import { useLevelHistory } from '../hooks/useLevelHistory.js'
 import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
 import { useEquipment } from '../hooks/useEquipment.js'
-import { useSetEffect } from '../hooks/useSetEffect.js'
 import { useBossSelection } from '../hooks/useBossSelection.js'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/ApiKeyPage.jsx'
-import CharacterSelectPage from './home/CharacterSelectPage.jsx'
+import CharacterSelectPage, { CharacterWorldDetailPage } from './home/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
 import SchedulerDetailPage from './home/SchedulerDetailPage.jsx'
@@ -24,7 +24,7 @@ import '../css/notice-ticker.css'
 
 const CATEGORIES = [
   { key: 'boss', label: '보스' },
-  { key: 'loot', label: '전리품' },
+  { key: 'loot', label: '장비' },
   { key: 'level', label: '레벨' },
   { key: 'story', label: '스토리' },
   { key: 'event', label: '이벤트' },
@@ -48,15 +48,12 @@ const CATEGORIES = [
 export default function Home() {
   const location = useLocation()
   const {
+    apiKey,
     isKeySet,
-    recentCharacters,
-    maxRecentCharacters,
     selectedCharacter,
     hasSelectedCharacter,
     setApiKey,
-    addCharacter,
     selectCharacter,
-    removeCharacter,
     clearSelectedCharacter,
     clearApiKey,
   } = useApiKey()
@@ -71,8 +68,14 @@ export default function Home() {
   const [keyError, setKeyError] = useState(null)
 
   const [active, setActive] = useState('boss')
+  // 캐릭터 선택 - 어느 서버(월드)를 골랐는지. select-detail 페이지가 이 값으로
+  // 그 서버의 캐릭터만 걸러서 보여준다.
+  const [selectedWorld, setSelectedWorld] = useState(null)
 
-  const { cardData, setCardData, cardLoading, cardError } = useCharacterCardData(
+  const { characters: accountCharacters, loading: accountCharactersLoading, error: accountCharactersError } =
+    useAccountCharacters(isKeySet && (page === 'select' || page === 'select-detail'), apiKey)
+
+  const { cardData, cardLoading, cardError } = useCharacterCardData(
     // "항상 표지부터 시작" 하도록 바꾼 뒤로, 화면은 표지에 있는데도 브라우저에
     // 저장된 예전 selectedCharacter 값 때문에 백그라운드에서 몰래 카드 조회가
     // 나가서(그 시점엔 키가 없어 API_KEY_REQUIRED로 실패) 버그가 있었다.
@@ -102,12 +105,8 @@ export default function Home() {
       hasSelectedCharacter,
     selectedCharacter
   )
-  // 전리품: "전리품" 카테고리를 선택했을 때만 조회 (장착장비 + 적용 세트효과)
+  // 장비: "장비" 카테고리를 선택했을 때만 조회
   const { equipment, loading: equipmentLoading, error: equipmentError } = useEquipment(
-    page === 'archive' && active === 'loot' && hasSelectedCharacter,
-    selectedCharacter
-  )
-  const { setEffect, loading: setEffectLoading, error: setEffectError } = useSetEffect(
     page === 'archive' && active === 'loot' && hasSelectedCharacter,
     selectedCharacter
   )
@@ -117,7 +116,7 @@ export default function Home() {
   // 그래서 여기 딱 한 번만 불러서 두 군데 다 똑같은 값을 내려준다.
   const bossSelection = useBossSelection(selectedCharacter)
 
-  // 전리품 - 왼쪽(선택 그리드)과 오른쪽(상세 패널) 페이지가 서로 다른 컴포넌트라서
+  // 장비 - 왼쪽(선택 그리드)과 오른쪽(상세 패널) 페이지가 서로 다른 컴포넌트라서
   // 상태를 여기(Home.jsx)에서 들고 있어야 양쪽이 같은 선택을 보게 된다.
   const [selectedEquipmentPreset, setSelectedEquipmentPreset] = useState(null)
   const [selectedEquipmentSlot, setSelectedEquipmentSlot] = useState(null)
@@ -155,17 +154,17 @@ export default function Home() {
     }
   }
 
-  const handleSelectCharacter = (name) => {
-    selectCharacter(name)
-    flipTo('card')
+  // 서버 버튼을 누르면 진짜 책 페이지로 넘어가서 그 서버의 캐릭터 목록(레벨순)을 보여준다.
+  const handleSelectWorld = (worldName) => {
+    setSelectedWorld(worldName)
+    flipTo('select-detail')
   }
 
-  // 예전처럼 검색해서 추가하면 바로 그 캐릭터의 카드 페이지로 넘어간다.
-  // 실패 시 예외를 던져서 CharacterSelectPage가 자체적으로 에러 문구를 보여주게 한다.
-  const handleAddCharacter = async (name) => {
-    const data = await fetchCharacterCard(name)
-    addCharacter(name, data.worldName)
-    setCardData(name, data) // 방금 조회한 데이터를 바로 캐시해서 카드 페이지에서 재조회 안 해도 되게
+  // CharacterSelectPage가 목록에서 고른 캐릭터 객체(ocid/characterName/worldName/...)를
+  // 그대로 넘겨준다 - 우리는 이름만 selectedCharacter로 저장해두면 나머지 조회
+  // (카드/스케줄러/보스 등)는 전부 그 이름 기준으로 알아서 이루어진다.
+  const handleSelectCharacter = (character) => {
+    selectCharacter(character.characterName)
     flipTo('card')
   }
 
@@ -205,11 +204,20 @@ export default function Home() {
     if (p === 'select') {
       return (
         <CharacterSelectPage
-          recentCharacters={recentCharacters}
-          maxRecentCharacters={maxRecentCharacters}
+          characters={accountCharacters}
+          loading={accountCharactersLoading}
+          error={accountCharactersError}
+          onSelectWorld={handleSelectWorld}
+        />
+      )
+    }
+    if (p === 'select-detail') {
+      return (
+        <CharacterWorldDetailPage
+          characters={accountCharacters}
+          worldName={selectedWorld}
           onSelectCharacter={handleSelectCharacter}
-          onAddCharacter={handleAddCharacter}
-          onRemoveCharacter={removeCharacter}
+          onBack={() => flipTo('select')}
         />
       )
     }
@@ -247,9 +255,6 @@ export default function Home() {
           equipment={equipment}
           equipmentLoading={equipmentLoading}
           equipmentError={equipmentError}
-          setEffect={setEffect}
-          setEffectLoading={setEffectLoading}
-          setEffectError={setEffectError}
           selectedPreset={selectedEquipmentPreset}
           selectedSlot={selectedEquipmentSlot}
         />

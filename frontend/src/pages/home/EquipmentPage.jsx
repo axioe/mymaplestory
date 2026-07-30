@@ -53,7 +53,8 @@ export function resolveEffectivePreset(equipment, selectedPreset) {
 /**
  * 왼쪽 페이지 - 캐릭터 이미지 + 장비 그리드 + 프리셋 선택. 칸을 누르면
  * 선택 상태가 Home.jsx에 저장되고, 오른쪽 페이지(EquipmentDetailPanel)가
- * 그 선택을 보고 상세 정보를 보여준다.
+ * 그 선택을 보고 상세 정보를 보여준다. 제목/직업 줄은 그리드만으로도
+ * 충분히 알아볼 수 있어서 뺐다.
  */
 export function EquipmentSelectionPage({ equipment, characterImage, selectedPreset, onSelectPreset, selectedSlot, onSelectSlot }) {
   const effectivePreset = resolveEffectivePreset(equipment, selectedPreset)
@@ -62,9 +63,6 @@ export function EquipmentSelectionPage({ equipment, characterImage, selectedPres
 
   return (
     <div className="home__level-content home__level-content--left">
-      <h2 className="display home__select-title">전리품</h2>
-      {equipment && <p className="home__select-hint">{equipment.characterClass}</p>}
-
       <div className="home__scheduler-nav">
         {[1, 2, 3].map((n) => (
           <button
@@ -124,90 +122,58 @@ export function EquipmentSelectionPage({ equipment, characterImage, selectedPres
 }
 
 /**
- * 오른쪽 페이지 - 왼쪽에서 고른 장비의 스텟/잠재능력 + 세트효과. 이 페이지
- * 자체는 아카이브의 "전리품" 카테고리 콘텐츠라서, ArchivePage 안에서
- * 그대로 호출된다(별도의 책 페이지가 아니라 archive 페이지 오른쪽 내용물).
+ * 오른쪽 페이지 - 왼쪽에서 고른 장비의 스텟/잠재능력. 이 페이지 자체는
+ * 아카이브의 "장비" 카테고리 콘텐츠라서, ArchivePage 안에서 그대로
+ * 호출된다(별도의 책 페이지가 아니라 archive 페이지 오른쪽 내용물).
  */
-export default function EquipmentDetailPanel({
-  equipment,
-  selectedPreset,
-  selectedSlot,
-  setEffect,
-  setEffectLoading,
-  setEffectError,
-}) {
+export default function EquipmentDetailPanel({ equipment, selectedPreset, selectedSlot }) {
   const effectivePreset = resolveEffectivePreset(equipment, selectedPreset)
   const items = getPresetItems(equipment, effectivePreset)
   const bySlot = new Map(items.map((item) => [item.slot, item]))
   const selectedItem = selectedSlot ? bySlot.get(selectedSlot) : null
 
   return (
-    <>
-      <div className="home__equipment-detail home__equipment-detail--standalone">
-        {!selectedItem ? (
-          <p className="home__select-hint">왼쪽 페이지에서 장비를 눌러서 스텟과 잠재능력을 확인해보세요.</p>
-        ) : (
-          <>
-            <p className="home__equipment-detail-name">
-              {selectedItem.itemName}
-              {selectedItem.starforce && Number(selectedItem.starforce) > 0 && (
-                <span className="home__equipment-starforce">★{selectedItem.starforce}</span>
-              )}
-            </p>
-            <p className="home__equipment-detail-slot">{selectedItem.slot}</p>
+    <div className="home__equipment-detail home__equipment-detail--standalone">
+      {!selectedItem ? (
+        <p className="home__select-hint">왼쪽 페이지에서 장비를 눌러서 스텟과 잠재능력을 확인해보세요.</p>
+      ) : (
+        <>
+          <p className="home__equipment-detail-name">
+            {selectedItem.itemName}
+            {selectedItem.starforce && Number(selectedItem.starforce) > 0 && (
+              <span className="home__equipment-starforce">★{selectedItem.starforce}</span>
+            )}
+          </p>
+          <p className="home__equipment-detail-slot">{selectedItem.slot}</p>
 
-            {selectedItem.statLines?.length > 0 && (
-              <div className="home__equipment-potential">
-                <p className="home__equipment-potential-label">스텟</p>
-                {selectedItem.statLines.map((line) => (
-                  <p key={line} className="home__equipment-potential-line">{line}</p>
-                ))}
-              </div>
-            )}
-            {selectedItem.potentialLines?.length > 0 && (
-              <div className="home__equipment-potential">
-                <p className="home__equipment-potential-label">잠재능력 ({selectedItem.potentialGrade || '-'})</p>
-                {selectedItem.potentialLines.map((line) => (
-                  <p key={line} className="home__equipment-potential-line">{line}</p>
-                ))}
-              </div>
-            )}
-            {selectedItem.additionalPotentialLines?.length > 0 && (
-              <div className="home__equipment-potential">
-                <p className="home__equipment-potential-label">
-                  에디셔널 잠재능력 ({selectedItem.additionalPotentialGrade || '-'})
-                </p>
-                {selectedItem.additionalPotentialLines.map((line) => (
-                  <p key={line} className="home__equipment-potential-line">{line}</p>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {(setEffectLoading || setEffectError) && (
-        <p className={setEffectError ? 'home__apikey-error' : undefined}>
-          {setEffectError || '세트효과 불러오는 중...'}
-        </p>
-      )}
-      {!setEffectLoading && !setEffectError && setEffect && setEffect.setEffects?.length > 0 && (
-        <div className="home__equipment-set-effects">
-          <p className="home__select-hint">적용 세트효과</p>
-          {setEffect.setEffects.map((set) => (
-            <div key={set.setName} className="home__boss-group">
-              <p className="home__boss-group-name">
-                {set.setName} ({set.totalSetCount}세트)
-              </p>
-              {set.setEffectInfo?.map((info) => (
-                <p key={info.setCount} className="home__equipment-potential-line">
-                  {info.setCount}세트: {info.setOption}
-                </p>
+          {selectedItem.statLines?.length > 0 && (
+            <div className="home__equipment-potential">
+              <p className="home__equipment-potential-label">스텟</p>
+              {selectedItem.statLines.map((line) => (
+                <p key={line} className="home__equipment-potential-line">{line}</p>
               ))}
             </div>
-          ))}
-        </div>
+          )}
+          {selectedItem.potentialLines?.length > 0 && (
+            <div className="home__equipment-potential">
+              <p className="home__equipment-potential-label">잠재능력 ({selectedItem.potentialGrade || '-'})</p>
+              {selectedItem.potentialLines.map((line) => (
+                <p key={line} className="home__equipment-potential-line">{line}</p>
+              ))}
+            </div>
+          )}
+          {selectedItem.additionalPotentialLines?.length > 0 && (
+            <div className="home__equipment-potential">
+              <p className="home__equipment-potential-label">
+                에디셔널 잠재능력 ({selectedItem.additionalPotentialGrade || '-'})
+              </p>
+              {selectedItem.additionalPotentialLines.map((line) => (
+                <p key={line} className="home__equipment-potential-line">{line}</p>
+              ))}
+            </div>
+          )}
+        </>
       )}
-    </>
+    </div>
   )
 }

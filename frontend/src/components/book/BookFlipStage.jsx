@@ -5,17 +5,21 @@ import '../../css/book-flip-stage.css'
 /**
  * react-pageflip이 각 페이지에 ref를 넘겨줄 수 있어야 해서(내부적으로 DOM을 직접 다룸),
  * 반드시 forwardRef로 감싼 단순 div여야 한다. (라이브러리 공식 안내사항)
+ *
+ * blank는 "지금은 빈 페이지"라는 뜻의 스타일 수식자일 뿐이다 - 예전엔 빈 페이지와
+ * 콘텐츠 있는 페이지를 아예 다른 컴포넌트(BlankPage vs Page)로 렌더링했는데,
+ * 같은 자리(예: 아카이브 페이지의 왼쪽 짝)가 카테고리에 따라 빈 페이지였다가
+ * 콘텐츠가 생기기도 하면서, 매번 다른 컴포넌트 타입으로 바뀌어버려 react-pageflip이
+ * 이미 직접 옮겨놓은 DOM 노드를 React가 지우거나 다시 끼워넣으려다가
+ * "removeChild/insertBefore - not a child of this node" 에러로 충돌했다.
+ * 항상 같은 Page 컴포넌트(같은 div)를 쓰고 내용/클래스만 바꾸면 이 문제가 없다.
  */
-const Page = forwardRef(function Page({ children }, ref) {
+const Page = forwardRef(function Page({ children, blank = false }, ref) {
   return (
-    <div className="flip-page" ref={ref}>
+    <div className={'flip-page' + (blank ? ' flip-page--blank' : '')} ref={ref}>
       {children}
     </div>
   )
-})
-
-const BlankPage = forwardRef(function BlankPage(_, ref) {
-  return <div className="flip-page flip-page--blank" ref={ref} />
 })
 
 /**
@@ -31,7 +35,7 @@ const BlankPage = forwardRef(function BlankPage(_, ref) {
  *
  * renderLeftPageContent(key)는 선택적이다 - 기본적으로는 왼쪽이 계속 빈 페이지이지만,
  * 특정 페이지(예: 보스 상세)에서는 왼쪽에도 실제 콘텐츠(선택 목록)를 넣고 싶을 때
- * null이 아닌 값을 반환하면 그 페이지가 <BlankPage> 대신 콘텐츠가 담긴 <Page>로 바뀐다.
+ * null이 아닌 값을 반환하면 그 자리의 Page가 blank=false로 바뀌어 콘텐츠를 보여준다.
  *
  * useMouseEvents는 일부러 껐다 - 캐릭터 선택/카드 페이지는 API 키 검증 같은
  * 실제 데이터 흐름을 거쳐야 의미가 있는 화면이라, 사용자가 손으로 마구 넘겨서
@@ -72,11 +76,9 @@ export default function BookFlipStage({
         {restKeys.flatMap((key) => {
           const leftContent = renderLeftPageContent ? renderLeftPageContent(key) : null
           return [
-            leftContent != null ? (
-              <Page key={`blank-${key}`}>{leftContent}</Page>
-            ) : (
-              <BlankPage key={`blank-${key}`} />
-            ),
+            <Page key={`blank-${key}`} blank={leftContent == null}>
+              {leftContent}
+            </Page>,
             <Page key={key}>{renderPageContent(key)}</Page>,
           ]
         })}

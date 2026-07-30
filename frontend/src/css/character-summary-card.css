@@ -34,6 +34,39 @@
   box-shadow: none;
 }
 
+/* 표지에서 오려온 단풍잎 장식 - 한 장을 뒤집고 돌려서 네 귀퉁이에 재사용 */
+.char-card__corner {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 1;
+}
+
+.char-card__corner--tl {
+  top: -8px;
+  left: -8px;
+}
+
+.char-card__corner--tr {
+  top: -8px;
+  right: -8px;
+  transform: scaleX(-1);
+}
+
+.char-card__corner--bl {
+  bottom: -8px;
+  left: -8px;
+  transform: scaleY(-1);
+}
+
+.char-card__corner--br {
+  bottom: -8px;
+  right: -8px;
+  transform: scale(-1, -1);
+}
+
 /* 리본 배지 - 위쪽이 카드 밖으로 살짝 걸치고, 아래쪽은 뾰족한 리본 모양 */
 .char-card__badge {
   position: absolute;

@@ -41,9 +41,6 @@ export default function ArchivePage({
   equipment,
   equipmentLoading,
   equipmentError,
-  setEffect,
-  setEffectLoading,
-  setEffectError,
   selectedPreset,
   selectedSlot,
 }) {
@@ -182,7 +179,7 @@ export default function ArchivePage({
         </div>
       ) : active === 'loot' ? (
         <div className="home__level-content">
-          {(equipmentLoading || setEffectLoading) && <p>불러오는 중...</p>}
+          {equipmentLoading && <p>불러오는 중...</p>}
           {equipmentError && <p className="home__apikey-error">{equipmentError}</p>}
 
           {!equipmentLoading && !equipmentError && equipment && (
@@ -190,9 +187,6 @@ export default function ArchivePage({
               equipment={equipment}
               selectedPreset={selectedPreset}
               selectedSlot={selectedSlot}
-              setEffect={setEffect}
-              setEffectLoading={setEffectLoading}
-              setEffectError={setEffectError}
             />
           )}
         </div>

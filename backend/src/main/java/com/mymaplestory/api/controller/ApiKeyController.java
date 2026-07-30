@@ -1,7 +1,9 @@
 package com.mymaplestory.api.controller;
 
+import com.mymaplestory.api.dto.CharacterListResponse;
 import com.mymaplestory.api.service.NexonApiService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +39,18 @@ public class ApiKeyController {
     ) {
         nexonApiService.validateApiKey(apiKey);
         return ResponseEntity.ok(Map.of("valid", true));
+    }
+
+    /**
+     * GET /api/auth/characters
+     * 헤더: x-nxopen-api-key
+     * 이 API 키가 연결된 계정의 전체 캐릭터 목록(월드/직업/레벨 포함)을 내려준다.
+     * 이제 캐릭터를 검색해서 하나씩 등록하지 않고, 이 목록에서 바로 골라서 들어간다.
+     */
+    @GetMapping("/characters")
+    public CharacterListResponse getCharacters(
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return nexonApiService.getAccountCharacterList(apiKey);
     }
 }

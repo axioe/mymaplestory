@@ -1,23 +1,11 @@
-import { useState } from 'react'
 import '../../css/home-shared.css'
 import '../../css/home-select.css'
+import '../../css/home-archive.css'
 
 /**
- * recentCharacters는 정상적으로는 {name, worldName} 객체 배열이지만,
- * 혹시 예전 버전(문자열 배열)이거나 props 자체가 안 넘어와 undefined/null인 경우에도
- * 화면이 죽지 않도록 방어한다.
- */
-function normalize(recentCharacters) {
-  if (!Array.isArray(recentCharacters)) return []
-  return recentCharacters
-    .map((c) => (typeof c === 'string' ? { name: c, worldName: '미확인' } : c))
-    .filter((c) => c?.name)
-}
-
-/**
- * 검색해서 추가한 캐릭터들을 월드(서버)별로 묶어서 보여준다. 같은 월드끼리
- * 모아두면 나중에 캐릭터가 많아져도 어디 서버 캐릭터인지 한눈에 구분된다.
- * Map을 쓰는 이유는 "먼저 등장한 월드 순서"를 그대로 유지하기 위함(최근 검색순).
+ * 검색해서 넣어둔 캐릭터가 아니라, API 키 계정에 실제로 연결된 캐릭터를
+ * 월드(서버)별로 묶는다. Map을 쓰는 이유는 "API가 내려준 순서"를 그대로
+ * 유지하기 위함이다.
  */
 function groupByWorld(characters) {
   const groups = new Map()
@@ -28,89 +16,76 @@ function groupByWorld(characters) {
   return groups
 }
 
-export default function CharacterSelectPage({
-  recentCharacters,
-  maxRecentCharacters,
-  onSelectCharacter,
-  onAddCharacter,
-  onRemoveCharacter,
-}) {
-  const [nameInput, setNameInput] = useState('')
-  const [adding, setAdding] = useState(false)
-  const [addError, setAddError] = useState(null)
-
-  const characters = normalize(recentCharacters)
-  const groups = groupByWorld(characters)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const trimmed = nameInput.trim()
-    if (!trimmed || adding) return
-
-    setAdding(true)
-    setAddError(null)
-    try {
-      await onAddCharacter(trimmed)
-      setNameInput('')
-    } catch {
-      setAddError('캐릭터를 찾을 수 없습니다. 닉네임을 다시 확인해주세요.')
-    } finally {
-      setAdding(false)
-    }
-  }
+/**
+ * 캐릭터 개요 - 서버(월드) 버튼 목록. 계정에 캐릭터가 워낙 많을 수 있어서
+ * (수십 개), 한 화면에 다 늘어놓는 대신 서버별로 몇 명인지 버튼으로 먼저
+ * 보여주고, 버튼을 누르면 실제 책장이 넘어가서 그 서버의 캐릭터 목록
+ * (레벨 높은 순)으로 이동한다 - 보스/스케줄러와 같은 방식.
+ */
+export default function CharacterSelectPage({ characters, loading, error, onSelectWorld }) {
+  const groups = groupByWorld(characters ?? [])
 
   return (
     <div className="home__select-content">
       <h2 className="display home__select-title">캐릭터 선택</h2>
       <p className="home__select-hint">
-        API 키 확인 완료! 캐릭터 닉네임을 검색해보세요.
+        {loading ? '내 캐릭터 목록을 불러오는 중...' : '서버를 선택해주세요.'}
       </p>
 
-      <form onSubmit={handleSubmit} className="home__select-form">
-        <input
-          type="text"
-          value={nameInput}
-          onChange={(e) => setNameInput(e.target.value)}
-          placeholder="캐릭터 닉네임 검색"
-          className="home__select-input"
-          autoComplete="off"
-          disabled={adding}
-        />
-        <button type="submit" className="home__select-submit" disabled={adding}>
-          {adding ? '조회 중...' : '검색하고 보기'}
-        </button>
-      </form>
-      {addError && <p className="home__apikey-error">{addError}</p>}
+      {error && <p className="home__apikey-error">{error}</p>}
 
-      {characters.length > 0 && (
-        <div className="home__select-groups">
+      {!loading && !error && characters?.length === 0 && (
+        <p className="home__select-hint">이 API 키에 연결된 캐릭터를 찾지 못했어요.</p>
+      )}
+
+      {!loading && !error && groups.size > 0 && (
+        <div className="home__select-world-list">
           {[...groups.entries()].map(([worldName, worldCharacters]) => (
-            <div key={worldName} className="home__select-group">
-              <p className="home__select-group-title">{worldName}</p>
-              <div className="home__select-list">
-                {worldCharacters.map((c) => (
-                  <div key={c.name} className="home__select-chip-row">
-                    <button onClick={() => onSelectCharacter(c.name)} className="home__select-chip">
-                      {c.name}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onRemoveCharacter(c.name)}
-                      className="home__select-chip-remove"
-                      aria-label={`${c.name} 목록에서 삭제`}
-                      title="목록에서 삭제"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <button
+              key={worldName}
+              type="button"
+              onClick={() => onSelectWorld(worldName)}
+              className="home__scheduler-nav-button"
+            >
+              {worldName}
+              <span className="home__scheduler-nav-count">{worldCharacters.length}</span>
+            </button>
           ))}
         </div>
       )}
+    </div>
+  )
+}
 
-      <p className="home__select-limit">최근 검색한 캐릭터를 최대 {maxRecentCharacters}개까지 기억해요.</p>
+/**
+ * 캐릭터 상세 - 고른 서버의 캐릭터를 레벨 높은 순으로 보여준다. onBack은
+ * flipTo('select')로 실제 책장을 넘겨서 서버 선택으로 돌아간다.
+ */
+export function CharacterWorldDetailPage({ characters, worldName, onSelectCharacter, onBack }) {
+  const worldCharacters = (characters ?? [])
+    .filter((c) => c.worldName === worldName)
+    .slice()
+    .sort((a, b) => (b.characterLevel ?? 0) - (a.characterLevel ?? 0))
+
+  return (
+    <div className="home__select-content">
+      <h2 className="display home__select-title">{worldName}</h2>
+      <p className="home__select-hint">레벨 높은 순으로 정렬했어요.</p>
+
+      <div className="home__select-list">
+        {worldCharacters.map((c) => (
+          <button key={c.ocid} onClick={() => onSelectCharacter(c)} className="home__select-chip">
+            {c.characterName}
+            <span className="home__select-chip-class">
+              {c.characterClass} · Lv.{c.characterLevel}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+        ← 서버 선택으로
+      </button>
     </div>
   )
 }

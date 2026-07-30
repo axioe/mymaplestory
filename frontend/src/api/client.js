@@ -104,3 +104,15 @@ export async function validateApiKey(apiKey) {
   )
   return data
 }
+
+/**
+ * 이 API 키가 연결된 계정의 전체 캐릭터 목록(월드/직업/레벨 포함)을 가져온다.
+ * 아직 localStorage에 저장 안 된 키로도 확인할 수 있어야 해서(키 입력 직후 바로
+ * 목록을 보여줘야 함), 인터셉터에 기대지 않고 헤더를 직접 지정한다.
+ */
+export async function fetchAccountCharacters(apiKey) {
+  const { data } = await apiClient.get('/auth/characters', {
+    headers: { 'x-nxopen-api-key': apiKey },
+  })
+  return data
+}

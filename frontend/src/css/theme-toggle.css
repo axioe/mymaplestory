@@ -10,10 +10,11 @@
   margin-top: 14px; /* 56px 홈 버튼과 세로 중앙이 맞도록 */
   border-radius: 999px;
   border: 2px solid var(--color-line);
-  background: var(--color-canvas);
+  background: var(--color-page);
+  box-shadow: 0 6px 14px rgba(78, 52, 46, 0.18);
   padding: 0;
   cursor: pointer;
-  transition: background 0.35s ease;
+  transition: background 0.35s ease, box-shadow 0.25s ease;
 }
 
 .theme-toggle__icon {

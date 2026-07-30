@@ -21,6 +21,16 @@ export default function CharacterSummaryCard({ character = MOCK_CHARACTER, bare 
 
   return (
     <div className={bare ? 'char-card char-card--bare' : 'char-card'}>
+      {!bare && (
+        <>
+          {/* 표지 이미지에서 그대로 오려온 단풍잎 장식 - 하나의 이미지를 돌리고
+              뒤집어서 네 귀퉁이에 재사용한다(표지와 같은 톤을 그대로 이어가기 위함). */}
+          <img src="/leaf-corner.png" alt="" aria-hidden="true" className="char-card__corner char-card__corner--tl" />
+          <img src="/leaf-corner.png" alt="" aria-hidden="true" className="char-card__corner char-card__corner--tr" />
+          <img src="/leaf-corner.png" alt="" aria-hidden="true" className="char-card__corner char-card__corner--bl" />
+          <img src="/leaf-corner.png" alt="" aria-hidden="true" className="char-card__corner char-card__corner--br" />
+        </>
+      )}
       {!bare && <div className="char-card__badge">MY MAPLESTORY</div>}
 
       <div className="char-card__portrait-wrap">
