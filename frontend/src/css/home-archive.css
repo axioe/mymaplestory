@@ -206,8 +206,10 @@
    방어구류)로 나누고, 캐릭터 이미지가 가운데 2칸x4행을 차지한다. */
 .home__equipment-grid {
   display: grid;
-  grid-template-columns: repeat(6, 46px);
-  grid-template-rows: repeat(6, 46px);
+  /* 이제 왼쪽 페이지 전체를 혼자 쓰기 때문에(예전엔 오른쪽 통계랑 나눠 썼음)
+     칸 크기를 키웠다 - 캐릭터 이미지 영역도 같이 커진다. */
+  grid-template-columns: repeat(6, 62px);
+  grid-template-rows: repeat(6, 62px);
   grid-template-areas:
     'ring1  forehead char     char      cap      cape'
     'ring2  eyeacc   char     char      clothes  gloves'
@@ -215,7 +217,7 @@
     'ring4  pendant1 char     char      shoulder medal'
     'belt   pendant2 weapon   subweapon emblem   heart'
     'pocket .        .        .         .        badge';
-  gap: 0.35rem;
+  gap: 0.45rem;
   justify-content: center;
   margin: 0 auto;
 }
@@ -299,6 +301,11 @@
   border: 1.5px solid var(--color-line);
   background: var(--color-canvas);
   text-align: left;
+}
+
+/* 오른쪽 페이지에 단독으로 놓일 때는(왼쪽 그리드와 안 나눠 쓰니까) 더 넓게 쓴다 */
+.home__equipment-detail--standalone {
+  max-width: 420px;
 }
 
 .home__equipment-detail-name {

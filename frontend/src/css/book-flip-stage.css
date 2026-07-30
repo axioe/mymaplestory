@@ -6,6 +6,13 @@
   min-height: 100vh;
   padding: 2rem 1rem;
   gap: 1rem;
+  /* 책 뒤에 깔리는 은은한 배경 - 채도/대비가 낮아서 책 자체를 가리지 않는다.
+     화면 전체를 채우되(cover) 찌그러지지 않게 하고, 스크롤해도 배경이
+     같이 안 흐르도록(fixed) 고정한다. */
+  background-image: url('/background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* HTMLFlipBook(size="stretch")이 늘어날 기준 너비를 잴 수 있도록,

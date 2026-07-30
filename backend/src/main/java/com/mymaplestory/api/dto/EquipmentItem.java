@@ -30,20 +30,14 @@ public record EquipmentItem(
                 .filter(s -> s != null && !s.isBlank())
                 .toList();
 
-        // 도안(item_shape_name)이 원래 이름과 다르면(작아 보이기 등 적용된 경우)
-        // 그쪽이 실제로 보이는 겉모습이라 이름을 그걸로 보여준다.
-        String displayName = item.itemShapeName() != null && !item.itemShapeName().isBlank()
-                ? item.itemShapeName()
-                : item.itemName();
-        String displayIcon = item.itemShapeIcon() != null && !item.itemShapeIcon().isBlank()
-                ? item.itemShapeIcon()
-                : item.itemIcon();
-
+        // item_shape_name/item_shape_icon(도안, "숨기기" 적용 시 겉모습)은 안 쓰고,
+        // 항상 실제 아이템의 이름/아이콘(item_name/item_icon)을 그대로 보여준다 -
+        // 이 화면은 실제 어떤 장비를 꼈는지 확인하는 용도라 겉모습보다 실제 아이템이 중요하다.
         return new EquipmentItem(
                 item.itemEquipmentPart(),
                 item.itemEquipmentSlot(),
-                displayName,
-                displayIcon,
+                item.itemName(),
+                item.itemIcon(),
                 item.starforce(),
                 buildStatLines(item.itemTotalOption()),
                 item.potentialOptionGrade(),

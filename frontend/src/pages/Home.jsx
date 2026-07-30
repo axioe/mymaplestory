@@ -18,6 +18,7 @@ import CharacterCardPage from './home/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
 import SchedulerDetailPage from './home/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage, BossWeeklyOverviewPage } from './home/BossDetailPage.jsx'
+import { EquipmentSelectionPage } from './home/EquipmentPage.jsx'
 import NoticeTicker from './home/NoticeTicker.jsx'
 import '../css/notice-ticker.css'
 
@@ -115,6 +116,11 @@ export default function Home() {
   // DOM에 갖고 있음)라, 각자 따로 훅을 부르면 상태가 서로 안 맞을 수 있다.
   // 그래서 여기 딱 한 번만 불러서 두 군데 다 똑같은 값을 내려준다.
   const bossSelection = useBossSelection(selectedCharacter)
+
+  // 전리품 - 왼쪽(선택 그리드)과 오른쪽(상세 패널) 페이지가 서로 다른 컴포넌트라서
+  // 상태를 여기(Home.jsx)에서 들고 있어야 양쪽이 같은 선택을 보게 된다.
+  const [selectedEquipmentPreset, setSelectedEquipmentPreset] = useState(null)
+  const [selectedEquipmentSlot, setSelectedEquipmentSlot] = useState(null)
 
   // MenuButton의 "홈으로" 클릭을 처리한다. 이미 "/" 위에 있을 때는 라우트가
   // 안 바뀌어서 아무 반응이 없었던 버그 수정 - state로 전달된 타임스탬프를 감지해서
@@ -244,7 +250,8 @@ export default function Home() {
           setEffect={setEffect}
           setEffectLoading={setEffectLoading}
           setEffectError={setEffectError}
-          characterImage={cardData?.characterImage}
+          selectedPreset={selectedEquipmentPreset}
+          selectedSlot={selectedEquipmentSlot}
         />
       )
     }
@@ -303,6 +310,18 @@ export default function Home() {
     if (p === 'boss-weekly-maple' || p === 'boss-weekly-arcane' || p === 'boss-weekly-grandis') {
       const regionKey = p.replace('boss-weekly-', '')
       return <BossSelectionPage pageKind={regionKey} scheduler={scheduler} bossSelection={bossSelection} />
+    }
+    if (p === 'archive' && active === 'loot') {
+      return (
+        <EquipmentSelectionPage
+          equipment={equipment}
+          characterImage={cardData?.characterImage}
+          selectedPreset={selectedEquipmentPreset}
+          onSelectPreset={setSelectedEquipmentPreset}
+          selectedSlot={selectedEquipmentSlot}
+          onSelectSlot={setSelectedEquipmentSlot}
+        />
+      )
     }
     return null
   }
