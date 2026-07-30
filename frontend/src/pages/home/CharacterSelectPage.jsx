@@ -14,12 +14,33 @@ function normalize(recentCharacters) {
     .filter((c) => c?.name)
 }
 
-export default function CharacterSelectPage({ recentCharacters, maxRecentCharacters, onSelectCharacter, onAddCharacter }) {
+/**
+ * 검색해서 추가한 캐릭터들을 월드(서버)별로 묶어서 보여준다. 같은 월드끼리
+ * 모아두면 나중에 캐릭터가 많아져도 어디 서버 캐릭터인지 한눈에 구분된다.
+ * Map을 쓰는 이유는 "먼저 등장한 월드 순서"를 그대로 유지하기 위함(최근 검색순).
+ */
+function groupByWorld(characters) {
+  const groups = new Map()
+  for (const c of characters) {
+    if (!groups.has(c.worldName)) groups.set(c.worldName, [])
+    groups.get(c.worldName).push(c)
+  }
+  return groups
+}
+
+export default function CharacterSelectPage({
+  recentCharacters,
+  maxRecentCharacters,
+  onSelectCharacter,
+  onAddCharacter,
+  onRemoveCharacter,
+}) {
   const [nameInput, setNameInput] = useState('')
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState(null)
 
   const characters = normalize(recentCharacters)
+  const groups = groupByWorld(characters)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -62,16 +83,29 @@ export default function CharacterSelectPage({ recentCharacters, maxRecentCharact
       {addError && <p className="home__apikey-error">{addError}</p>}
 
       {characters.length > 0 && (
-        <div className="home__select-list">
-          {characters.map((c) => (
-            <button
-              key={c.name}
-              onClick={() => onSelectCharacter(c.name)}
-              className="home__select-chip"
-            >
-              {c.name}
-              <span className="home__select-chip-world">{c.worldName}</span>
-            </button>
+        <div className="home__select-groups">
+          {[...groups.entries()].map(([worldName, worldCharacters]) => (
+            <div key={worldName} className="home__select-group">
+              <p className="home__select-group-title">{worldName}</p>
+              <div className="home__select-list">
+                {worldCharacters.map((c) => (
+                  <div key={c.name} className="home__select-chip-row">
+                    <button onClick={() => onSelectCharacter(c.name)} className="home__select-chip">
+                      {c.name}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveCharacter(c.name)}
+                      className="home__select-chip-remove"
+                      aria-label={`${c.name} 목록에서 삭제`}
+                      title="목록에서 삭제"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}

@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import {
   resolveBossCycle,
   resolveBossPrice,
@@ -270,10 +269,6 @@ export function BossWeeklyOverviewPage({ scheduler, bossSelection, onNavigateReg
 
   return (
     <>
-      <div className="home__result-datetime">
-        <DateTimeLabel />
-      </div>
-
       <div className="home__level-content">
         <h2 className="display home__select-title">주간 보스</h2>
         <p className="home__select-hint">
@@ -345,10 +340,6 @@ export default function BossDetailPage({ pageKind, scheduler, bossSelection, onB
 
   return (
     <>
-      <div className="home__result-datetime">
-        <DateTimeLabel />
-      </div>
-
       <div className="home__level-content home__level-content--stats">
         <h2 className="display home__select-title">{label} 통계</h2>
 

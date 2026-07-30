@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import DateTimeLabel from '../../components/DateTimeLabel.jsx'
 import { useSkipTracker } from '../../hooks/useSkipTracker.js'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
@@ -140,10 +139,6 @@ export default function SchedulerDetailPage({ cycle, scheduler, onBack }) {
 
   return (
     <>
-      <div className="home__result-datetime">
-        <DateTimeLabel />
-      </div>
-
       <div className="home__level-content">
         <h2 className="display home__select-title">{CYCLE_LABEL[cycle]}</h2>
         <ContentButtonList

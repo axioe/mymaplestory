@@ -3,3 +3,13 @@
   letter-spacing: 0.05em;
   opacity: 0.8;
 }
+
+/* 홈 버튼(우측 상단, 56px 폭) 바로 아래에 고정. 예전엔 책 안 페이지마다
+   따로 넣었는데, 책 내용이 아니라 화면 고정 요소로 바뀌면서 한 번만 렌더링한다. */
+.datetime-label--fixed {
+  position: fixed;
+  top: calc(1.5rem + 56px + 0.5rem);
+  right: 1.5rem;
+  z-index: 50;
+  color: var(--color-ink);
+}

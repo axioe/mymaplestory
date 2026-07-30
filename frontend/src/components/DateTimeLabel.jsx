@@ -9,7 +9,7 @@ function format(date) {
   return `${yyyy}.${mm}.${dd} ${days[date.getDay()]}`
 }
 
-export default function DateTimeLabel() {
+export default function DateTimeLabel({ fixed = false }) {
   const [now, setNow] = useState(new Date())
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function DateTimeLabel() {
   }, [])
 
   return (
-    <span className="datetime-label">
+    <span className={'datetime-label' + (fixed ? ' datetime-label--fixed' : '')}>
       {format(now)}
     </span>
   )

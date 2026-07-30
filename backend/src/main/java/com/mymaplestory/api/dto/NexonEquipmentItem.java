@@ -25,6 +25,7 @@ public record NexonEquipmentItem(
         @JsonProperty("additional_potential_option_grade") String additionalPotentialOptionGrade,
         @JsonProperty("additional_potential_option_1") String additionalPotentialOption1,
         @JsonProperty("additional_potential_option_2") String additionalPotentialOption2,
-        @JsonProperty("additional_potential_option_3") String additionalPotentialOption3
+        @JsonProperty("additional_potential_option_3") String additionalPotentialOption3,
+        @JsonProperty("item_total_option") NexonItemOption itemTotalOption
 ) {
 }

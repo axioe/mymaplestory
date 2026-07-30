@@ -4,6 +4,7 @@ import { ApiKeyProvider } from './ApiKeyContext.jsx'
 import MenuButton from './components/MenuButton.jsx'
 import FontNotice from './components/FontNotice.jsx'
 import ThemeToggleSwitch from './components/ThemeToggleSwitch.jsx'
+import DateTimeLabel from './components/DateTimeLabel.jsx'
 import Home from './pages/Home.jsx'
 import CharacterCard from './pages/CharacterCard.jsx'
 
@@ -13,6 +14,7 @@ export default function App() {
       <ApiKeyProvider>
         <MenuButton />
         <ThemeToggleSwitch />
+        <DateTimeLabel fixed />
         <FontNotice />
         <main>
           <Routes>

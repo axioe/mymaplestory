@@ -6,6 +6,16 @@
   justify-content: center;
 }
 
+/* 이미지(apikey.png) 안의 점선 네모 칸 자리에 맞춘 위치 - 세로 기준 약 48% 지점 */
+.home__apikey-form--overlay {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 78%;
+  max-width: 520px;
+}
+
 .home__apikey-input {
   padding: 0.75rem 1.2rem;
   border-radius: 10px;
@@ -14,6 +24,17 @@
   color: var(--color-ink);
   width: 320px;
   font-size: 0.95rem;
+}
+
+/* 점선 칸 바로 아래, 에러/힌트 문구가 들어갈 자리 */
+.home__apikey-below {
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 420px;
+  text-align: center;
 }
 
 .home__apikey-hint {

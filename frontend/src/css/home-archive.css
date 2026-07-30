@@ -110,12 +110,6 @@
   font-weight: 800;
 }
 
-.home__result-datetime {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
 /* 이벤트/공지사항 - 제목은 위, 북마크 리본은 페이지 하단에 붙는다 */
 .home__notice-page {
   position: absolute;
@@ -208,15 +202,109 @@
   font-size: 0.95rem;
 }
 
-/* 전리품 장비 목록의 아이콘 이미지 */
-.home__equipment-icon {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background: var(--color-page);
-  border: 1px solid var(--color-line);
+/* 전리품 - 인게임 장비창처럼 생긴 그리드. 6칸(반지/얼굴장식류 | 캐릭터 |
+   방어구류)로 나누고, 캐릭터 이미지가 가운데 2칸x4행을 차지한다. */
+.home__equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 46px);
+  grid-template-rows: repeat(6, 46px);
+  grid-template-areas:
+    'ring1  forehead char     char      cap      cape'
+    'ring2  eyeacc   char     char      clothes  gloves'
+    'ring3  earacc   char     char      pants    shoes'
+    'ring4  pendant1 char     char      shoulder medal'
+    'belt   pendant2 weapon   subweapon emblem   heart'
+    'pocket .        .        .         .        badge';
+  gap: 0.35rem;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.home__equipment-grid-character {
+  grid-area: char;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--color-canvas);
+  border: 1.5px solid var(--color-line);
+  overflow: hidden;
+}
+
+.home__equipment-grid-character img {
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+}
+
+.home__equipment-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-line);
+  background: var(--color-canvas);
+  padding: 0;
+  cursor: default;
+}
+
+.home__equipment-cell--filled {
+  cursor: pointer;
+  background: var(--color-page);
+}
+
+.home__equipment-cell--filled:hover {
+  border-color: var(--color-accent);
+}
+
+.home__equipment-cell--selected {
+  border-color: var(--color-accent);
+  border-width: 2px;
+  box-shadow: 0 0 0 2px var(--color-accent) inset;
+}
+
+.home__equipment-cell img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.home__equipment-cell-label {
+  font-size: 0.5rem;
+  line-height: 1.1;
+  opacity: 0.45;
+  padding: 0 2px;
+  word-break: keep-all;
+}
+
+.home__equipment-cell-star {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--color-accent-2);
+  background: var(--color-page);
+  border-radius: 999px;
+  padding: 0 3px;
+}
+
+/* 선택한 장비 상세(스텟/잠재능력) 패널 */
+.home__equipment-detail {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-line);
+  background: var(--color-canvas);
+  text-align: left;
+}
+
+.home__equipment-detail-name {
+  margin: 0 0 0.2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 /* 개인 스킵 표시 체크박스 - 넥슨 데이터와 무관, 브라우저에만 저장됨 */
@@ -300,16 +388,6 @@
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--color-accent-2);
-}
-
-/* 장비를 클릭해서 펼쳤을 때 나오는 잠재능력 상세 */
-.home__equipment-detail {
-  width: 100%;
-  margin-top: 0.4rem;
-  padding: 0.5rem 0.7rem;
-  border-radius: 8px;
-  background: var(--color-canvas);
-  text-align: left;
 }
 
 .home__equipment-detail-slot {

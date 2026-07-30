@@ -55,6 +55,7 @@ export default function Home() {
     setApiKey,
     addCharacter,
     selectCharacter,
+    removeCharacter,
     clearSelectedCharacter,
     clearApiKey,
   } = useApiKey()
@@ -153,6 +154,7 @@ export default function Home() {
     flipTo('card')
   }
 
+  // 예전처럼 검색해서 추가하면 바로 그 캐릭터의 카드 페이지로 넘어간다.
   // 실패 시 예외를 던져서 CharacterSelectPage가 자체적으로 에러 문구를 보여주게 한다.
   const handleAddCharacter = async (name) => {
     const data = await fetchCharacterCard(name)
@@ -201,6 +203,7 @@ export default function Home() {
           maxRecentCharacters={maxRecentCharacters}
           onSelectCharacter={handleSelectCharacter}
           onAddCharacter={handleAddCharacter}
+          onRemoveCharacter={removeCharacter}
         />
       )
     }
@@ -241,6 +244,7 @@ export default function Home() {
           setEffect={setEffect}
           setEffectLoading={setEffectLoading}
           setEffectError={setEffectError}
+          characterImage={cardData?.characterImage}
         />
       )
     }
