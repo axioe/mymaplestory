@@ -78,8 +78,25 @@ export function useBookFlip(initialPage) {
     // 되는 버그가 있었다. 그래서 애니메이션 시작과 동시에 낙관적으로 먼저
     // 갱신한다 (onFlip이 나중에 와도 같은 값이라 문제 없음).
     setPage(next)
+    attemptFlip(next, nextIndex, 0)
+  }
+
+  /**
+   * 표지("시작하기")에서 다음 페이지로 넘어가는, 마운트 직후 첫 페이지 전환에서
+   * react-pageflip 내부 인스턴스가 아직 완전히 준비되기 전에 flip()이 호출되어
+   * 아예 반응이 없는 경우가 있었다(getPageFlip()이 null을 반환). 그래서 준비가
+   * 안 됐으면 조금 기다렸다가 다시 시도한다 - 최대 1초(100ms x 10회) 정도면
+   * 충분하고, 그 이후로는 이미 여러 번 써서 안정적으로 준비되어 있다.
+   */
+  const attemptFlip = (next, nextIndex, retryCount) => {
+    if (nextIndex < 0) return
     const pageFlip = getPageFlip()
-    if (nextIndex < 0 || !pageFlip) return
+    if (!pageFlip) {
+      if (retryCount < 10) {
+        setTimeout(() => attemptFlip(next, nextIndex, retryCount + 1), 100)
+      }
+      return
+    }
 
     const targetFlipIndex = contentToFlipIndex(nextIndex)
     // 목표 페이지가 몇 장 떨어져 있든 flip()은 한 번만 호출한다 - 예전에

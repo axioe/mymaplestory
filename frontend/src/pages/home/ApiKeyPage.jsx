@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTheme } from '../../ThemeContext.jsx'
 import '../../css/home-shared.css'
 import '../../css/home-apikey.css'
 
@@ -8,10 +9,13 @@ import '../../css/home-apikey.css'
  *
  * 표지처럼, 이 페이지도 배경 전체를 이미지(public/apikey.png)로 깔고 그 위에
  * 실제 입력창/버튼만 얹는다. 이미지 안의 점선 네모 칸 자리에 맞춰서 위치를 잡았다.
+ * 다크모드일 때는 밤 버전 이미지(apikey-dark.png)로 바뀐다.
  */
 const MAX_KEY_LENGTH = 200 // 넥슨 API 키는 보통 이보다 훨씬 짧다 - 이보다 길면 잘못 붙여넣은 것으로 간주
 
 export default function ApiKeyPage({ onSubmit, checking, disabled, error }) {
+  const { theme } = useTheme()
+  const coverImage = theme === 'dark' ? '/apikey-dark.png' : '/apikey.png'
   const [value, setValue] = useState('')
   const [localError, setLocalError] = useState(null)
 
@@ -36,7 +40,7 @@ export default function ApiKeyPage({ onSubmit, checking, disabled, error }) {
 
   return (
     <div className="home__cover">
-      <img src="/apikey.png" alt="NEXON API KEY" className="home__cover-image" />
+      <img src={coverImage} alt="NEXON API KEY" className="home__cover-image" />
 
       <form onSubmit={handleSubmit} className="home__apikey-form home__apikey-form--overlay">
         <input
