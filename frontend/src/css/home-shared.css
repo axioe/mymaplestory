@@ -21,7 +21,7 @@
    이미지 세로 기준 약 68% 지점 - 이미지 비율이 바뀌면 이 값만 조정하면 된다. */
 .home__cover-start {
   position: absolute;
-  top: 68%;
+  top: 71%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
@@ -73,13 +73,20 @@
 
 /* start(시작하기)와 apikey(확인) 버튼이 같이 쓰는 기본 버튼 스타일 */
 .home__apikey-submit {
-  padding: 0.75rem 2rem;
+  padding: 0.7rem 2rem;
   border-radius: 999px;
-  border: 2px solid var(--color-line);
-  background: var(--color-accent);
-  color: var(--color-page);
+  border: 2px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
   font-weight: 700;
   font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.home__apikey-submit:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-page);
 }
 
 .home__apikey-submit:disabled {

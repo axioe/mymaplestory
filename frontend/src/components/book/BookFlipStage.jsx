@@ -13,10 +13,19 @@ import '../../css/book-flip-stage.css'
  * 이미 직접 옮겨놓은 DOM 노드를 React가 지우거나 다시 끼워넣으려다가
  * "removeChild/insertBefore - not a child of this node" 에러로 충돌했다.
  * 항상 같은 Page 컴포넌트(같은 div)를 쓰고 내용/클래스만 바꾸면 이 문제가 없다.
+ *
+ * left는 "이 자리가 왼쪽 슬롯인지"를 나타낸다 - blank(내용 유무)와는 별개다.
+ * 왼쪽 슬롯은 비어있을 때도, 실제 콘텐츠(보스 선택 목록 등)가 들어있을 때도
+ * 항상 "왼쪽 페이지 배경 이미지"(제본선이 오른쪽에 그려진 이미지)를 써야
+ * 책이 자연스럽게 이어져 보인다. blank로만 구분하면 콘텐츠가 채워진 왼쪽
+ * 페이지가 오른쪽 페이지용 이미지를 잘못 쓰게 되는 문제가 있었다.
  */
-const Page = forwardRef(function Page({ children, blank = false }, ref) {
+const Page = forwardRef(function Page({ children, blank = false, left = false }, ref) {
   return (
-    <div className={'flip-page' + (blank ? ' flip-page--blank' : '')} ref={ref}>
+    <div
+      className={'flip-page' + (blank ? ' flip-page--blank' : '') + (left ? ' flip-page--left' : '')}
+      ref={ref}
+    >
       {children}
     </div>
   )
@@ -76,7 +85,7 @@ export default function BookFlipStage({
         {restKeys.flatMap((key) => {
           const leftContent = renderLeftPageContent ? renderLeftPageContent(key) : null
           return [
-            <Page key={`blank-${key}`} blank={leftContent == null}>
+            <Page key={`blank-${key}`} blank={leftContent == null} left>
               {leftContent}
             </Page>,
             <Page key={key}>{renderPageContent(key)}</Page>,

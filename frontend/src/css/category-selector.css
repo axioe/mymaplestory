@@ -1,37 +1,48 @@
 /* 뷰포트 기준 고정(position: fixed) 대신, 책 페이지(.flip-page, position:relative)
    기준 절대 위치로 붙인다. 이렇게 해야 책 크기/위치가 반응형으로 바뀌어도
-   항상 책 안의 날짜(top:0; right:0) 바로 아래에 붙어있는다. */
+   항상 책 안의 날짜(top:0; right:0) 바로 아래에 붙어있는다.
+   각 카테고리를 감싸는 박스는 없애고, 개별 버튼 하나하나가 책 오른쪽 밖으로
+   튀어나온 "책갈피 탭"처럼 보이도록 만든다 (파일 폴더 인덱스탭 느낌). */
 .category-selector {
   position: absolute;
   top: 2.6rem;
-  right: 0;
+  /* 책 페이지 오른쪽 경계 밖으로 내밀어서 "책 밖에 붙어있는" 느낌을 낸다. */
+  right: -44px;
   z-index: 45;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  background: var(--color-page);
-  border: 2px solid var(--color-line);
-  border-radius: 14px;
-  padding: 0.5rem;
-  box-shadow: var(--shadow-book);
-  max-width: 140px;
-  max-height: calc(100% - 3rem);
-  overflow-y: auto;
+  gap: 0.5rem;
 }
 
 .category-selector__item {
-  padding: 0.4rem 0.8rem;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
+  padding: 0.55rem 0.9rem 0.55rem 0.7rem;
+  /* 왼쪽(책에 붙는 쪽)은 각지게, 오른쪽만 둥글게 - 탭이 책에서 튀어나온 것처럼 */
+  border-radius: 0 10px 10px 0;
+  border: 2px solid var(--color-line);
+  border-left: none;
+  background: var(--color-page);
   color: var(--color-ink);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-align: left;
   white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 3px 3px 8px rgba(78, 52, 46, 0.18);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.category-selector__item:hover {
+  transform: translateX(4px);
 }
 
 .category-selector__item--active {
   background: var(--color-accent);
   color: var(--color-page);
+  border-color: var(--color-accent);
+  /* 선택된 탭은 더 길게 튀어나오게 해서 "지금 펼쳐진 책갈피"라는 걸 보여준다 */
+  transform: translateX(8px);
+}
+
+.category-selector__item--active:hover {
+  transform: translateX(8px);
 }

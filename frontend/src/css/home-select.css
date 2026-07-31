@@ -41,7 +41,10 @@
   padding: 0.55rem 1.1rem;
   border-radius: 14px;
   border: 2px solid var(--color-line);
-  background: var(--color-canvas);
+  /* 캔버스(약간 다른 톤)보다 페이지와 같은 색으로 맞춰서, 이제 배경에
+     단풍잎/깃펜 장식 이미지가 깔린 상태에서도 뜬금없이 도드라져 보이지
+     않고 자연스럽게 어우러지도록 한다. */
+  background: var(--color-page);
   color: var(--color-ink);
   font-weight: 700;
   font-size: 0.95rem;

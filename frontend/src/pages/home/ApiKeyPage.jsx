@@ -53,7 +53,7 @@ export default function ApiKeyPage({ onSubmit, checking, disabled, error }) {
           maxLength={MAX_KEY_LENGTH}
           disabled={checking || disabled}
         />
-        <button type="submit" className="home__apikey-submit" disabled={checking || disabled}>
+        <button type="submit" className="home__apikey-confirm" disabled={checking || disabled}>
           {checking ? '확인 중...' : '확인'}
         </button>
       </form>
