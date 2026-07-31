@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import CategorySelector from './CategorySelector.jsx'
 import EquipmentDetailPanel from './EquipmentPage.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
@@ -50,8 +49,8 @@ export default function ArchivePage({
   unionChampion,
   unionLoading,
   unionError,
+  onGoUnionDetail,
 }) {
-  const [unionSection, setUnionSection] = useState('info')
   const activeLabel = categories.find((c) => c.key === active)?.label
 
   const validBossContents = scheduler ? getValidBossContents(scheduler) : []
@@ -205,141 +204,27 @@ export default function ArchivePage({
           {unionLoading && <p>불러오는 중...</p>}
           {unionError && <p className="home__apikey-error">{unionError}</p>}
 
-          {!unionLoading && !unionError && (
+          {!unionLoading && !unionError && union && (
             <>
+              <p className="home__select-hint">
+                Lv.{union.unionLevel} · {union.unionGrade}
+              </p>
               <div className="home__scheduler-nav">
-                {[
-                  { key: 'info', label: '유니온 정보' },
-                  { key: 'raider', label: '공격대' },
-                  { key: 'artifact', label: '아티팩트' },
-                  { key: 'champion', label: '챔피언' },
-                ].map((s) => (
-                  <button
-                    key={s.key}
-                    type="button"
-                    onClick={() => setUnionSection(s.key)}
-                    className={
-                      'home__scheduler-nav-button' + (unionSection === s.key ? ' home__scheduler-nav-button--active' : '')
-                    }
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="home__union-detail">
-                {unionSection === 'info' && union && (
-                  <div className="home__level-summary">
-                    <div className="home__level-summary-row">
-                      <span className="home__level-summary-label">유니온 레벨</span>
-                      <span className="home__level-summary-value">{union.unionLevel}</span>
-                    </div>
-                    <div className="home__level-summary-row">
-                      <span className="home__level-summary-label">등급</span>
-                      <span className="home__level-summary-value">{union.unionGrade}</span>
-                    </div>
-                    <div className="home__level-summary-row">
-                      <span className="home__level-summary-label">아티팩트 레벨</span>
-                      <span className="home__level-summary-value">{union.unionArtifactLevel}</span>
-                    </div>
-                    <div className="home__level-summary-row">
-                      <span className="home__level-summary-label">아티팩트 경험치</span>
-                      <span className="home__level-summary-value">{union.unionArtifactExp}</span>
-                    </div>
-                    <div className="home__level-summary-row">
-                      <span className="home__level-summary-label">아티팩트 포인트</span>
-                      <span className="home__level-summary-value">{union.unionArtifactPoint}</span>
-                    </div>
-                  </div>
-                )}
-
-                {unionSection === 'raider' && unionRaider && (
-                  <div className="home__union-list">
-                    <p className="home__select-hint">
-                      공격대원 효과{unionRaider.maxPoint != null && ` (최대 ${unionRaider.maxPoint}pt)`}
-                    </p>
-                    {unionRaider.raiderStats?.length > 0 ? (
-                      unionRaider.raiderStats.map((stat, i) => (
-                        <p key={i} className="home__equipment-potential-line">
-                          {stat}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="home__select-hint">배치된 공격대원이 없어요.</p>
-                    )}
-                    {unionRaider.stateStats?.length > 0 && (
-                      <>
-                        <p className="home__union-subheading">유니온 상태 스탯</p>
-                        {unionRaider.stateStats.map((stat, i) => (
-                          <p key={i} className="home__equipment-potential-line">
-                            {stat}
-                          </p>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {unionSection === 'artifact' && unionArtifact && (
-                  <div className="home__union-list">
-                    <p className="home__select-hint">
-                      아티팩트 효과{unionArtifact.remainAp != null && ` (잔여 AP ${unionArtifact.remainAp})`}
-                    </p>
-                    {unionArtifact.effects?.map((e) => (
-                      <p key={e.name} className="home__equipment-potential-line">
-                        {e.name} (Lv.{e.level})
-                      </p>
-                    ))}
-                    {unionArtifact.crystals?.length > 0 && (
-                      <>
-                        <p className="home__union-subheading">크리스탈</p>
-                        {unionArtifact.crystals.map((c) => (
-                          <div key={c.name} className="home__boss-group">
-                            <p className="home__boss-group-name">
-                              {c.name} (Lv.{c.level})
-                            </p>
-                            {c.options.map((o) => (
-                              <p key={o} className="home__equipment-potential-line">
-                                {o}
-                              </p>
-                            ))}
-                          </div>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {unionSection === 'champion' && unionChampion && (
-                  <div className="home__union-list">
-                    {unionChampion.champions?.length > 0 ? (
-                      unionChampion.champions.map((c) => (
-                        <div key={c.slot} className="home__boss-group">
-                          <p className="home__boss-group-name">
-                            {c.name} · {c.className} ({c.grade})
-                          </p>
-                          {c.badges.map((b) => (
-                            <p key={b} className="home__equipment-potential-line">
-                              {b}
-                            </p>
-                          ))}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="home__select-hint">등록된 챔피언이 없어요.</p>
-                    )}
-                    {unionChampion.totalBadges?.length > 0 && (
-                      <>
-                        <p className="home__union-subheading">전체 뱃지 합계</p>
-                        {unionChampion.totalBadges.map((b) => (
-                          <p key={b} className="home__equipment-potential-line">
-                            {b}
-                          </p>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                )}
+                <button type="button" onClick={() => onGoUnionDetail('info')} className="home__scheduler-nav-button">
+                  유니온 정보
+                </button>
+                <button type="button" onClick={() => onGoUnionDetail('raider')} className="home__scheduler-nav-button">
+                  공격대
+                  <span className="home__scheduler-nav-count">{unionRaider?.raiderStats?.length ?? 0}</span>
+                </button>
+                <button type="button" onClick={() => onGoUnionDetail('artifact')} className="home__scheduler-nav-button">
+                  아티팩트
+                  <span className="home__scheduler-nav-count">{unionArtifact?.effects?.length ?? 0}</span>
+                </button>
+                <button type="button" onClick={() => onGoUnionDetail('champion')} className="home__scheduler-nav-button">
+                  챔피언
+                  <span className="home__scheduler-nav-count">{unionChampion?.champions?.length ?? 0}</span>
+                </button>
               </div>
             </>
           )}

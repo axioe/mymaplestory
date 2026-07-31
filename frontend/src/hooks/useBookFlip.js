@@ -6,7 +6,12 @@ export const PAGE_ORDER = [
   'select',
   'select-detail',
   'card',
-  'archive',
+  'archive-boss',
+  'archive-loot',
+  'archive-level',
+  'archive-union',
+  'archive-event',
+  'archive-scheduler',
   'scheduler-daily',
   'scheduler-weekly',
   'boss-daily',
@@ -14,6 +19,10 @@ export const PAGE_ORDER = [
   'boss-weekly-maple',
   'boss-weekly-arcane',
   'boss-weekly-grandis',
+  'union-info',
+  'union-raider',
+  'union-artifact',
+  'union-champion',
 ]
 
 /**

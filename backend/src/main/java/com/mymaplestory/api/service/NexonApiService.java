@@ -491,38 +491,38 @@ public class NexonApiService {
     }
 
     /**
-     * 유니온 레벨/등급/아티팩트 요약 정보. 경로: /character/union
+     * 유니온 레벨/등급/아티팩트 요약 정보. 경로: /user/union
      * (문서: https://openapi.nexon.com/ko/game/maplestory/?id=15)
      */
     public UnionResponse getUnion(String characterName, String requestApiKey) {
-        NexonUnionResponse raw = callUnionEndpoint("/character/union", characterName, requestApiKey, NexonUnionResponse.class);
+        NexonUnionResponse raw = callUnionEndpoint("/user/union", characterName, requestApiKey, NexonUnionResponse.class);
         return UnionResponse.from(raw);
     }
 
     /**
-     * 유니온 공격대원 효과/유니온 상태 스탯 정보. 경로: /character/union-raider
+     * 유니온 공격대원 효과/유니온 상태 스탯 정보. 경로: /user/union-raider
      */
     public UnionRaiderResponse getUnionRaider(String characterName, String requestApiKey) {
         NexonUnionRaiderResponse raw =
-                callUnionEndpoint("/character/union-raider", characterName, requestApiKey, NexonUnionRaiderResponse.class);
+                callUnionEndpoint("/user/union-raider", characterName, requestApiKey, NexonUnionRaiderResponse.class);
         return UnionRaiderResponse.from(raw);
     }
 
     /**
-     * 유니온 아티팩트 효과/크리스탈 정보. 경로: /character/union-artifact
+     * 유니온 아티팩트 효과/크리스탈 정보. 경로: /user/union-artifact
      */
     public UnionArtifactResponse getUnionArtifact(String characterName, String requestApiKey) {
         NexonUnionArtifactResponse raw =
-                callUnionEndpoint("/character/union-artifact", characterName, requestApiKey, NexonUnionArtifactResponse.class);
+                callUnionEndpoint("/user/union-artifact", characterName, requestApiKey, NexonUnionArtifactResponse.class);
         return UnionArtifactResponse.from(raw);
     }
 
     /**
-     * 유니온 챔피언(대표 캐릭터) 정보. 경로: /character/union-champion
+     * 유니온 챔피언(대표 캐릭터) 정보. 경로: /user/union-champion
      */
     public UnionChampionResponse getUnionChampion(String characterName, String requestApiKey) {
         NexonUnionChampionResponse raw =
-                callUnionEndpoint("/character/union-champion", characterName, requestApiKey, NexonUnionChampionResponse.class);
+                callUnionEndpoint("/user/union-champion", characterName, requestApiKey, NexonUnionChampionResponse.class);
         return UnionChampionResponse.from(raw);
     }
 

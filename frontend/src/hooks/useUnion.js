@@ -21,19 +21,29 @@ export function useUnion(enabled, characterName) {
     let cancelled = false
     setLoading(true)
     setError(null)
-    Promise.all([
-      fetchUnion(characterName),
-      fetchUnionRaider(characterName),
-      fetchUnionArtifact(characterName),
-      fetchUnionChampion(characterName),
-    ])
-      .then(([unionData, raiderData, artifactData, championData]) => {
-        if (cancelled) return
-        setUnion(unionData)
-        setRaider(raiderData)
-        setArtifact(artifactData)
-        setChampion(championData)
-      })
+
+    // 4개를 Promise.all로 한꺼번에 쏘면 넥슨 API의 초당 호출 제한에 걸려서
+    // 일부만 실패하는 문제가 있었다. 그래서 하나씩 순서대로(await) 요청한다 -
+    // 살짝 느려지지만, 안정적으로 4개 다 받아오는 게 더 중요하다.
+    async function loadAll() {
+      const unionData = await fetchUnion(characterName)
+      if (cancelled) return
+      setUnion(unionData)
+
+      const raiderData = await fetchUnionRaider(characterName)
+      if (cancelled) return
+      setRaider(raiderData)
+
+      const artifactData = await fetchUnionArtifact(characterName)
+      if (cancelled) return
+      setArtifact(artifactData)
+
+      const championData = await fetchUnionChampion(characterName)
+      if (cancelled) return
+      setChampion(championData)
+    }
+
+    loadAll()
       .catch((err) => {
         if (!cancelled) setError(describeApiError(err, '유니온 정보를 불러오지 못했습니다.'))
       })

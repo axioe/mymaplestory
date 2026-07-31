@@ -20,6 +20,7 @@ import ArchivePage from './home/ArchivePage.jsx'
 import SchedulerDetailPage from './home/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage, BossWeeklyOverviewPage } from './home/BossDetailPage.jsx'
 import { EquipmentSelectionPage } from './home/EquipmentPage.jsx'
+import UnionDetailPage from './home/UnionPage.jsx'
 import NoticeTicker from './home/NoticeTicker.jsx'
 import '../css/notice-ticker.css'
 
@@ -40,9 +41,11 @@ const CATEGORIES = [
 
 /**
  * 전체 흐름을 "책 페이지를 넘기는" 하나의 동작으로 통일한다.
- * 페이지 순서: start(표지) -> apikey(키 입력) -> select(캐릭터 선택) -> card(캐릭터 카드) -> archive(아카이브)
- * 아카이브도 이제 같은 플립 시스템의 한 페이지라서, 캐릭터 선택부터 이어지는 디자인/전환이
- * 그대로 유지된다 (예전엔 별도 레이아웃으로 분리되어 있었음).
+ * 페이지 순서: start(표지) -> apikey(키 입력) -> select(캐릭터 선택) -> card(캐릭터 카드) -> archive-*(카테고리별 아카이브)
+ * 예전엔 카테고리(보스/장비/레벨/유니온/이벤트/스케줄러)를 하나의 'archive' 페이지 안에서
+ * active 상태로만 전환했는데(페이지 넘김 애니메이션 없이 내용만 바뀜), 카테고리를 바꿀 때도
+ * 진짜 책장이 넘어가는 느낌을 원해서 카테고리마다 실제 페이지(archive-boss, archive-loot 등)로
+ * 분리했다. CategorySelector를 누르면 이제 flipTo('archive-' + key)로 실제 전환된다.
  * 실제 애니메이션/레이아웃은 각 하위 컴포넌트(components/book, pages/home/*)로 분리되어 있고,
  * 이 파일은 그 조각들을 연결하는 오케스트레이션만 담당한다.
  */
@@ -68,7 +71,6 @@ export default function Home() {
   const [checking, setChecking] = useState(false)
   const [keyError, setKeyError] = useState(null)
 
-  const [active, setActive] = useState('boss')
   // 캐릭터 선택 - 어느 서버(월드)를 골랐는지. select-detail 페이지가 이 값으로
   // 그 서버의 캐릭터만 걸러서 보여준다.
   const [selectedWorld, setSelectedWorld] = useState(null)
@@ -81,37 +83,36 @@ export default function Home() {
     // 저장된 예전 selectedCharacter 값 때문에 백그라운드에서 몰래 카드 조회가
     // 나가서(그 시점엔 키가 없어 API_KEY_REQUIRED로 실패) 버그가 있었다.
     // 실제로 카드/아카이브 화면을 보고 있을 때만 조회하도록 조건을 추가했다.
-    hasSelectedCharacter && (page === 'card' || page === 'archive'),
+    hasSelectedCharacter && (page === 'card' || page.startsWith('archive-')),
     selectedCharacter
   )
   const { levelHistory, loading: levelHistoryLoading, error: levelHistoryError } = useLevelHistory(
-    page === 'archive' && active === 'level' && hasSelectedCharacter,
+    page === 'archive-level' && hasSelectedCharacter,
     selectedCharacter
   )
   // 이벤트: "이벤트" 카테고리를 선택했을 때만 조회
   const { notices: eventNotices, loading: eventNoticesLoading, error: eventNoticesError } = useNotices(
-    page === 'archive' && active === 'event',
+    page === 'archive-event',
     'event'
   )
-  // 공지사항: 카테고리 선택과 무관하게, 아카이브 페이지에 들어오면 항상 하단 티커용으로 조회
+  // 공지사항: 카테고리 선택과 무관하게, 아카이브 계열 페이지에 들어오면 항상 하단 티커용으로 조회
   const { notices: footerNotices, loading: footerNoticesLoading, error: footerNoticesError } = useNotices(
-    page === 'archive',
+    page.startsWith('archive-'),
     'notice'
   )
   const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
     // "스케줄러"/"보스" 카테고리와 그 상세 페이지들은 전부 같은 API(scheduler
     // 응답)를 재사용한다.
-    (page === 'archive' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
-      (active === 'scheduler' || active === 'boss' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
+    (page === 'archive-scheduler' || page === 'archive-boss' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
       hasSelectedCharacter,
     selectedCharacter
   )
   // 장비: "장비" 카테고리를 선택했을 때만 조회
   const { equipment, loading: equipmentLoading, error: equipmentError } = useEquipment(
-    page === 'archive' && active === 'loot' && hasSelectedCharacter,
+    page === 'archive-loot' && hasSelectedCharacter,
     selectedCharacter
   )
-  // 유니온: "유니온" 카테고리를 선택했을 때만 4종(정보/공격대/아티팩트/챔피언) 조회
+  // 유니온: "유니온" 카테고리 개요 + 4개 상세 페이지 전부에서 필요해서 조건에 같이 포함한다.
   const {
     union,
     raider: unionRaider,
@@ -119,7 +120,10 @@ export default function Home() {
     champion: unionChampion,
     loading: unionLoading,
     error: unionError,
-  } = useUnion(page === 'archive' && active === 'union' && hasSelectedCharacter, selectedCharacter)
+  } = useUnion(
+    (page === 'archive-union' || page.startsWith('union-')) && hasSelectedCharacter,
+    selectedCharacter
+  )
   // 보스 선택(난이도/인원수)은 아카이브 페이지(개요)와 boss-daily/weekly/monthly
   // 페이지가 동시에 마운트되어 있는 상태(react-pageflip은 모든 페이지를 항상
   // DOM에 갖고 있음)라, 각자 따로 훅을 부르면 상태가 서로 안 맞을 수 있다.
@@ -189,6 +193,9 @@ export default function Home() {
     jumpTo('select')
   }
 
+  // 카테고리 버튼(보스/장비/레벨/유니온/이벤트/스케줄러)을 누르면 실제 책 페이지로 넘어간다.
+  const handleSelectCategory = (key) => flipTo(`archive-${key}`)
+
   // 보스 개요(아카이브 안)에서 일일/주간/월간 버튼을 누르면, 진짜 책 페이지로
   // 실제 책장 넘김이 일어난다.
   const handleGoBossDetail = (cycle) => flipTo(`boss-${cycle}`)
@@ -198,6 +205,9 @@ export default function Home() {
 
   // 스케줄러 개요에서 일일/주간 버튼을 누르면 마찬가지로 진짜 책 페이지로 넘어간다.
   const handleGoSchedulerDetail = (cycle) => flipTo(`scheduler-${cycle}`)
+
+  // 유니온 개요에서 정보/공격대/아티팩트/챔피언 버튼을 누르면 진짜 책 페이지로 넘어간다.
+  const handleGoUnionDetail = (kind) => flipTo(`union-${kind}`)
 
   function renderPageContent(p) {
     if (p === 'start') return <StartPage onStart={handleStart} disabled={false} />
@@ -237,18 +247,19 @@ export default function Home() {
           cardData={cardData}
           loading={cardLoading}
           error={cardError}
-          onGoArchive={() => flipTo('archive')}
+          onGoArchive={() => flipTo('archive-boss')}
           onBackToSelect={handleBackToSelect}
           onReset={handleReset}
         />
       )
     }
-    if (p === 'archive') {
+    if (p.startsWith('archive-')) {
+      const category = p.replace('archive-', '')
       return (
         <ArchivePage
           categories={CATEGORIES}
-          active={active}
-          onSelectCategory={setActive}
+          active={category}
+          onSelectCategory={handleSelectCategory}
           onBack={() => flipTo('card')}
           levelHistory={levelHistory}
           levelHistoryLoading={levelHistoryLoading}
@@ -273,6 +284,7 @@ export default function Home() {
           unionChampion={unionChampion}
           unionLoading={unionLoading}
           unionError={unionError}
+          onGoUnionDetail={handleGoUnionDetail}
         />
       )
     }
@@ -282,7 +294,7 @@ export default function Home() {
         <SchedulerDetailPage
           cycle={cycle}
           scheduler={scheduler}
-          onBack={() => flipTo('archive')}
+          onBack={() => flipTo('archive-scheduler')}
         />
       )
     }
@@ -292,7 +304,7 @@ export default function Home() {
           pageKind="daily"
           scheduler={scheduler}
           bossSelection={bossSelection}
-          onBack={() => flipTo('archive')}
+          onBack={() => flipTo('archive-boss')}
         />
       )
     }
@@ -302,7 +314,7 @@ export default function Home() {
           scheduler={scheduler}
           bossSelection={bossSelection}
           onNavigateRegion={handleGoBossRegion}
-          onBack={() => flipTo('archive')}
+          onBack={() => flipTo('archive-boss')}
         />
       )
     }
@@ -315,6 +327,19 @@ export default function Home() {
           bossSelection={bossSelection}
           onBack={() => flipTo('boss-weekly')}
           backLabel="← 주간 보스로"
+        />
+      )
+    }
+    if (p === 'union-info' || p === 'union-raider' || p === 'union-artifact' || p === 'union-champion') {
+      const kind = p.replace('union-', '')
+      return (
+        <UnionDetailPage
+          pageKind={kind}
+          union={union}
+          unionRaider={unionRaider}
+          unionArtifact={unionArtifact}
+          unionChampion={unionChampion}
+          onBack={() => flipTo('archive-union')}
         />
       )
     }
@@ -332,7 +357,7 @@ export default function Home() {
       const regionKey = p.replace('boss-weekly-', '')
       return <BossSelectionPage pageKind={regionKey} scheduler={scheduler} bossSelection={bossSelection} />
     }
-    if (p === 'archive' && active === 'loot') {
+    if (p === 'archive-loot') {
       return (
         <EquipmentSelectionPage
           equipment={equipment}
@@ -349,11 +374,11 @@ export default function Home() {
 
   return (
     <section className="home">
-      {/* 책 바로 위 - 아카이브를 보고 있을 때만 뜨는 공지사항 티커.
+      {/* 책 바로 위 - 아카이브 계열 페이지를 보고 있을 때만 뜨는 공지사항 티커.
           책 안에 두면 다른 콘텐츠(북마크, 스케줄러 목록 등)와 겹쳐 보이는
           문제가 있어서 밖으로 뺐고, 책과 같은 그룹으로 묶어서 화면 가운데
           위쪽에 위치하도록 했다. */}
-      {page === 'archive' && (
+      {page.startsWith('archive-') && (
         <div className="home__footer-ticker-outside">
           {footerNoticesLoading && <p className="home__select-hint">공지 불러오는 중...</p>}
           {footerNoticesError && <p className="home__apikey-error">{footerNoticesError}</p>}
