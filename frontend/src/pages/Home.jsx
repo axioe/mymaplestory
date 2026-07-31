@@ -9,6 +9,7 @@ import { useLevelHistory } from '../hooks/useLevelHistory.js'
 import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
 import { useEquipment } from '../hooks/useEquipment.js'
+import { useUnion } from '../hooks/useUnion.js'
 import { useBossSelection } from '../hooks/useBossSelection.js'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
@@ -26,7 +27,7 @@ const CATEGORIES = [
   { key: 'boss', label: '보스' },
   { key: 'loot', label: '장비' },
   { key: 'level', label: '레벨' },
-  { key: 'story', label: '스토리' },
+  { key: 'union', label: '유니온' },
   { key: 'event', label: '이벤트' },
   // 공지사항은 카테고리로 따로 안 두고, 아카이브 페이지 하단에 항상 떠 있는
   // 티커 바(NoticeTicker)로 옮겼다 - 카테고리로도 있으면 중복이라 삭제함.
@@ -110,6 +111,15 @@ export default function Home() {
     page === 'archive' && active === 'loot' && hasSelectedCharacter,
     selectedCharacter
   )
+  // 유니온: "유니온" 카테고리를 선택했을 때만 4종(정보/공격대/아티팩트/챔피언) 조회
+  const {
+    union,
+    raider: unionRaider,
+    artifact: unionArtifact,
+    champion: unionChampion,
+    loading: unionLoading,
+    error: unionError,
+  } = useUnion(page === 'archive' && active === 'union' && hasSelectedCharacter, selectedCharacter)
   // 보스 선택(난이도/인원수)은 아카이브 페이지(개요)와 boss-daily/weekly/monthly
   // 페이지가 동시에 마운트되어 있는 상태(react-pageflip은 모든 페이지를 항상
   // DOM에 갖고 있음)라, 각자 따로 훅을 부르면 상태가 서로 안 맞을 수 있다.
@@ -257,6 +267,12 @@ export default function Home() {
           equipmentError={equipmentError}
           selectedPreset={selectedEquipmentPreset}
           selectedSlot={selectedEquipmentSlot}
+          union={union}
+          unionRaider={unionRaider}
+          unionArtifact={unionArtifact}
+          unionChampion={unionChampion}
+          unionLoading={unionLoading}
+          unionError={unionError}
         />
       )
     }

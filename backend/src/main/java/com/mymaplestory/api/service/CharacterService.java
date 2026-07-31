@@ -7,6 +7,10 @@ import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
 import com.mymaplestory.api.dto.SetEffectResponse;
+import com.mymaplestory.api.dto.UnionArtifactResponse;
+import com.mymaplestory.api.dto.UnionChampionResponse;
+import com.mymaplestory.api.dto.UnionRaiderResponse;
+import com.mymaplestory.api.dto.UnionResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,5 +59,24 @@ public class CharacterService {
      */
     public SetEffectResponse getSetEffect(String characterName, String apiKey) {
         return nexonApiService.getSetEffect(characterName, apiKey);
+    }
+
+    /**
+     * 아카이브 - 유니온 카테고리용 4종 조회 (기본 정보/공격대/아티팩트/챔피언).
+     */
+    public UnionResponse getUnion(String characterName, String apiKey) {
+        return nexonApiService.getUnion(characterName, apiKey);
+    }
+
+    public UnionRaiderResponse getUnionRaider(String characterName, String apiKey) {
+        return nexonApiService.getUnionRaider(characterName, apiKey);
+    }
+
+    public UnionArtifactResponse getUnionArtifact(String characterName, String apiKey) {
+        return nexonApiService.getUnionArtifact(characterName, apiKey);
+    }
+
+    public UnionChampionResponse getUnionChampion(String characterName, String apiKey) {
+        return nexonApiService.getUnionChampion(characterName, apiKey);
     }
 }

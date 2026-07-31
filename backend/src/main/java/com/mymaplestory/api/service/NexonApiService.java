@@ -20,11 +20,19 @@ import com.mymaplestory.api.dto.NexonNoticeItem;
 import com.mymaplestory.api.dto.NexonNoticeListResponse;
 import com.mymaplestory.api.dto.NexonSchedulerResponse;
 import com.mymaplestory.api.dto.NexonSetEffectResponse;
+import com.mymaplestory.api.dto.NexonUnionArtifactResponse;
+import com.mymaplestory.api.dto.NexonUnionChampionResponse;
+import com.mymaplestory.api.dto.NexonUnionRaiderResponse;
+import com.mymaplestory.api.dto.NexonUnionResponse;
 import com.mymaplestory.api.dto.NoticeItem;
 import com.mymaplestory.api.dto.OcidResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
 import com.mymaplestory.api.dto.SetEffectItem;
 import com.mymaplestory.api.dto.SetEffectResponse;
+import com.mymaplestory.api.dto.UnionArtifactResponse;
+import com.mymaplestory.api.dto.UnionChampionResponse;
+import com.mymaplestory.api.dto.UnionRaiderResponse;
+import com.mymaplestory.api.dto.UnionResponse;
 import com.mymaplestory.api.exception.ApiKeyRequiredException;
 import com.mymaplestory.api.exception.InvalidApiKeyException;
 import com.mymaplestory.api.exception.NexonApiException;
@@ -479,6 +487,62 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (character/list): " + e.getStatusCode(), e);
+        }
+    }
+
+    /**
+     * 유니온 레벨/등급/아티팩트 요약 정보. 경로: /character/union
+     * (문서: https://openapi.nexon.com/ko/game/maplestory/?id=15)
+     */
+    public UnionResponse getUnion(String characterName, String requestApiKey) {
+        NexonUnionResponse raw = callUnionEndpoint("/character/union", characterName, requestApiKey, NexonUnionResponse.class);
+        return UnionResponse.from(raw);
+    }
+
+    /**
+     * 유니온 공격대원 효과/유니온 상태 스탯 정보. 경로: /character/union-raider
+     */
+    public UnionRaiderResponse getUnionRaider(String characterName, String requestApiKey) {
+        NexonUnionRaiderResponse raw =
+                callUnionEndpoint("/character/union-raider", characterName, requestApiKey, NexonUnionRaiderResponse.class);
+        return UnionRaiderResponse.from(raw);
+    }
+
+    /**
+     * 유니온 아티팩트 효과/크리스탈 정보. 경로: /character/union-artifact
+     */
+    public UnionArtifactResponse getUnionArtifact(String characterName, String requestApiKey) {
+        NexonUnionArtifactResponse raw =
+                callUnionEndpoint("/character/union-artifact", characterName, requestApiKey, NexonUnionArtifactResponse.class);
+        return UnionArtifactResponse.from(raw);
+    }
+
+    /**
+     * 유니온 챔피언(대표 캐릭터) 정보. 경로: /character/union-champion
+     */
+    public UnionChampionResponse getUnionChampion(String characterName, String requestApiKey) {
+        NexonUnionChampionResponse raw =
+                callUnionEndpoint("/character/union-champion", characterName, requestApiKey, NexonUnionChampionResponse.class);
+        return UnionChampionResponse.from(raw);
+    }
+
+    /**
+     * 유니온 관련 4개 엔드포인트가 전부 "ocid 하나만 필요, path만 다름" 패턴이라 공통으로 뺐다.
+     */
+    private <T> T callUnionEndpoint(String path, String characterName, String requestApiKey, Class<T> responseType) {
+        String apiKey = resolveApiKey(requestApiKey);
+        String ocid = getOcid(characterName, requestApiKey);
+        try {
+            return nexonRestClient.get()
+                    .uri(uriBuilder -> uriBuilder.path(path).queryParam("ocid", ocid).build())
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(responseType);
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (" + path + "): " + e.getStatusCode(), e);
         }
     }
 }

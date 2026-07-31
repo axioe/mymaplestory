@@ -5,6 +5,10 @@ import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
 import com.mymaplestory.api.dto.SetEffectResponse;
+import com.mymaplestory.api.dto.UnionArtifactResponse;
+import com.mymaplestory.api.dto.UnionChampionResponse;
+import com.mymaplestory.api.dto.UnionRaiderResponse;
+import com.mymaplestory.api.dto.UnionResponse;
 import com.mymaplestory.api.service.CharacterService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -89,5 +93,53 @@ public class CharacterController {
             @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
     ) {
         return characterService.getSetEffect(characterName, apiKey);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/union
+     * 유니온 레벨/등급/아티팩트 요약 (문서: https://openapi.nexon.com/ko/game/maplestory/?id=15).
+     */
+    @GetMapping("/{characterName}/union")
+    public UnionResponse getUnion(
+            @PathVariable String characterName,
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return characterService.getUnion(characterName, apiKey);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/union-raider
+     * 유니온 공격대원 효과 / 유니온 상태 스탯.
+     */
+    @GetMapping("/{characterName}/union-raider")
+    public UnionRaiderResponse getUnionRaider(
+            @PathVariable String characterName,
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return characterService.getUnionRaider(characterName, apiKey);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/union-artifact
+     * 유니온 아티팩트 효과 / 크리스탈.
+     */
+    @GetMapping("/{characterName}/union-artifact")
+    public UnionArtifactResponse getUnionArtifact(
+            @PathVariable String characterName,
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return characterService.getUnionArtifact(characterName, apiKey);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/union-champion
+     * 유니온 챔피언(대표 캐릭터) 목록.
+     */
+    @GetMapping("/{characterName}/union-champion")
+    public UnionChampionResponse getUnionChampion(
+            @PathVariable String characterName,
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return characterService.getUnionChampion(characterName, apiKey);
     }
 }

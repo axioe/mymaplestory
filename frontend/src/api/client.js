@@ -57,6 +57,26 @@ export async function fetchSetEffect(characterName) {
   return data
 }
 
+export async function fetchUnion(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/union`)
+  return data
+}
+
+export async function fetchUnionRaider(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/union-raider`)
+  return data
+}
+
+export async function fetchUnionArtifact(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/union-artifact`)
+  return data
+}
+
+export async function fetchUnionChampion(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/union-champion`)
+  return data
+}
+
 // ---- 보스 선택 (DB 저장) ----
 export async function fetchBossSelections(characterName) {
   const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/boss-selections`)
