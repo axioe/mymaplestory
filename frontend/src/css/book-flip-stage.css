@@ -27,7 +27,11 @@
    이게 없으면 책이 최소 크기로 쪼그라드는 문제가 있었다. */
 .book-flip-wrapper {
   width: 100%;
-  max-width: 920px;
+  /* BookFlipStage.jsx의 HTMLFlipBook maxWidth와 반드시 같은 값이어야 한다 -
+     카테고리 탭(.category-selector)이 이 wrapper의 오른쪽 끝을 기준으로
+     붙는데, wrapper 너비가 책의 실제 렌더링 너비와 달라지면 탭이 책
+     모서리에서 떨어지거나 어긋나 보인다. */
+  max-width: 1200px;
   display: flex;
   justify-content: center;
   position: relative;

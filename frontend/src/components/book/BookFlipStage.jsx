@@ -71,13 +71,13 @@ export default function BookFlipStage({
       {overlay}
       <HTMLFlipBook
         ref={flipBookRef}
-        width={750}
-        height={680}
+        width={960}
+        height={864}
         size="stretch"
-        minWidth={300}
-        maxWidth={920}
-        minHeight={450}
-        maxHeight={820}
+        minWidth={384}
+        maxWidth={1200}
+        minHeight={576}
+        maxHeight={1056}
         showCover={true}
         usePortrait={true}
         maxShadowOpacity={0.35}
