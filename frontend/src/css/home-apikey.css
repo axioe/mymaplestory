@@ -6,16 +6,15 @@
   justify-content: center;
 }
 
-/* 이미지(apikey.png) 안의 점선 네모 칸 자리에 맞춘 위치 - 세로 기준 약 48% 지점.
-   버튼까지 합친 너비가 점선 칸 밖으로 삐져나오지 않도록 폭을 살짝 좁히고,
-   점선 칸 안에서 중심이 맞도록 위치를 조정했다. */
+/* 이미지(apikey.png) 안의 점선 네모 칸 자리 - 픽셀 분석으로 실측한 값
+   (세로 중심 약 51%, 가로 중심 약 46%, 칸 너비 약 71%). */
 .home__apikey-form--overlay {
   position: absolute;
-  top: 48%;
-  left: 54%;
+  top: 51%;
+  left: 46%;
   transform: translate(-50%, -50%);
-  width: 56%;
-  max-width: 360px;
+  width: 62%;
+  max-width: 380px;
 }
 
 /* 흰 박스로 따로 떠 보이지 않고, 점선 칸 안에 그대로 스며들도록 배경/테두리를
@@ -69,10 +68,11 @@
   cursor: default;
 }
 
-/* 점선 칸 바로 아래, 에러/힌트 문구가 들어갈 자리 */
+/* 점선 칸 바로 아래, 에러/힌트 문구가 들어갈 자리 - 칸 하단(약 57%)보다
+   여유 있게 아래로 뒀다. */
 .home__apikey-below {
   position: absolute;
-  top: 58%;
+  top: 62%;
   left: 50%;
   transform: translateX(-50%);
   width: 80%;

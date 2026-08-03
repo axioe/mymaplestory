@@ -4,7 +4,9 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem 1rem;
+  /* 오른쪽에 책갈피 탭(카테고리)이 책 밖으로 튀어나오는 만큼 여백을 더
+     넉넉하게 잡아둔다 - 그래야 좁은 화면에서도 화면 경계에 잘리지 않는다. */
+  padding: 2rem 6rem 2rem 1rem;
   gap: 1rem;
   /* 책 뒤에 깔리는 은은한 배경 - 채도/대비가 낮아서 책 자체를 가리지 않는다.
      화면 전체를 채우되(cover) 찌그러지지 않게 하고, 스크롤해도 배경이
@@ -25,8 +27,10 @@
    이게 없으면 책이 최소 크기로 쪼그라드는 문제가 있었다. */
 .book-flip-wrapper {
   width: 100%;
+  max-width: 920px;
   display: flex;
   justify-content: center;
+  position: relative;
 }
 
 /* react-pageflip이 만드는 바깥 래퍼 - 우리가 직접 크기를 잡진 않고

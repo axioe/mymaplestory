@@ -17,6 +17,7 @@ import ApiKeyPage from './home/ApiKeyPage.jsx'
 import CharacterSelectPage, { CharacterWorldDetailPage } from './home/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
+import CategorySelector from './home/CategorySelector.jsx'
 import SchedulerDetailPage from './home/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage, BossWeeklyOverviewPage } from './home/BossDetailPage.jsx'
 import { EquipmentSelectionPage } from './home/EquipmentPage.jsx'
@@ -395,6 +396,15 @@ export default function Home() {
         onFlip={handleFlip}
         renderPageContent={renderPageContent}
         renderLeftPageContent={renderLeftPageContent}
+        overlay={
+          page.startsWith('archive-') && (
+            <CategorySelector
+              categories={CATEGORIES}
+              active={page.replace('archive-', '')}
+              onSelectCategory={handleSelectCategory}
+            />
+          )
+        }
       />
     </section>
   )

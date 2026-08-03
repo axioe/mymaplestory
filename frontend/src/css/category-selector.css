@@ -1,13 +1,11 @@
-/* 뷰포트 기준 고정(position: fixed) 대신, 책 페이지(.flip-page, position:relative)
-   기준 절대 위치로 붙인다. 이렇게 해야 책 크기/위치가 반응형으로 바뀌어도
-   항상 책 안의 날짜(top:0; right:0) 바로 아래에 붙어있는다.
-   각 카테고리를 감싸는 박스는 없애고, 개별 버튼 하나하나가 책 오른쪽 밖으로
-   튀어나온 "책갈피 탭"처럼 보이도록 만든다 (파일 폴더 인덱스탭 느낌). */
+/* .book-flip-wrapper(overflow 제한 없는 책 바깥 레이어) 기준 절대 위치.
+   책 페이지(.flip-page)는 overflow: hidden이라 그 안에 두면 책 밖으로
+   튀어나오는 요소가 잘려 보였는데, 여기서는 그 문제가 없어서 진짜로
+   책 오른쪽 바깥에 튀어나오게 만들 수 있다. */
 .category-selector {
   position: absolute;
   top: 2.6rem;
-  /* 책 페이지 오른쪽 경계 밖으로 내밀어서 "책 밖에 붙어있는" 느낌을 낸다. */
-  right: -44px;
+  right: -76px;
   z-index: 45;
   display: flex;
   flex-direction: column;
@@ -28,7 +26,7 @@
   text-align: left;
   cursor: pointer;
   box-shadow: 3px 3px 8px rgba(78, 52, 46, 0.18);
-  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
 .category-selector__item:hover {
@@ -39,10 +37,5 @@
   background: var(--color-accent);
   color: var(--color-page);
   border-color: var(--color-accent);
-  /* 선택된 탭은 더 길게 튀어나오게 해서 "지금 펼쳐진 책갈피"라는 걸 보여준다 */
-  transform: translateX(8px);
-}
-
-.category-selector__item--active:hover {
-  transform: translateX(8px);
+  transform: translateX(6px);
 }

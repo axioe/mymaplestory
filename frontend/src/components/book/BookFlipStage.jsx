@@ -58,20 +58,26 @@ export default function BookFlipStage({
   onFlip,
   renderPageContent,
   renderLeftPageContent,
+  overlay,
 }) {
   const [coverKey, ...restKeys] = pageKeys
 
   return (
     <div className="book-flip-wrapper">
+      {/* .flip-page는 overflow: hidden이라 그 안에 넣으면 카테고리 탭처럼 책
+          바깥으로 튀어나오는 요소가 잘려 보였다. 여기(.book-flip-wrapper,
+          overflow 제한 없음)에 형제로 렌더링해서, 책의 실제 렌더링 크기
+          기준으로 밖으로 자연스럽게 튀어나올 수 있게 한다. */}
+      {overlay}
       <HTMLFlipBook
         ref={flipBookRef}
-        width={800}
-        height={720}
+        width={750}
+        height={680}
         size="stretch"
-        minWidth={320}
-        maxWidth={1000}
-        minHeight={480}
-        maxHeight={880}
+        minWidth={300}
+        maxWidth={920}
+        minHeight={450}
+        maxHeight={820}
         showCover={true}
         usePortrait={true}
         maxShadowOpacity={0.35}

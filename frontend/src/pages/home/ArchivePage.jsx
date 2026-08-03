@@ -1,4 +1,3 @@
-import CategorySelector from './CategorySelector.jsx'
 import EquipmentDetailPanel from './EquipmentPage.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import '../../css/home-shared.css'
@@ -10,8 +9,10 @@ import '../../css/home-archive.css'
  * 만들지 않는다 - 다른 페이지(ApiKeyPage, CharacterSelectPage 등)와 완전히
  * 같은 방식이라 캐릭터 선택부터 이어지는 디자인이 자연스럽게 유지된다.
  *
- * 카테고리 선택 UI는 홈/다크모드 버튼 바로 아래 고정되는 CategorySelector로 뺐다
- * (예전의 큰 캡슐형 옆 패널 대신).
+ * 카테고리 선택 UI(CategorySelector)는 더 이상 여기서 렌더링하지 않는다 -
+ * .flip-page(overflow: hidden)의 자식이면 책갈피 탭이 책 밖으로 튀어나올 때
+ * 잘려 보이는 문제가 있어서, Home.jsx가 책 바깥(.book-flip-wrapper)에
+ * 별도로 렌더링하도록 옮겼다.
  *
  * 공지사항 티커는 여기 없다 - 화면 상단에 별도로 떠 있도록 Home.jsx에서 렌더링한다.
  *
@@ -60,8 +61,6 @@ export default function ArchivePage({
 
   return (
     <>
-      <CategorySelector categories={categories} active={active} onSelectCategory={onSelectCategory} />
-
       {active === 'level' ? (
         <div className="home__level-content">
           <h2 className="display home__select-title">레벨 진척도</h2>
