@@ -10,7 +10,7 @@ import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
 import { useEquipment } from '../hooks/useEquipment.js'
 import { useUnion } from '../hooks/useUnion.js'
-import { useBossSelection } from '../hooks/useBossSelection.js'
+import { BossSelectionProvider } from '../context/BossSelectionContext.jsx'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/ApiKeyPage.jsx'
@@ -130,11 +130,13 @@ export default function Home() {
     (page === 'archive-union' || page.startsWith('union-')) && hasSelectedCharacter,
     selectedCharacter
   )
-  // 보스 선택(난이도/인원수)은 아카이브 페이지(개요)와 boss-daily/weekly/monthly
-  // 페이지가 동시에 마운트되어 있는 상태(react-pageflip은 모든 페이지를 항상
-  // DOM에 갖고 있음)라, 각자 따로 훅을 부르면 상태가 서로 안 맞을 수 있다.
-  // 그래서 여기 딱 한 번만 불러서 두 군데 다 똑같은 값을 내려준다.
-  const bossSelection = useBossSelection(selectedCharacter)
+  // 보스 선택(난이도/인원수) 상태는 이제 Home.jsx가 직접 들고 있지 않고
+  // BossSelectionProvider(Context)가 대신 들고 있는다. react-pageflip은 모든
+  // 페이지를 항상 DOM에 갖고 있어서(book-flip 구조), 예전처럼 Home.jsx가 이
+  // 상태를 직접 들고 있으면 체크박스 하나 누를 때마다 Home.jsx 전체가 다시
+  // 렌더링되고, 그 여파로 책 전체(모든 페이지)가 다시 그려지면서 스크롤
+  // 위치가 맨 위로 튀는 문제가 있었다. 아래 return문에서 책 전체를
+  // <BossSelectionProvider>로 감싸는 것으로 대체했다.
 
   // 장비 - 왼쪽(선택 그리드)과 오른쪽(상세 패널) 페이지가 서로 다른 컴포넌트라서
   // 상태를 여기(Home.jsx)에서 들고 있어야 양쪽이 같은 선택을 보게 된다.
@@ -277,7 +279,6 @@ export default function Home() {
           schedulerLoading={schedulerLoading}
           schedulerError={schedulerError}
           onGoSchedulerDetail={handleGoSchedulerDetail}
-          bossSelection={bossSelection}
           onGoBossDetail={handleGoBossDetail}
           equipment={equipment}
           equipmentLoading={equipmentLoading}
@@ -309,7 +310,6 @@ export default function Home() {
         <BossDetailPage
           pageKind="daily"
           scheduler={scheduler}
-          bossSelection={bossSelection}
           onBack={() => flipTo('archive-boss')}
         />
       )
@@ -318,7 +318,6 @@ export default function Home() {
       return (
         <BossWeeklyOverviewPage
           scheduler={scheduler}
-          bossSelection={bossSelection}
           onNavigateRegion={handleGoBossRegion}
           onBack={() => flipTo('archive-boss')}
         />
@@ -330,7 +329,6 @@ export default function Home() {
         <BossDetailPage
           pageKind={regionKey}
           scheduler={scheduler}
-          bossSelection={bossSelection}
           onBack={() => flipTo('boss-weekly')}
           backLabel="← 주간 보스로"
         />
@@ -359,11 +357,11 @@ export default function Home() {
       return <ApiKeyLeftPage />
     }
     if (p === 'boss-daily') {
-      return <BossSelectionPage pageKind="daily" scheduler={scheduler} bossSelection={bossSelection} />
+      return <BossSelectionPage pageKind="daily" scheduler={scheduler} />
     }
     if (p === 'boss-weekly-maple' || p === 'boss-weekly-arcane' || p === 'boss-weekly-grandis') {
       const regionKey = p.replace('boss-weekly-', '')
-      return <BossSelectionPage pageKind={regionKey} scheduler={scheduler} bossSelection={bossSelection} />
+      return <BossSelectionPage pageKind={regionKey} scheduler={scheduler} />
     }
     if (p === 'archive-loot') {
       return (
@@ -393,39 +391,41 @@ export default function Home() {
   }
 
   return (
-    <section className="home">
-      {/* 책 바로 위 - 아카이브 계열 페이지를 보고 있을 때만 뜨는 공지사항 티커.
-          책 안에 두면 다른 콘텐츠(북마크, 스케줄러 목록 등)와 겹쳐 보이는
-          문제가 있어서 밖으로 뺐고, 책과 같은 그룹으로 묶어서 화면 가운데
-          위쪽에 위치하도록 했다. */}
-      {page.startsWith('archive-') && (
-        <div className="home__footer-ticker-outside">
-          {footerNoticesLoading && <p className="home__select-hint">공지 불러오는 중...</p>}
-          {footerNoticesError && <p className="home__apikey-error">{footerNoticesError}</p>}
-          {!footerNoticesLoading && !footerNoticesError && footerNotices && (
-            <NoticeTicker items={footerNotices} intervalMs={6000} />
-          )}
-        </div>
-      )}
+    <BossSelectionProvider characterName={selectedCharacter}>
+      <section className="home">
+        {/* 책 바로 위 - 아카이브 계열 페이지를 보고 있을 때만 뜨는 공지사항 티커.
+            책 안에 두면 다른 콘텐츠(북마크, 스케줄러 목록 등)와 겹쳐 보이는
+            문제가 있어서 밖으로 뺐고, 책과 같은 그룹으로 묶어서 화면 가운데
+            위쪽에 위치하도록 했다. */}
+        {page.startsWith('archive-') && (
+          <div className="home__footer-ticker-outside">
+            {footerNoticesLoading && <p className="home__select-hint">공지 불러오는 중...</p>}
+            {footerNoticesError && <p className="home__apikey-error">{footerNoticesError}</p>}
+            {!footerNoticesLoading && !footerNoticesError && footerNotices && (
+              <NoticeTicker items={footerNotices} intervalMs={6000} />
+            )}
+          </div>
+        )}
 
-      <BookFlipStage
-        pageKeys={PAGE_ORDER}
-        flipBookRef={flipBookRef}
-        startFlipIndex={startFlipIndex}
-        onFlip={handleFlip}
-        renderPageContent={renderPageContent}
-        renderLeftPageContent={renderLeftPageContent}
-        coverOnly={page === 'start'}
-        overlay={
-          page.startsWith('archive-') && (
-            <CategorySelector
-              categories={CATEGORIES}
-              active={page.replace('archive-', '')}
-              onSelectCategory={handleSelectCategory}
-            />
-          )
-        }
-      />
-    </section>
+        <BookFlipStage
+          pageKeys={PAGE_ORDER}
+          flipBookRef={flipBookRef}
+          startFlipIndex={startFlipIndex}
+          onFlip={handleFlip}
+          renderPageContent={renderPageContent}
+          renderLeftPageContent={renderLeftPageContent}
+          coverOnly={page === 'start'}
+          overlay={
+            page.startsWith('archive-') && (
+              <CategorySelector
+                categories={CATEGORIES}
+                active={page.replace('archive-', '')}
+                onSelectCategory={handleSelectCategory}
+              />
+            )
+          }
+        />
+      </section>
+    </BossSelectionProvider>
   )
 }

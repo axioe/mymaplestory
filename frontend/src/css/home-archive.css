@@ -15,6 +15,11 @@
      허용해서 항상 끝까지 다 볼 수 있게 한다. */
   overflow-x: hidden;
   overflow-y: auto;
+  /* 보스 체크박스를 누르면 위쪽 내용(인원수 선택 등)이 살짝 바뀌면서 이
+     컨테이너가 맨 위로 스크롤되는 문제가 있었다. overflow-anchor는 브라우저가
+     "지금 보고 있던 위치"를 자동으로 유지해주는 표준 기능이라, JS로 스크롤
+     위치를 일일이 기록/복원하던 방식 대신 이걸로 먼저 해결을 시도한다. */
+  overflow-anchor: auto;
   transition: padding-top 0.35s ease;
 }
 
@@ -251,6 +256,7 @@
   max-width: 380px;
   max-height: 320px;
   overflow-y: auto;
+  overflow-anchor: auto;
   padding-right: 0.2rem;
 }
 

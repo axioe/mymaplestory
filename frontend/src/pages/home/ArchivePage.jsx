@@ -1,5 +1,6 @@
 import EquipmentDetailPanel from './EquipmentPage.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
+import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 
@@ -37,7 +38,6 @@ export default function ArchivePage({
   schedulerLoading,
   schedulerError,
   onGoSchedulerDetail,
-  bossSelection,
   onGoBossDetail,
   equipment,
   equipmentLoading,
@@ -52,6 +52,7 @@ export default function ArchivePage({
   unionError,
   onGoUnionDetail,
 }) {
+  const bossSelection = useBossSelectionContext()
   const activeLabel = categories.find((c) => c.key === active)?.label
 
   const validBossContents = scheduler ? getValidBossContents(scheduler) : []

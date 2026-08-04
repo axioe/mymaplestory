@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useState } from 'react'
 import {
   resolveBossCycle,
   resolveBossPrice,
@@ -8,6 +8,7 @@ import {
   getRegionBossItems,
   WEEKLY_REGIONS,
 } from '../../utils/bossHelpers.js'
+import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 
@@ -23,34 +24,6 @@ import '../../css/home-archive.css'
  * 실제 cycle(resolveBossCycle)로 판단한다.
  */
 function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
-  const listRef = useRef(null)
-  const scrollTopRef = useRef(0)
-  const windowScrollRef = useRef(0)
-
-  // 원인이 뭐든(포커스, 레이아웃 변화 등) 렌더링 이후에 스크롤 위치가 흐트러지면
-  // 매번 마지막으로 기억해둔 위치로 강제 복원한다. 목록 안쪽 스크롤과 브라우저
-  // 창(window) 스크롤 둘 다 붙잡는다.
-  useLayoutEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = scrollTopRef.current
-    }
-    if (window.scrollY !== windowScrollRef.current) {
-      window.scrollTo(0, windowScrollRef.current)
-    }
-  })
-
-  useEffect(() => {
-    const handleWindowScroll = () => {
-      windowScrollRef.current = window.scrollY
-    }
-    window.addEventListener('scroll', handleWindowScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleWindowScroll)
-  }, [])
-
-  const handleScroll = (e) => {
-    scrollTopRef.current = e.currentTarget.scrollTop
-  }
-
   if (!items || items.length === 0) {
     return <p className="home__select-hint">표시할 항목이 없어요.</p>
   }
@@ -71,7 +44,7 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
   const firstMonthlyIndex = sortedEntries.findIndex(([, difficulties]) => isMonthlyGroup(difficulties))
 
   return (
-    <div className="home__scheduler-list" ref={listRef} onScroll={handleScroll}>
+    <div className="home__scheduler-list">
       {sortedEntries.map(([bossName, difficulties], index) => {
         const selected = hasAnySelection(bossName)
         const partySize = getPartySize(bossName)
@@ -261,7 +234,8 @@ function selectionSummaryText(pageKind, bossSelection) {
  * 지역(메이플월드/아케인/그란디스) 버튼 3개만 보여주고, 버튼을 누르면 그
  * 지역의 선택/통계 페이지로 진짜 책장 넘김을 통해 들어간다.
  */
-export function BossWeeklyOverviewPage({ scheduler, bossSelection, onNavigateRegion, onBack }) {
+export function BossWeeklyOverviewPage({ scheduler, onNavigateRegion, onBack }) {
+  const bossSelection = useBossSelectionContext()
   const regionCounts = WEEKLY_REGIONS.map((r) => ({
     ...r,
     count: getRegionBossItems(scheduler, r.key).length,
@@ -307,31 +281,12 @@ export function BossWeeklyOverviewPage({ scheduler, bossSelection, onNavigateReg
  * boss-daily / boss-weekly-maple 등 페이지의 "짝(왼쪽) 페이지"에 이 내용을
  * 얹어준다 (다른 페이지들처럼 빈 페이지로 두지 않고).
  */
-export function BossSelectionPage({ pageKind, scheduler, bossSelection }) {
+export function BossSelectionPage({ pageKind, scheduler }) {
+  const bossSelection = useBossSelectionContext()
   const { items, label } = resolvePageItemsAndLabel(pageKind, scheduler)
 
-  // 안쪽 목록(.home__scheduler-list)의 스크롤 위치는 BossGroupList 안에서
-  // 따로 보존하고 있는데, 이 바깥 페이지 컨테이너(.home__level-content--left)
-  // 자체도 세로 스크롤이 가능해서(overflow-y: auto), 보스를 체크할 때마다
-  // 이쪽 스크롤 위치는 보존 안 되고 맨 위로 튀는 문제가 있었다. 같은 방식으로
-  // 이 컨테이너의 스크롤 위치도 렌더링마다 복원한다.
-  const containerRef = useRef(null)
-  const containerScrollTopRef = useRef(0)
-
-  useLayoutEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerScrollTopRef.current
-    }
-  })
-
   return (
-    <div
-      className="home__level-content home__level-content--left"
-      ref={containerRef}
-      onScroll={(e) => {
-        containerScrollTopRef.current = e.currentTarget.scrollTop
-      }}
-    >
+    <div className="home__level-content home__level-content--left">
       <h2 className="display home__select-title">{label}</h2>
       <p className="home__select-hint">{selectionSummaryText(pageKind, bossSelection)}</p>
       <BossGroupList
@@ -355,7 +310,8 @@ export function BossSelectionPage({ pageKind, scheduler, bossSelection }) {
  * onBack의 목적지는 pageKind에 따라 다르다 - 일일은 아카이브(보스 개요)로,
  * 지역 페이지는 "주간 보스" 개요 페이지로 돌아간다 (Home.jsx에서 결정).
  */
-export default function BossDetailPage({ pageKind, scheduler, bossSelection, onBack, backLabel }) {
+export default function BossDetailPage({ pageKind, scheduler, onBack, backLabel }) {
+  const bossSelection = useBossSelectionContext()
   const { label } = resolvePageItemsAndLabel(pageKind, scheduler)
   const allItems = getValidBossContents(scheduler)
 
