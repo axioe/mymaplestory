@@ -209,9 +209,6 @@ export default function ArchivePage({
                 Lv.{union.unionLevel} · {union.unionGrade}
               </p>
               <div className="home__scheduler-nav">
-                <button type="button" onClick={() => onGoUnionDetail('info')} className="home__scheduler-nav-button">
-                  유니온 정보
-                </button>
                 <button type="button" onClick={() => onGoUnionDetail('raider')} className="home__scheduler-nav-button">
                   공격대
                   <span className="home__scheduler-nav-count">{unionRaider?.raiderStats?.length ?? 0}</span>
@@ -221,7 +218,7 @@ export default function ArchivePage({
                   <span className="home__scheduler-nav-count">{unionArtifact?.effects?.length ?? 0}</span>
                 </button>
                 <button type="button" onClick={() => onGoUnionDetail('champion')} className="home__scheduler-nav-button">
-                  챔피언
+                  유니온 챔피언
                   <span className="home__scheduler-nav-count">{unionChampion?.champions?.length ?? 0}</span>
                 </button>
               </div>

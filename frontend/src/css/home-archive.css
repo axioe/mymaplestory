@@ -753,3 +753,54 @@
   font-weight: 800;
   color: var(--color-accent);
 }
+
+/* 아티팩트 - 크리스탈을 3열 격자의 직사각형 카드로 배치 */
+.home__union-crystal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.home__union-crystal-card {
+  padding: 0.55rem 0.6rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-canvas);
+}
+
+.home__union-crystal-card .home__boss-group-name {
+  font-size: 0.78rem;
+  margin-bottom: 0.35rem;
+}
+
+.home__union-crystal-card .home__equipment-potential-line {
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+/* 유니온 챔피언 - 캐릭터 카드를 3열 2행 격자로 배치 */
+.home__union-champion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.home__union-champion-card {
+  padding: 0.55rem 0.6rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-canvas);
+}
+
+.home__union-champion-card .home__boss-group-name {
+  font-size: 0.78rem;
+  margin-bottom: 0.35rem;
+}
+
+.home__union-champion-card .home__equipment-potential-line {
+  font-size: 0.66rem;
+  line-height: 1.35;
+}

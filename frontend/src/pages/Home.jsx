@@ -23,6 +23,10 @@ import SchedulerDetailPage from './home/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage, BossWeeklyOverviewPage } from './home/BossDetailPage.jsx'
 import { EquipmentSelectionPage } from './home/EquipmentPage.jsx'
 import UnionDetailPage from './home/UnionPage.jsx'
+import UnionInfoPage from './home/UnionInfoPage.jsx'
+import UnionRaiderStateLeftPage from './home/UnionRaiderStateLeftPage.jsx'
+import UnionArtifactEffectsLeftPage from './home/UnionArtifactEffectsLeftPage.jsx'
+import UnionChampionCardsLeftPage from './home/UnionChampionCardsLeftPage.jsx'
 import NoticeTicker from './home/NoticeTicker.jsx'
 import '../css/notice-ticker.css'
 
@@ -332,12 +336,11 @@ export default function Home() {
         />
       )
     }
-    if (p === 'union-info' || p === 'union-raider' || p === 'union-artifact' || p === 'union-champion') {
+    if (p === 'union-raider' || p === 'union-artifact' || p === 'union-champion') {
       const kind = p.replace('union-', '')
       return (
         <UnionDetailPage
           pageKind={kind}
-          union={union}
           unionRaider={unionRaider}
           unionArtifact={unionArtifact}
           unionChampion={unionChampion}
@@ -373,6 +376,18 @@ export default function Home() {
           onSelectSlot={setSelectedEquipmentSlot}
         />
       )
+    }
+    if (p === 'archive-union') {
+      return <UnionInfoPage union={union} loading={unionLoading} error={unionError} />
+    }
+    if (p === 'union-raider') {
+      return <UnionRaiderStateLeftPage unionRaider={unionRaider} />
+    }
+    if (p === 'union-artifact') {
+      return <UnionArtifactEffectsLeftPage unionArtifact={unionArtifact} />
+    }
+    if (p === 'union-champion') {
+      return <UnionChampionCardsLeftPage unionChampion={unionChampion} />
     }
     return null
   }

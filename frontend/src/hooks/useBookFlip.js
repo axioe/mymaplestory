@@ -19,7 +19,6 @@ export const PAGE_ORDER = [
   'boss-weekly-maple',
   'boss-weekly-arcane',
   'boss-weekly-grandis',
-  'union-info',
   'union-raider',
   'union-artifact',
   'union-champion',

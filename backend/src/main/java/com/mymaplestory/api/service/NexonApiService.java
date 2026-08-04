@@ -44,6 +44,8 @@ import org.springframework.web.client.RestClientResponseException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 넥슨 메이플스토리 오픈 API 연동 서비스.
@@ -66,6 +68,17 @@ public class NexonApiService {
     private final RestClient nexonRestClient;
     private final NexonApiProperties properties;
     private final ObjectMapper objectMapper;
+
+    /**
+     * characterName+apiKey -> ocid 캐시.
+     * ocid는 캐릭터마다 한 번 정해지면 절대 바뀌지 않는 값인데, 유니온 탭처럼
+     * 한 화면에서 넥슨 API를 여러 번(유니온/공격대/아티팩트/챔피언 각각) 호출할
+     * 때마다 getOcid()를 매번 새로 호출하고 있었다. 캐릭터 하나당 최대 4번씩
+     * 불필요하게 중복 호출되면서 응답이 느려지고, 배포 환경(리버스 프록시 등)의
+     * 타임아웃을 넘겨 502가 나는 원인이 됐다. 여기서 한 번 조회한 ocid는
+     * 재사용해서 이 중복 호출을 없앤다.
+     */
+    private final Map<String, String> ocidCache = new ConcurrentHashMap<>();
 
     public NexonApiService(RestClient nexonRestClient, NexonApiProperties properties, ObjectMapper objectMapper) {
         this.nexonRestClient = nexonRestClient;
@@ -133,9 +146,16 @@ public class NexonApiService {
 
     /**
      * 캐릭터명 -> ocid 변환. 이후 모든 조회의 시작점.
+     * 같은 캐릭터+API 키 조합으로 이미 조회한 적 있으면 캐시된 값을 그대로
+     * 돌려주고, 넥슨 API를 다시 호출하지 않는다.
      */
     public String getOcid(String characterName, String requestApiKey) {
         String apiKey = resolveApiKey(requestApiKey);
+        String cacheKey = characterName + "::" + apiKey;
+        String cachedOcid = ocidCache.get(cacheKey);
+        if (cachedOcid != null) {
+            return cachedOcid;
+        }
         try {
             OcidResponse response = nexonRestClient.get()
                     .uri(uriBuilder -> uriBuilder
@@ -149,6 +169,7 @@ public class NexonApiService {
             if (response == null || response.ocid() == null) {
                 throw new NexonApiException("캐릭터를 찾을 수 없습니다: " + characterName);
             }
+            ocidCache.put(cacheKey, response.ocid());
             return response.ocid();
         } catch (RestClientResponseException e) {
             if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
