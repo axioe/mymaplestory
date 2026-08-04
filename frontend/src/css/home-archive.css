@@ -203,6 +203,13 @@
   transform: translateX(-50%);
 }
 
+/* "← 캐릭터 카드로"(ArchivePage) 링크만 요청에 따라 15px 아래로 - 위 공용
+   --standalone 위치는 다른 페이지(스케줄러/보스 상세 등)와 공유하므로 그대로
+   두고, 여기서만 보정한다. */
+.home__archive-back--card {
+  bottom: calc(1rem - 15px);
+}
+
 .home__scheduler-list {
   display: flex;
   flex-direction: column;

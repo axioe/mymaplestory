@@ -14,6 +14,7 @@ import { useBossSelection } from '../hooks/useBossSelection.js'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/ApiKeyPage.jsx'
+import ApiKeyLeftPage from './home/ApiKeyLeftPage.jsx'
 import CharacterSelectPage, { CharacterWorldDetailPage } from './home/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
@@ -351,6 +352,9 @@ export default function Home() {
   // 넣는다. "주간 보스" 개요(지역 3개 버튼만 있는 페이지)는 왼쪽에 특별히 넣을
   // 게 없어서 다른 페이지들처럼 빈 페이지로 둔다.
   function renderLeftPageContent(p) {
+    if (p === 'apikey') {
+      return <ApiKeyLeftPage />
+    }
     if (p === 'boss-daily') {
       return <BossSelectionPage pageKind="daily" scheduler={scheduler} bossSelection={bossSelection} />
     }
@@ -396,6 +400,7 @@ export default function Home() {
         onFlip={handleFlip}
         renderPageContent={renderPageContent}
         renderLeftPageContent={renderLeftPageContent}
+        coverOnly={page === 'start'}
         overlay={
           page.startsWith('archive-') && (
             <CategorySelector

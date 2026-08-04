@@ -40,7 +40,7 @@
   padding: 0.55rem 1.4rem;
   border-radius: 999px;
   border: 2px solid var(--color-line);
-  background: var(--color-page);
+  background: transparent;
   color: var(--color-ink);
   font-weight: 700;
   font-size: 0.85rem;
@@ -62,6 +62,9 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  /* 요청에 따라 버튼 묶음 전체를 30px 위로 - 아래 .home__card-links도 흐름상
+     같이 따라 올라간다. */
+  margin-top: -30px;
 }
 
 .home__card-next {
@@ -69,7 +72,7 @@
   height: 38px;
   border-radius: 50%;
   border: 2px solid var(--color-line);
-  background: var(--color-page);
+  background: transparent;
   color: var(--color-accent);
   cursor: pointer;
   display: flex;
@@ -86,6 +89,9 @@
 .home__card-links {
   display: flex;
   gap: 1rem;
+  /* 요청에 따라 살짝 위로 - 부모(.home__card-content)의 flex gap(1.1rem)에서
+     이만큼을 상쇄해서 위쪽 버튼들과 더 가깝게 붙인다. */
+  margin-top: -0.6rem;
 }
 
 .home__card-link {

@@ -17,11 +17,25 @@
   object-position: center;
 }
 
+/* apikey-left.png / apikey.png처럼 원래 하나였던 스프레드 이미지를 반으로 나눠
+   쓰는 경우, 스프링(제본선)이 이음매 쪽 가장자리에 있어서 object-position:
+   center로 두면 통째로 잘려 나간다 (.flip-page--left / .flip-page:not(.flip-page--left)에
+   준 배경 이미지와 같은 문제). crop 기준을 이음매 쪽으로 붙여서 스프링이 보이게 한다. */
+.home__cover-image--spring-left {
+  /* 왼쪽 페이지(apikey-left.png) - 스프링이 오른쪽 끝에 있음 */
+  object-position: right center;
+}
+
+.home__cover-image--spring-right {
+  /* 오른쪽 페이지(apikey.png) - 스프링이 왼쪽 끝에 있음 */
+  object-position: left center;
+}
+
 /* 이미지 안에서 캡션 문구와 책 그림 사이에 비워둔 자리에 맞춘 위치.
    이미지 세로 기준 약 68% 지점 - 이미지 비율이 바뀌면 이 값만 조정하면 된다. */
 .home__cover-start {
   position: absolute;
-  top: 71%;
+  top: calc(71% - 30px);
   left: 50%;
   transform: translate(-50%, -50%);
 }

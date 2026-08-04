@@ -40,7 +40,7 @@ export default function ApiKeyPage({ onSubmit, checking, disabled, error }) {
 
   return (
     <div className="home__cover">
-      <img src={coverImage} alt="NEXON API KEY" className="home__cover-image" />
+      <img src={coverImage} alt="NEXON API KEY" className="home__cover-image home__cover-image--spring-right" />
 
       <form onSubmit={handleSubmit} className="home__apikey-form home__apikey-form--overlay">
         <input

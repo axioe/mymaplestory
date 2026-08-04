@@ -7,11 +7,15 @@
 }
 
 /* 이미지(apikey.png) 안의 점선 네모 칸 자리 - 픽셀 분석으로 실측한 값
-   (세로 중심 약 51%, 가로 중심 약 46%, 칸 너비 약 71%). */
+   (세로 중심 약 51%, 가로 중심 약 46%, 칸 너비 약 71%).
+   스프링을 보이게 하려고 object-position을 center에서 left로 바꾸면서
+   화면에 보이는 이미지 내용 전체가 오른쪽으로 밀렸다(약 6.9%p, 페이지
+   가로세로 비율 기준 계산) - 그만큼 여기 위치도 같이 옮겨서 점선 칸과
+   다시 맞춘다. */
 .home__apikey-form--overlay {
   position: absolute;
   top: 51%;
-  left: 46%;
+  left: 52.9%;
   transform: translate(-50%, -50%);
   width: 62%;
   max-width: 380px;
@@ -69,11 +73,11 @@
 }
 
 /* 점선 칸 바로 아래, 에러/힌트 문구가 들어갈 자리 - 칸 하단(약 57%)보다
-   여유 있게 아래로 뒀다. */
+   여유 있게 아래로 뒀다. 위 폼 오버레이와 같은 이유로 가로 위치도 +6.9%p 보정. */
 .home__apikey-below {
   position: absolute;
-  top: 62%;
-  left: 50%;
+  top: calc(62% - 30px);
+  left: 56.9%;
   transform: translateX(-50%);
   width: 80%;
   max-width: 420px;

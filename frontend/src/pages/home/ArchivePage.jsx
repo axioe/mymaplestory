@@ -236,7 +236,7 @@ export default function ArchivePage({
         </div>
       )}
 
-      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+      <button onClick={onBack} className="home__archive-back home__archive-back--standalone home__archive-back--card">
         ← 캐릭터 카드로
       </button>
     </>

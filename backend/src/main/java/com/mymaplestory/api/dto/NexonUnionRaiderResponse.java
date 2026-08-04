@@ -6,8 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * union_raider_preset_1~5(배치판 좌표 정보로 추정)는 현재 실제 값이 항상 null로
- * 와서 구조를 몰라 DTO에 안 담는다 - 나중에 값이 채워진 예시가 확보되면 추가한다.
+ * union_raider_preset_1~5는 과거 방식의 유니온 공격대 배치판 필드로 보이며, 실제
+ * 값이 항상 null로 온다 - 지금은 union_state_stat_preset[].presetNo(1~10) 쪽으로
+ * 대체된 것으로 보여, 의도적으로 DTO에 담지 않는다(추후 구현 계획 없음).
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record NexonUnionRaiderResponse(

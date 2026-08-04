@@ -5,8 +5,11 @@
   justify-content: center;
   min-height: 100vh;
   /* 오른쪽에 책갈피 탭(카테고리)이 책 밖으로 튀어나오는 만큼 여백을 더
-     넉넉하게 잡아둔다 - 그래야 좁은 화면에서도 화면 경계에 잘리지 않는다. */
-  padding: 2rem 6rem 2rem 1rem;
+     넉넉하게 잡아둔다 - 그래야 좁은 화면에서도 화면 경계에 잘리지 않는다.
+     탭이 book-flip-wrapper의 left: 100% 지점(=책 오른쪽 끝)에 붙어서 라벨
+     너비만큼 튀어나오므로("스케줄러" 기준 가장 김), hover 시 translateX와
+     그림자까지 감안해 7rem으로 잡는다. */
+  padding: 2rem 7rem 2rem 1rem;
   gap: 1rem;
   /* 책 뒤에 깔리는 은은한 배경 - 채도/대비가 낮아서 책 자체를 가리지 않는다.
      화면 전체를 채우되(cover) 찌그러지지 않게 하고, 스크롤해도 배경이
@@ -22,17 +25,17 @@
   background-image: url('/background-dark.png');
 }
 
-/* HTMLFlipBook(size="stretch")이 늘어날 기준 너비를 잴 수 있도록,
-   책을 감싸는 요소가 항상 실제 너비(100%)를 갖고 있어야 한다.
-   이게 없으면 책이 최소 크기로 쪼그라드는 문제가 있었다. */
+/* 예전엔 HTMLFlipBook의 size="stretch"가 이 wrapper의 실제 너비(100%)를 재서
+   그 안에서 알아서 늘어나는 방식이었는데, 화면 크기를 고려 못 해서 책이
+   화면보다 커지거나 중앙에서 벗어나는 문제가 반복됐다. 그래서 이제
+   BookFlipStage.jsx가 window 크기를 직접 재서 책의 정확한 px 크기를 계산해
+   HTMLFlipBook에 minWidth=maxWidth로 그대로 박아버린다(라이브러리의 자체
+   stretch 계산에 기대지 않음). 그 결과 이 wrapper도 더 이상 폭을 100%로
+   늘려둘 필요가 없다 - 오히려 내용(책 실제 너비)에 딱 맞게 줄여야, 카테고리
+   탭(.category-selector, 이 wrapper의 오른쪽 끝 기준)이 항상 책의 실제
+   오른쪽 모서리에 정확히 붙는다. */
 .book-flip-wrapper {
-  width: 100%;
-  /* BookFlipStage.jsx의 HTMLFlipBook maxWidth와 반드시 같은 값이어야 한다 -
-     카테고리 탭(.category-selector)이 이 wrapper의 오른쪽 끝을 기준으로
-     붙는데, wrapper 너비가 책의 실제 렌더링 너비와 달라지면 탭이 책
-     모서리에서 떨어지거나 어긋나 보인다. */
-  max-width: 1200px;
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   position: relative;
 }
@@ -55,7 +58,11 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: var(--color-page);
+  /* var(--color-page)는 버튼 등 다른 UI에도 쓰이는 공용 색이라 여기서 건드리지
+     않고, page-left.png/page-right.png의 실제 종이 색상을 픽셀로 직접 추출한
+     값을 따로 쓴다. background-size: contain으로 이미지 위아래에 생기는
+     여백이 이 색과 정확히 이어져서 흰 띠처럼 보이지 않게 하기 위함이다. */
+  background-color: #f7e6c2;
   background-image:
     /* 종이 섬유 결 - 아주 옅은 점무늬를 촘촘히 반복 */
     radial-gradient(circle, rgba(78, 52, 46, 0.05) 0.6px, transparent 0.6px),
@@ -69,6 +76,7 @@
 }
 
 [data-theme='dark'] .flip-page {
+  background-color: #20180f;
   background-image:
     radial-gradient(circle, rgba(245, 236, 223, 0.05) 0.6px, transparent 0.6px),
     radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.25) 100%);
@@ -84,6 +92,9 @@
   background-image:
     url('/page-right.png'),
     radial-gradient(circle, rgba(78, 52, 46, 0.05) 0.6px, transparent 0.6px);
+  /* 페이지 비율을 이미지 원본 비율(정사각형)에 맞췄으므로 cover와 contain의
+     결과가 사실상 같아진다. cover를 쓰면 JS 계산의 반올림 오차로 페이지가
+     이미지보다 1px 정도 안 맞아도 여백 없이 꽉 채워져서 더 안전하다. */
   background-size: cover, 5px 5px;
   background-position: center, center;
 }
@@ -100,7 +111,7 @@
    들어있을 때든 항상 같은 이미지를 쓴다. 왼쪽 페이지는 제본선이 오른쪽
    (책 가운데로 이어지는 쪽)에 그려진 이미지라 오른쪽 페이지와 자연스럽게 짝을 이룬다. */
 .flip-page--left {
-  background-color: var(--color-page);
+  background-color: #f7e6c2;
   background-image:
     url('/page-left.png'),
     radial-gradient(circle, rgba(78, 52, 46, 0.05) 0.6px, transparent 0.6px);
@@ -109,9 +120,21 @@
 }
 
 [data-theme='dark'] .flip-page--left {
+  background-color: #20180f;
   background-image:
     url('/page-left-dark.png'),
     radial-gradient(circle, rgba(245, 236, 223, 0.05) 0.6px, transparent 0.6px);
   background-size: cover, 5px 5px;
   background-position: center, center;
+}
+
+/* HTMLFlipBook은 표지(showCover 단독 페이지)일 때도 내부적으로 "두 페이지짜리
+   펼침면" 만큼의 폭을 그대로 확보해두고, 그중 오른쪽 절반에만 표지를 그린다
+   (마치 덮여있는 책의 앞표지가 오른쪽에 있는 것처럼). 그 결과 .book-flip-wrapper
+   자체는 화면 중앙에 있어도, 실제로 눈에 보이는 표지 그림은 화면 중앙보다
+   오른쪽으로 치우쳐 보였다. 표지 단계에서는 안 보이는 왼쪽 절반만큼(전체 폭의
+   1/4) 컨테이너를 왼쪽으로 밀어서, 눈에 보이는 표지가 화면 정중앙에 오게 한다. */
+.book-flip-wrapper--cover-only {
+  /* 기존 중앙 정렬(-25%)에서 오른쪽으로 100px 추가 이동 */
+  transform: translateX(calc(-25% + 100px));
 }

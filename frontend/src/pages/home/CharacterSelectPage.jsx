@@ -83,7 +83,7 @@ export function CharacterWorldDetailPage({ characters, worldName, onSelectCharac
         ))}
       </div>
 
-      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+      <button onClick={onBack} className="home__archive-back">
         ← 서버 선택으로
       </button>
     </div>

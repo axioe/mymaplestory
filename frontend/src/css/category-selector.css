@@ -4,8 +4,9 @@
    책 오른쪽 바깥에 튀어나오게 만들 수 있다. */
 .category-selector {
   position: absolute;
-  top: 2.6rem;
-  right: -76px;
+  /* 책 위쪽 테두리에서 30px 아래로 내려서 시작 */
+  top: 30px;
+  left: 100%;
   z-index: 45;
   display: flex;
   flex-direction: column;

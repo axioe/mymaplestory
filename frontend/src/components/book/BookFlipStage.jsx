@@ -1,6 +1,67 @@
-import { forwardRef } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 import HTMLFlipBook from 'react-pageflip'
 import '../../css/book-flip-stage.css'
+
+/**
+ * 책 가로:세로 비율. width/height 고정 px 값을 계속 키워왔는데, 그 값이 실제
+ * 화면(뷰포트) 크기를 전혀 몰라서 화면보다 책이 커지면 아래로 밀려 보이거나
+ * 잘리는 문제가 반복됐다. 그래서 이제 "비율"만 여기서 고정해두고, 실제 픽셀
+ * 크기는 매번 화면 크기를 재서 계산한다 - 항상 화면 안에 맞고, 그래서
+ * .home의 justify-content: center가 제대로 작동해 정중앙에 오게 된다.
+ */
+// page-left.png / page-right.png / apikey*.png 전부 887x887 정사각형으로
+// 만들어진 이미지라, 페이지 비율도 그에 맞춰 정사각형(1:1)으로 잡는다.
+// 예전엔 세로가 긴 비율(1518:1335)이라 이미지를 억지로 자르거나(cover)
+// 여백을 두고 넣어야(contain) 했는데, 비율을 아예 이미지에 맞추면 그럴
+// 필요 없이 이미지가 그대로 딱 맞게 채워진다.
+const BOOK_ASPECT = 1 // height / width
+// .home의 실제 padding(左 1rem=16px + 右 7rem=112px = 128px, book-flip-stage.css
+// 참고)과 반드시 맞춰야 한다 - 여기 값이 그보다 크면 .home의 padding과 중복으로
+// 여백이 잡혀서 책이 화면 중앙보다 왼쪽으로 밀려 보이는 문제가 생긴다.
+const RESERVED_WIDTH = 128 + 16 // padding 128px + 그림자/테두리 여유 16px
+// 위쪽 고정 아이콘/날짜 라벨 + 위아래 여백을 위해 세로로 남겨둘 공간(px)
+const RESERVED_HEIGHT = 220
+const MIN_BOOK_WIDTH = 320
+
+function computeBookSize() {
+  if (typeof window === 'undefined') {
+    return { width: 1335, height: 1518 }
+  }
+  const availableWidth = Math.max(MIN_BOOK_WIDTH * 2, window.innerWidth - RESERVED_WIDTH)
+  const availableHeight = Math.max(MIN_BOOK_WIDTH, window.innerHeight - RESERVED_HEIGHT)
+
+  // width/height 프롭은 "페이지 한 장"의 크기다. 평소엔 왼쪽+오른쪽 두 페이지가
+  // 나란히 펼쳐져 보이므로, 실제 화면에서 차지하는 폭은 이 값의 2배가 된다.
+  // 이전엔 가용 폭 전체를 페이지 한 장 너비로 써버려서, 두 페이지를 나란히 놓을
+  // 자리가 없다고 라이브러리가 판단해 표지처럼 한 페이지만 보이는 portrait
+  // 모드로 자동 전환되는 문제가 있었다.
+  let width = availableWidth / 2
+  let height = width * BOOK_ASPECT
+  if (height > availableHeight) {
+    height = availableHeight
+    width = height / BOOK_ASPECT
+  }
+  return { width: Math.round(width), height: Math.round(height) }
+}
+
+/**
+ * 창 크기(리사이즈)에 맞춰 책의 실제 픽셀 크기를 다시 계산해주는 훅.
+ * HTMLFlipBook에 min===max로 넘겨서, 라이브러리의 자체 stretch 계산에
+ * 기대지 않고 우리가 직접 잰 값으로 정확히 고정한다.
+ */
+function useBookSize() {
+  const [size, setSize] = useState(computeBookSize)
+
+  useEffect(() => {
+    function handleResize() {
+      setSize(computeBookSize())
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return size
+}
 
 /**
  * react-pageflip이 각 페이지에 ref를 넘겨줄 수 있어야 해서(내부적으로 DOM을 직접 다룸),
@@ -59,11 +120,13 @@ export default function BookFlipStage({
   renderPageContent,
   renderLeftPageContent,
   overlay,
+  coverOnly = false,
 }) {
   const [coverKey, ...restKeys] = pageKeys
+  const { width: bookWidth, height: bookHeight } = useBookSize()
 
   return (
-    <div className="book-flip-wrapper">
+    <div className={'book-flip-wrapper' + (coverOnly ? ' book-flip-wrapper--cover-only' : '')}>
       {/* .flip-page는 overflow: hidden이라 그 안에 넣으면 카테고리 탭처럼 책
           바깥으로 튀어나오는 요소가 잘려 보였다. 여기(.book-flip-wrapper,
           overflow 제한 없음)에 형제로 렌더링해서, 책의 실제 렌더링 크기
@@ -71,15 +134,15 @@ export default function BookFlipStage({
       {overlay}
       <HTMLFlipBook
         ref={flipBookRef}
-        width={960}
-        height={864}
+        width={bookWidth}
+        height={bookHeight}
         size="stretch"
-        minWidth={384}
-        maxWidth={1200}
-        minHeight={576}
-        maxHeight={1056}
+        minWidth={bookWidth}
+        maxWidth={bookWidth}
+        minHeight={bookHeight}
+        maxHeight={bookHeight}
         showCover={true}
-        usePortrait={true}
+        usePortrait={false}
         maxShadowOpacity={0.35}
         flippingTime={700}
         useMouseEvents={false}
