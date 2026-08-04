@@ -19,7 +19,7 @@
   border-radius: 0 10px 10px 0;
   border: 2px solid var(--color-line);
   border-left: none;
-  background: var(--color-page);
+  background: transparent;
   color: var(--color-ink);
   font-size: 0.75rem;
   font-weight: 700;

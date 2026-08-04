@@ -1,6 +1,7 @@
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 import { mergeUnionStatLines } from '../../utils/mergeUnionStats.js'
+import MergedStatList from '../../components/MergedStatList.jsx'
 
 const PAGE_LABEL = { raider: '공격대', artifact: '아티팩트', champion: '유니온 챔피언' }
 
@@ -24,11 +25,7 @@ export default function UnionDetailPage({ pageKind, unionRaider, unionArtifact, 
             공격대원 효과{unionRaider.maxPoint != null && ` (최대 ${unionRaider.maxPoint}pt)`}
           </p>
           {mergedRaiderStats.length > 0 ? (
-            mergedRaiderStats.map((stat, i) => (
-              <p key={i} className="home__equipment-potential-line">
-                {stat}
-              </p>
-            ))
+            <MergedStatList lines={mergedRaiderStats} />
           ) : (
             <p className="home__select-hint">배치된 공격대원이 없어요.</p>
           )}
@@ -46,11 +43,7 @@ export default function UnionDetailPage({ pageKind, unionRaider, unionArtifact, 
                     <p className="home__boss-group-name">
                       {c.name} (Lv.{c.level})
                     </p>
-                    {c.options.map((o) => (
-                      <p key={o} className="home__equipment-potential-line">
-                        {o}
-                      </p>
-                    ))}
+                    <MergedStatList lines={c.options} />
                   </div>
                 ))}
               </div>
@@ -64,11 +57,7 @@ export default function UnionDetailPage({ pageKind, unionRaider, unionArtifact, 
           {mergedTotalBadges.length > 0 ? (
             <>
               <p className="home__union-subheading">전체 뱃지 합계</p>
-              {mergedTotalBadges.map((b) => (
-                <p key={b} className="home__equipment-potential-line">
-                  {b}
-                </p>
-              ))}
+              <MergedStatList lines={mergedTotalBadges} />
             </>
           ) : (
             <p className="home__select-hint">등록된 챔피언이 없어요.</p>
@@ -76,7 +65,7 @@ export default function UnionDetailPage({ pageKind, unionRaider, unionArtifact, 
         </div>
       )}
 
-      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+      <button onClick={onBack} className="home__archive-back home__archive-back--standalone home__archive-back--union">
         ← 유니온으로
       </button>
     </div>

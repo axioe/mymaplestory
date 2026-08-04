@@ -27,7 +27,7 @@ export default function CharacterSelectPage({ characters, loading, error, onSele
 
   return (
     <div className="home__select-content">
-      <h2 className="display home__select-title">캐릭터 선택</h2>
+      <h2 className="display home__select-title">서버 선택</h2>
       <p className="home__select-hint">
         {loading ? '내 캐릭터 목록을 불러오는 중...' : '서버를 선택해주세요.'}
       </p>
@@ -45,7 +45,7 @@ export default function CharacterSelectPage({ characters, loading, error, onSele
               key={worldName}
               type="button"
               onClick={() => onSelectWorld(worldName)}
-              className="home__scheduler-nav-button"
+              className="home__scheduler-nav-button home__scheduler-nav-button--select"
             >
               {worldName}
               <span className="home__scheduler-nav-count">{worldCharacters.length}</span>

@@ -15,7 +15,7 @@
 .home__apikey-form--overlay {
   position: absolute;
   top: 51%;
-  left: 52.9%;
+  left: calc(52.9% - 15px);
   transform: translate(-50%, -50%);
   width: 62%;
   max-width: 380px;

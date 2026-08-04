@@ -1,3 +1,5 @@
+import MergedStatList from '../../components/MergedStatList.jsx'
+
 /**
  * 참고 이미지(인게임 장비창)와 같은 배치. 왼쪽엔 반지/얼굴장식류/무기류,
  * 가운데엔 캐릭터 이미지, 오른쪽엔 방어구류가 오도록 6칸 그리드로 짠다.
@@ -70,7 +72,8 @@ export function EquipmentSelectionPage({ equipment, characterImage, selectedPres
             type="button"
             onClick={() => onSelectPreset(n)}
             className={
-              'home__scheduler-nav-button' + (effectivePreset === n ? ' home__scheduler-nav-button--active' : '')
+              'home__scheduler-nav-button home__scheduler-nav-button--equipment' +
+              (effectivePreset === n ? ' home__scheduler-nav-button--active' : '')
             }
           >
             프리셋 {n}
@@ -126,6 +129,27 @@ export function EquipmentSelectionPage({ equipment, characterImage, selectedPres
  * 아카이브의 "장비" 카테고리 콘텐츠라서, ArchivePage 안에서 그대로
  * 호출된다(별도의 책 페이지가 아니라 archive 페이지 오른쪽 내용물).
  */
+/**
+ * 메이플스토리 잠재능력/아이템 테두리 등급 색상 관례를 그대로 따른다 -
+ * 레어(파랑) / 에픽(보라) / 유니크(금색) / 레전드리(초록). NULL(없음)은
+ * 색을 따로 안 준다. "레전더리"/"레전드리" 두 표기 다 대응한다.
+ */
+function potentialGradeClass(grade) {
+  switch (grade) {
+    case '레어':
+      return ' home__equipment-potential-label--rare'
+    case '에픽':
+      return ' home__equipment-potential-label--epic'
+    case '유니크':
+      return ' home__equipment-potential-label--unique'
+    case '레전더리':
+    case '레전드리':
+      return ' home__equipment-potential-label--legendary'
+    default:
+      return ''
+  }
+}
+
 export default function EquipmentDetailPanel({ equipment, selectedPreset, selectedSlot }) {
   const effectivePreset = resolveEffectivePreset(equipment, selectedPreset)
   const items = getPresetItems(equipment, effectivePreset)
@@ -143,33 +167,35 @@ export default function EquipmentDetailPanel({ equipment, selectedPreset, select
             {selectedItem.starforce && Number(selectedItem.starforce) > 0 && (
               <span className="home__equipment-starforce">★{selectedItem.starforce}</span>
             )}
+            <span className="home__equipment-detail-slot home__equipment-detail-slot--inline">
+              {selectedItem.slot}
+            </span>
           </p>
-          <p className="home__equipment-detail-slot">{selectedItem.slot}</p>
 
           {selectedItem.statLines?.length > 0 && (
             <div className="home__equipment-potential">
               <p className="home__equipment-potential-label">스텟</p>
-              {selectedItem.statLines.map((line) => (
-                <p key={line} className="home__equipment-potential-line">{line}</p>
-              ))}
+              <MergedStatList lines={selectedItem.statLines} />
             </div>
           )}
           {selectedItem.potentialLines?.length > 0 && (
             <div className="home__equipment-potential">
-              <p className="home__equipment-potential-label">잠재능력 ({selectedItem.potentialGrade || '-'})</p>
-              {selectedItem.potentialLines.map((line) => (
-                <p key={line} className="home__equipment-potential-line">{line}</p>
-              ))}
+              <p className={'home__equipment-potential-label' + potentialGradeClass(selectedItem.potentialGrade)}>
+                잠재능력 ({selectedItem.potentialGrade || '-'})
+              </p>
+              <MergedStatList lines={selectedItem.potentialLines} />
             </div>
           )}
           {selectedItem.additionalPotentialLines?.length > 0 && (
             <div className="home__equipment-potential">
-              <p className="home__equipment-potential-label">
+              <p
+                className={
+                  'home__equipment-potential-label' + potentialGradeClass(selectedItem.additionalPotentialGrade)
+                }
+              >
                 에디셔널 잠재능력 ({selectedItem.additionalPotentialGrade || '-'})
               </p>
-              {selectedItem.additionalPotentialLines.map((line) => (
-                <p key={line} className="home__equipment-potential-line">{line}</p>
-              ))}
+              <MergedStatList lines={selectedItem.additionalPotentialLines} />
             </div>
           )}
         </>

@@ -281,7 +281,7 @@ export function BossWeeklyOverviewPage({ scheduler, bossSelection, onNavigateReg
               key={r.key}
               type="button"
               onClick={() => onNavigateRegion(r.key)}
-              className="home__scheduler-nav-button"
+              className="home__scheduler-nav-button home__scheduler-nav-button--boss"
             >
               {r.label}
               <span className="home__scheduler-nav-count">{r.count}</span>

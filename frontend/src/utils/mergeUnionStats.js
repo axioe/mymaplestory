@@ -17,6 +17,18 @@ const STAT_KEYS = ['INT', 'STR', 'DEX', 'LUK']
 const SINGLE_STAT_RE = /^(STR|DEX|INT|LUK)\s+(\d+)\s*증가$/
 const MULTI_STAT_RE = /^((?:STR|DEX|INT|LUK)(?:,\s*(?:STR|DEX|INT|LUK))+)\s+(\d+)\s*증가$/
 
+/**
+ * "이동속도, 최대 이동속도 10 증가. 최대 이동속도 170 이상 시 초과분의 20%
+ * 적용, 렌 공격대원 효과로 증가하는 최대 이동속도는 190 초과 불가"처럼
+ * 유독 긴 설명이 붙는 줄(렌 공격대원 고유 효과)이 있다. 상세 조건까지 다
+ * 보여주면 목록이 너무 길어져서, 요청에 따라 "렌 공격대원"이라는 짧은
+ * 표현으로 단순화한다.
+ */
+function simplifyVerboseLines(lines) {
+  if (!lines) return lines
+  return lines.map((line) => (line.trim().startsWith('이동속도, 최대 이동속도') ? '렌 공격대원' : line))
+}
+
 function extractStatTotals(lines) {
   const totals = { INT: 0, STR: 0, DEX: 0, LUK: 0 }
   const seen = { INT: false, STR: false, DEX: false, LUK: false }
@@ -102,6 +114,7 @@ function mergeRemainingLines(lines) {
  */
 export function mergeUnionStatLines(lines) {
   if (!lines || lines.length === 0) return []
-  const { statLines, rest } = extractStatTotals(lines)
+  const simplified = simplifyVerboseLines(lines)
+  const { statLines, rest } = extractStatTotals(simplified)
   return [...statLines, ...mergeRemainingLines(rest)]
 }

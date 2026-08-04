@@ -17,9 +17,10 @@ export default function UnionArtifactEffectsLeftPage({ unionArtifact }) {
       {unionArtifact?.effects?.length > 0 ? (
         <div className="home__union-list">
           {unionArtifact.effects.map((e) => (
-            <p key={e.name} className="home__equipment-potential-line">
-              {e.name} (Lv.{e.level})
-            </p>
+            <div key={e.name} className="home__union-ledger-row">
+              <span className="home__union-ledger-label">{e.name}</span>
+              <span className="home__union-ledger-value">Lv.{e.level}</span>
+            </div>
           ))}
         </div>
       ) : (

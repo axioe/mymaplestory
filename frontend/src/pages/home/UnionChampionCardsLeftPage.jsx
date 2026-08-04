@@ -1,6 +1,7 @@
 import '../../css/home-shared.css'
 import '../../css/home-archive.css'
 import { mergeUnionStatLines } from '../../utils/mergeUnionStats.js'
+import MergedStatList from '../../components/MergedStatList.jsx'
 
 /**
  * "유니온 챔피언" 상세 페이지(union-champion)의 왼쪽 슬롯. 예전엔 챔피언
@@ -19,13 +20,10 @@ export default function UnionChampionCardsLeftPage({ unionChampion }) {
           {champions.map((c) => (
             <div key={c.slot} className="home__union-champion-card">
               <p className="home__boss-group-name">
-                {c.name} · {c.className} ({c.grade})
+                {c.name} · {c.className}
+                <span className="home__union-stat-badge home__union-grade-badge">{c.grade}</span>
               </p>
-              {mergeUnionStatLines(c.badges).map((b) => (
-                <p key={b} className="home__equipment-potential-line">
-                  {b}
-                </p>
-              ))}
+              <MergedStatList lines={mergeUnionStatLines(c.badges)} />
             </div>
           ))}
         </div>

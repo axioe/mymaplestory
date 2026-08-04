@@ -53,7 +53,9 @@
   padding: 1.6rem;
   border: 2px solid var(--color-line);
   border-radius: 16px;
-  background: var(--color-canvas);
+  /* 유니온 정보 박스와 디자인을 통일 - 배경을 투명하게 둬서 페이지 질감이
+     그대로 비친다. */
+  background: transparent;
 }
 
 /* 유니온 - 버튼으로 고른 섹션(공격대/아티팩트/챔피언)의 상세 목록 영역.
@@ -88,9 +90,16 @@
 }
 
 .home__level-summary-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
   font-size: 0.78rem;
   opacity: 0.65;
   letter-spacing: 0.03em;
+  /* 유니온 정보 박스와 통일 - 라벨과 값 사이를 점선으로 잇는 장부 스타일. */
+  border-bottom: 1.5px dashed var(--color-line);
+  padding-bottom: 0.15rem;
 }
 
 .home__level-summary-value {
@@ -203,6 +212,12 @@
   transform: translateX(-50%);
 }
 
+/* "← 유니온으로" 링크만 20px 아래로(이후 5px 다시 위로 보정) - 스케줄러/보스
+   상세 등과 공유하는 위 기본 위치는 그대로 두고 여기서만 보정한다. */
+.home__archive-back--union {
+  bottom: calc(1rem - 20px + 5px);
+}
+
 /* "← 캐릭터 카드로"(ArchivePage) 링크만 요청에 따라 15px 아래로 - 위 공용
    --standalone 위치는 다른 페이지(스케줄러/보스 상세 등)와 공유하므로 그대로
    두고, 여기서만 보정한다. */
@@ -228,7 +243,8 @@
   padding: 0.7rem 1rem;
   border: 1.5px solid var(--color-line);
   border-radius: 12px;
-  background: var(--color-canvas);
+  /* 유니온/장비 등과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
   font-size: 0.95rem;
 }
 
@@ -284,14 +300,14 @@
   justify-content: center;
   border-radius: 8px;
   border: 1.5px solid var(--color-line);
-  background: var(--color-canvas);
+  /* 유니온/장비 상세 패널과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
   padding: 0;
   cursor: default;
 }
 
 .home__equipment-cell--filled {
   cursor: pointer;
-  background: var(--color-page);
 }
 
 .home__equipment-cell--filled:hover {
@@ -337,7 +353,8 @@
   padding: 0.7rem 0.9rem;
   border-radius: 12px;
   border: 1.5px solid var(--color-line);
-  background: var(--color-canvas);
+  /* 유니온/레벨 디자인과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
   text-align: left;
 }
 
@@ -391,6 +408,27 @@
   cursor: pointer;
 }
 
+/* 유니온 개요(공격대/아티팩트/유니온챔피언) 버튼만 배경을 투명하게 -
+   스케줄러/장비 등 다른 카테고리와 공유하는 위 기본 스타일은 그대로 둔다. */
+.home__scheduler-nav-button--union {
+  background: transparent;
+}
+
+/* 장비 프리셋 1/2/3 버튼도 동일하게 투명 배경으로 통일 (선택된 프리셋은
+   아래 --active가 나중에 선언돼서 우선 적용되므로 계속 코랄색으로 강조됨). */
+.home__scheduler-nav-button--equipment {
+  background: transparent;
+}
+
+/* 보스/스케줄러 개요(일일/주간, 지역 선택) 버튼도 동일하게 투명 배경으로 통일 */
+.home__scheduler-nav-button--boss {
+  background: transparent;
+}
+
+.home__scheduler-nav-button--scheduler {
+  background: transparent;
+}
+
 .home__scheduler-nav-button:hover {
   background: var(--color-accent);
   color: var(--color-page);
@@ -441,6 +479,13 @@
   opacity: 0.55;
 }
 
+/* 부위를 이름/스타포스와 한 줄에 이어 붙일 때 쓰는 인라인 버전 - 줄바꿈 없이
+   오른쪽에 붙고, 별도 마진 없이 이름 텍스트와 자연스럽게 이어진다. */
+.home__equipment-detail-slot--inline {
+  display: inline;
+  margin: 0 0 0 0.5rem;
+}
+
 .home__equipment-potential {
   margin-bottom: 0.3rem;
 }
@@ -450,6 +495,29 @@
   font-size: 0.68rem;
   font-weight: 700;
   opacity: 0.6;
+}
+
+/* 메이플스토리 잠재능력 등급 색상 관례 그대로 - 레어(파랑)/에픽(보라)/
+   유니크(금색)/레전드리(초록). opacity를 낮춘 기본값 대신 등급색을 쓰므로
+   여기선 opacity를 1로 되돌린다. */
+.home__equipment-potential-label--rare {
+  opacity: 1;
+  color: #4a7ba6;
+}
+
+.home__equipment-potential-label--epic {
+  opacity: 1;
+  color: #8a5fb0;
+}
+
+.home__equipment-potential-label--unique {
+  opacity: 1;
+  color: #c99a2e;
+}
+
+.home__equipment-potential-label--legendary {
+  opacity: 1;
+  color: #4f9152;
 }
 
 .home__equipment-potential-line {
@@ -531,7 +599,8 @@
   padding: 0.7rem 1rem;
   border: 1.5px solid var(--color-line);
   border-radius: 12px;
-  background: var(--color-canvas);
+  /* 유니온/장비 등과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
 }
 
 /* 주간 보스 목록 안에서 월간 보스(검은 마법사 등)를 실선으로 구분하는 경계선 */
@@ -645,7 +714,8 @@
   padding: 0.9rem 1rem;
   border: 1.5px solid var(--color-line);
   border-radius: 12px;
-  background: var(--color-canvas);
+  /* 유니온/장비 등과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
   text-align: left;
 }
 
@@ -732,10 +802,15 @@
 }
 
 .home__boss-stats-row-name {
+  flex: 1;
+  min-width: 0;
   opacity: 0.8;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* 유니온/레벨과 통일 - 이름과 값 사이를 점선으로 잇는다. */
+  border-bottom: 1.5px dashed var(--color-line);
+  padding-bottom: 0.1rem;
 }
 
 .home__boss-stats-row-value {
@@ -766,7 +841,7 @@
   padding: 0.55rem 0.6rem;
   border: 1.5px solid var(--color-line);
   border-radius: 10px;
-  background: var(--color-canvas);
+  background: transparent;
 }
 
 .home__union-crystal-card .home__boss-group-name {
@@ -792,7 +867,7 @@
   padding: 0.55rem 0.6rem;
   border: 1.5px solid var(--color-line);
   border-radius: 10px;
-  background: var(--color-canvas);
+  background: transparent;
 }
 
 .home__union-champion-card .home__boss-group-name {
@@ -803,4 +878,70 @@
 .home__union-champion-card .home__equipment-potential-line {
   font-size: 0.66rem;
   line-height: 1.35;
+}
+
+/* STR/DEX/INT/LUK 총합 줄도 다른 줄들과 똑같이 점선 장부 줄로 표시하되,
+   수치 텍스트 색만 스탯별로 다르게 줘서 구분한다 - STR(힘, 붉은 톤) /
+   DEX(민첩, 초록 톤) / INT(지력, 파란 톤) / LUK(행운, 금색 톤). */
+.home__union-ledger-value--STR {
+  color: #c0533a;
+}
+
+.home__union-ledger-value--DEX {
+  color: #6f8c4f;
+}
+
+.home__union-ledger-value--INT {
+  color: #4d7ea8;
+}
+
+.home__union-ledger-value--LUK {
+  color: #c99a2e;
+}
+
+.home__union-stat-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-page);
+  font-weight: 700;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+/* 챔피언 카드 이름 옆에 붙는 등급(SSS/B 등) 배지 - 인장 배지와 같은 스타일을
+   이름 옆에 작게 인라인으로 붙인다. */
+.home__union-grade-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.6rem;
+  vertical-align: middle;
+}
+
+/* ② 장부(원장) 스타일 - 나머지 줄은 "라벨 ⋯⋯ 수치"로 점선을 이어서
+   다이어리 느낌을 살린다. API 키 입력칸의 점선 밑줄과 같은 스타일을 쓴다. */
+.home__union-ledger-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.15rem 0;
+}
+
+.home__union-ledger-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  border-bottom: 1.5px dashed var(--color-line);
+  opacity: 0.85;
+  padding-bottom: 0.15rem;
+}
+
+.home__union-ledger-value {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
 }

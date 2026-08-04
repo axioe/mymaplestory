@@ -41,10 +41,8 @@
   padding: 0.55rem 1.1rem;
   border-radius: 14px;
   border: 2px solid var(--color-line);
-  /* 캔버스(약간 다른 톤)보다 페이지와 같은 색으로 맞춰서, 이제 배경에
-     단풍잎/깃펜 장식 이미지가 깔린 상태에서도 뜬금없이 도드라져 보이지
-     않고 자연스럽게 어우러지도록 한다. */
-  background: var(--color-page);
+  /* 유니온 카드들과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
   color: var(--color-ink);
   font-weight: 700;
   font-size: 0.95rem;
@@ -59,6 +57,13 @@
   font-size: 0.7rem;
   font-weight: 400;
   opacity: 0.7;
+}
+
+/* 서버 선택 화면의 월드(서버) 버튼 - 스케줄러/장비 등과 공유하는
+   .home__scheduler-nav-button 기본 스타일은 그대로 두고, 여기서만 유니온
+   디자인과 통일되게 배경을 투명하게 덮어쓴다. */
+.home__scheduler-nav-button--select {
+  background: transparent;
 }
 
 /* 서버(월드)별로 캐릭터 목록을 묶는 영역 */

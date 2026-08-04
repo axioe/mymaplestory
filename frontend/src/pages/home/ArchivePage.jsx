@@ -140,11 +140,19 @@ export default function ArchivePage({
                 {scheduler.characterClass} {scheduler.date && `(${scheduler.date.slice(0, 10)} 기준)`}
               </p>
               <div className="home__scheduler-nav">
-                <button type="button" onClick={() => onGoSchedulerDetail('daily')} className="home__scheduler-nav-button">
+                <button
+                  type="button"
+                  onClick={() => onGoSchedulerDetail('daily')}
+                  className="home__scheduler-nav-button home__scheduler-nav-button--scheduler"
+                >
                   일일 콘텐츠
                   <span className="home__scheduler-nav-count">{scheduler.dailyContents?.length ?? 0}</span>
                 </button>
-                <button type="button" onClick={() => onGoSchedulerDetail('weekly')} className="home__scheduler-nav-button">
+                <button
+                  type="button"
+                  onClick={() => onGoSchedulerDetail('weekly')}
+                  className="home__scheduler-nav-button home__scheduler-nav-button--scheduler"
+                >
                   주간 콘텐츠
                   <span className="home__scheduler-nav-count">{scheduler.weeklyContents?.length ?? 0}</span>
                 </button>
@@ -166,11 +174,19 @@ export default function ArchivePage({
                 {bossSelection.limit}마리 (주간 보스 기준)
               </p>
               <div className="home__scheduler-nav">
-                <button type="button" onClick={() => onGoBossDetail('daily')} className="home__scheduler-nav-button">
+                <button
+                  type="button"
+                  onClick={() => onGoBossDetail('daily')}
+                  className="home__scheduler-nav-button home__scheduler-nav-button--boss"
+                >
                   일일 보스
                   <span className="home__scheduler-nav-count">{dailyBossCount}</span>
                 </button>
-                <button type="button" onClick={() => onGoBossDetail('weekly')} className="home__scheduler-nav-button">
+                <button
+                  type="button"
+                  onClick={() => onGoBossDetail('weekly')}
+                  className="home__scheduler-nav-button home__scheduler-nav-button--boss"
+                >
                   주간 보스
                   <span className="home__scheduler-nav-count">{weeklyBossCount + monthlyBossCount}</span>
                 </button>
@@ -184,7 +200,7 @@ export default function ArchivePage({
           )}
         </div>
       ) : active === 'loot' ? (
-        <div className="home__level-content">
+        <div className="home__level-content home__level-content--stats">
           {equipmentLoading && <p>불러오는 중...</p>}
           {equipmentError && <p className="home__apikey-error">{equipmentError}</p>}
 
@@ -209,15 +225,27 @@ export default function ArchivePage({
                 Lv.{union.unionLevel} · {union.unionGrade}
               </p>
               <div className="home__scheduler-nav">
-                <button type="button" onClick={() => onGoUnionDetail('raider')} className="home__scheduler-nav-button">
+                <button
+                  type="button"
+                  onClick={() => onGoUnionDetail('raider')}
+                  className="home__scheduler-nav-button home__scheduler-nav-button--union"
+                >
                   공격대
                   <span className="home__scheduler-nav-count">{unionRaider?.raiderStats?.length ?? 0}</span>
                 </button>
-                <button type="button" onClick={() => onGoUnionDetail('artifact')} className="home__scheduler-nav-button">
+                <button
+                  type="button"
+                  onClick={() => onGoUnionDetail('artifact')}
+                  className="home__scheduler-nav-button home__scheduler-nav-button--union"
+                >
                   아티팩트
                   <span className="home__scheduler-nav-count">{unionArtifact?.effects?.length ?? 0}</span>
                 </button>
-                <button type="button" onClick={() => onGoUnionDetail('champion')} className="home__scheduler-nav-button">
+                <button
+                  type="button"
+                  onClick={() => onGoUnionDetail('champion')}
+                  className="home__scheduler-nav-button home__scheduler-nav-button--union"
+                >
                   유니온 챔피언
                   <span className="home__scheduler-nav-count">{unionChampion?.champions?.length ?? 0}</span>
                 </button>
