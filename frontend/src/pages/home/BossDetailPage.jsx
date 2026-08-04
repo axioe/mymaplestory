@@ -295,7 +295,7 @@ export function BossWeeklyOverviewPage({ scheduler, bossSelection, onNavigateReg
         )}
       </div>
 
-      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+      <button onClick={onBack} className="home__archive-back home__archive-back--standalone home__archive-back--boss">
         ← 보스로
       </button>
     </>
@@ -309,8 +309,29 @@ export function BossWeeklyOverviewPage({ scheduler, bossSelection, onNavigateReg
  */
 export function BossSelectionPage({ pageKind, scheduler, bossSelection }) {
   const { items, label } = resolvePageItemsAndLabel(pageKind, scheduler)
+
+  // 안쪽 목록(.home__scheduler-list)의 스크롤 위치는 BossGroupList 안에서
+  // 따로 보존하고 있는데, 이 바깥 페이지 컨테이너(.home__level-content--left)
+  // 자체도 세로 스크롤이 가능해서(overflow-y: auto), 보스를 체크할 때마다
+  // 이쪽 스크롤 위치는 보존 안 되고 맨 위로 튀는 문제가 있었다. 같은 방식으로
+  // 이 컨테이너의 스크롤 위치도 렌더링마다 복원한다.
+  const containerRef = useRef(null)
+  const containerScrollTopRef = useRef(0)
+
+  useLayoutEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerScrollTopRef.current
+    }
+  })
+
   return (
-    <div className="home__level-content home__level-content--left">
+    <div
+      className="home__level-content home__level-content--left"
+      ref={containerRef}
+      onScroll={(e) => {
+        containerScrollTopRef.current = e.currentTarget.scrollTop
+      }}
+    >
       <h2 className="display home__select-title">{label}</h2>
       <p className="home__select-hint">{selectionSummaryText(pageKind, bossSelection)}</p>
       <BossGroupList
@@ -357,7 +378,7 @@ export default function BossDetailPage({ pageKind, scheduler, bossSelection, onB
         <BossStatsPanel items={allItems} bossSelection={bossSelection} />
       </div>
 
-      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+      <button onClick={onBack} className="home__archive-back home__archive-back--standalone home__archive-back--boss">
         {backLabel ?? '← 보스로'}
       </button>
     </>

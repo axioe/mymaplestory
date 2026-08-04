@@ -45,7 +45,6 @@ export const BOSS_CYCLE_DATA = {
   '데미안|normal': { cycle: 'weekly', price: 17500000, region: 'maple' },
   '데미안|hard': { cycle: 'weekly', price: 48900000, region: 'maple' },
   '가디언 엔젤 슬라임|normal': { cycle: 'weekly', price: 25500000, region: 'maple' },
-  '가디언 엔젤 슬라임|hard': { cycle: 'weekly', price: 75100000, region: 'maple' },
   '루시드|easy': { cycle: 'weekly', price: 29800000, region: 'arcane' },
   '루시드|normal': { cycle: 'weekly', price: 35600000, region: 'arcane' },
   '루시드|hard': { cycle: 'weekly', price: 62900000, region: 'arcane' },
@@ -85,8 +84,9 @@ export const BOSS_CYCLE_DATA = {
   '시즌 보스 메이린|hard': { cycle: 'weekly', price: 600000000, region: 'maple' },
   '검은 마법사|hard': { cycle: 'monthly', price: 665000000, region: 'arcane' },
   '검은 마법사|extreme': { cycle: 'monthly', price: 8740000000, region: 'arcane' },
-  // 이전 넥슨 API 응답으로 실존이 확인됐으나 이번 엑셀엔 없는 항목 - 형제 난이도와 같은 지역으로 분류
-  '가디언 엔젤 슬라임|chaos': { cycle: 'weekly', price: null, region: 'maple' },
+  // 이전 넥슨 API 응답으로 실존이 확인됐으나 이번 엑셀엔 없는 항목 - hard로
+  // 잘못 들어가 있던 메소 값을 실제 난이도인 chaos로 옮겼다.
+  '가디언 엔젤 슬라임|chaos': { cycle: 'weekly', price: 75100000, region: 'maple' },
 }
 
 export function lookupBossCycle(bossName, difficulty) {
