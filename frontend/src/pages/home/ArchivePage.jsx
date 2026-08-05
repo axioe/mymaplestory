@@ -1,8 +1,17 @@
-import EquipmentDetailPanel from './EquipmentPage.jsx'
+import EquipmentDetailPanel from './equipment/EquipmentPage.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
 import '../../css/home-shared.css'
-import '../../css/home-archive.css'
+// ArchivePage는 여러 카테고리 개요(레벨/보스/장비/스케줄러/유니온/이벤트)를 한
+// 컴포넌트에서 오케스트레이션하기 때문에, 공용 스타일 + 실제로 여기서 직접
+// 쓰는 각 카테고리별 스타일(개요 버튼 수식자, 보스 초기화 버튼, 이벤트 북마크
+// 등)을 전부 명시적으로 가져온다. 카테고리 상세 화면 자체의 스타일(예:
+// 장비 그리드, 유니온 카드 등)은 각 상세 컴포넌트가 알아서 가져온다.
+import '../../css/home-archive-shared.css'
+import '../../css/home-boss.css'
+import '../../css/home-scheduler.css'
+import '../../css/home-union.css'
+import '../../css/home-event.css'
 
 /**
  * 아카이브 페이지 콘텐츠. BookFlipStage 안의 <Page>에 그대로 얹히는

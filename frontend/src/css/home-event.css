@@ -1,0 +1,51 @@
+/* 이벤트/공지사항 카테고리(ArchivePage의 event 분기) 전용 스타일. */
+
+/* 이벤트/공지사항 - 제목은 위, 북마크 리본은 페이지 하단에 붙는다 */
+.home__notice-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.6rem 1.6rem 1.6rem;
+  gap: 1rem;
+  text-align: center;
+}
+
+.home__notice-bookmarks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 400px;
+  max-height: 70%;
+  overflow-y: auto;
+  padding-top: 0.5rem;
+}
+
+/* 북마크 리본 모양 - 아래쪽이 뾰족하게 잘린 태그 형태 */
+.home__notice-bookmark {
+  flex: 0 0 88px;
+  padding: 0.65rem 0.4rem 1.1rem;
+  background: var(--color-accent);
+  color: var(--color-page);
+  text-decoration: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+  clip-path: polygon(0 0, 100% 0, 100% 76%, 50% 100%, 0 76%);
+  box-shadow: 0 3px 6px rgba(23, 20, 15, 0.2);
+}
+
+.home__notice-bookmark:nth-child(even) {
+  background: var(--color-accent-2);
+}
+
+.home__notice-bookmark-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -1,5 +1,6 @@
 import '../../../css/home-shared.css'
-import '../../../css/home-archive.css'
+import '../../../css/home-archive-shared.css'
+import '../../../css/home-union.css'
 
 /**
  * "아티팩트" 상세 페이지(union-artifact)의 왼쪽 슬롯. 예전엔 크리스탈과 같이

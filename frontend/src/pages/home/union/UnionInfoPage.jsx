@@ -1,5 +1,6 @@
 import '../../../css/home-shared.css'
-import '../../../css/home-archive.css'
+import '../../../css/home-archive-shared.css'
+import '../../../css/home-union.css'
 
 /**
  * 예전엔 "유니온 정보" 버튼을 눌러야 별도 책 페이지(union-info)로 넘어가서

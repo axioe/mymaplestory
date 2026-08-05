@@ -1,0 +1,153 @@
+/* 유니온 카테고리 전용 스타일 (union/ 폴더의 여러 페이지). */
+
+/* 유니온 - 버튼으로 고른 섹션(공격대/아티팩트/챔피언)의 상세 목록 영역.
+   내용이 길어질 수 있어서(공격대원 효과가 수십 줄) 최대 높이 + 스크롤. */
+.home__union-detail {
+  width: 100%;
+  max-width: 380px;
+}
+
+.home__union-list {
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0.2rem;
+  text-align: left;
+}
+
+.home__union-subheading {
+  margin: 0.6rem 0 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.7;
+  text-align: center;
+}
+
+/* "← 유니온으로" 링크만 20px 아래로(이후 5px 다시 위로 보정) - 스케줄러/보스
+   상세 등과 공유하는 위 기본 위치는 그대로 두고 여기서만 보정한다. */
+.home__archive-back--union {
+  bottom: calc(1rem - 20px + 5px);
+}
+
+/* 유니온 개요(공격대/아티팩트/유니온챔피언) 버튼만 배경을 투명하게 -
+   스케줄러/장비 등 다른 카테고리와 공유하는 위 기본 스타일은 그대로 둔다. */
+.home__scheduler-nav-button--union {
+  background: transparent;
+}
+
+/* 아티팩트 - 크리스탈을 3열 격자의 직사각형 카드로 배치 */
+.home__union-crystal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.home__union-crystal-card {
+  padding: 0.55rem 0.6rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  background: transparent;
+}
+
+.home__union-crystal-card .home__boss-group-name {
+  font-size: 0.78rem;
+  margin-bottom: 0.35rem;
+}
+
+.home__union-crystal-card .home__equipment-potential-line {
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+/* 유니온 챔피언 - 캐릭터 카드를 3열 2행 격자로 배치 */
+.home__union-champion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.home__union-champion-card {
+  padding: 0.55rem 0.6rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  background: transparent;
+}
+
+.home__union-champion-card .home__boss-group-name {
+  font-size: 0.78rem;
+  margin-bottom: 0.35rem;
+}
+
+.home__union-champion-card .home__equipment-potential-line {
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+/* STR/DEX/INT/LUK 총합 줄도 다른 줄들과 똑같이 점선 장부 줄로 표시하되,
+   수치 텍스트 색만 스탯별로 다르게 줘서 구분한다 - STR(힘, 붉은 톤) /
+   DEX(민첩, 초록 톤) / INT(지력, 파란 톤) / LUK(행운, 금색 톤). */
+.home__union-ledger-value--STR {
+  color: #c0533a;
+}
+
+.home__union-ledger-value--DEX {
+  color: #6f8c4f;
+}
+
+.home__union-ledger-value--INT {
+  color: #4d7ea8;
+}
+
+.home__union-ledger-value--LUK {
+  color: #c99a2e;
+}
+
+.home__union-stat-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-page);
+  font-weight: 700;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+/* 챔피언 카드 이름 옆에 붙는 등급(SSS/B 등) 배지 - 인장 배지와 같은 스타일을
+   이름 옆에 작게 인라인으로 붙인다. */
+.home__union-grade-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.6rem;
+  vertical-align: middle;
+}
+
+/* ② 장부(원장) 스타일 - 나머지 줄은 "라벨 ⋯⋯ 수치"로 점선을 이어서
+   다이어리 느낌을 살린다. API 키 입력칸의 점선 밑줄과 같은 스타일을 쓴다. */
+.home__union-ledger-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.15rem 0;
+}
+
+.home__union-ledger-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  border-bottom: 1.5px dashed var(--color-line);
+  opacity: 0.85;
+  padding-bottom: 0.15rem;
+}
+
+.home__union-ledger-value {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}

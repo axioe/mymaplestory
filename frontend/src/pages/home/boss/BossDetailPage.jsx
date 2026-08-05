@@ -10,7 +10,8 @@ import {
 } from '../../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../../context/BossSelectionContext.jsx'
 import '../../../css/home-shared.css'
-import '../../../css/home-archive.css'
+import '../../../css/home-archive-shared.css'
+import '../../../css/home-boss.css'
 
 /**
  * 보스 목록 - 같은 보스 이름 아래 난이도별로 묶어서, 난이도는 라디오 버튼처럼

@@ -1,4 +1,9 @@
 import MergedStatList from '../../../components/MergedStatList.jsx'
+// 예전엔 CSS를 직접 import하지 않고, ArchivePage가 home-archive.css를 먼저
+// 불러온 덕에 전역으로 이미 로드돼있는 걸 그냥 얻어 쓰고 있었다 - 어느 파일이
+// 실제로 이 스타일에 의존하는지 알기 어려워서, 이제 명시적으로 가져온다.
+import '../../../css/home-archive-shared.css'
+import '../../../css/home-equipment.css'
 
 /**
  * 참고 이미지(인게임 장비창)와 같은 배치. 왼쪽엔 반지/얼굴장식류/무기류,

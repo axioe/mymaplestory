@@ -1,5 +1,6 @@
 import '../../../css/home-shared.css'
-import '../../../css/home-archive.css'
+import '../../../css/home-archive-shared.css'
+import '../../../css/home-union.css'
 import { mergeUnionStatLines } from '../../../utils/mergeUnionStats.js'
 import MergedStatList from '../../../components/MergedStatList.jsx'
 

@@ -1,0 +1,204 @@
+/* 장비 카테고리 전용 스타일 (EquipmentPage.jsx). */
+
+/* 장비 - 인게임 장비창처럼 생긴 그리드. 6칸(반지/얼굴장식류 | 캐릭터 |
+   방어구류)로 나누고, 캐릭터 이미지가 가운데 2칸x4행을 차지한다. */
+.home__equipment-grid {
+  display: grid;
+  /* 장비 칸은 원래 크기(46px)로 되돌리고, 캐릭터 이미지 영역만 아래에서
+     따로 확대한다 - 칸 크기를 키우면 장비 아이콘까지 같이 커져버려서 분리함. */
+  grid-template-columns: repeat(6, 46px);
+  grid-template-rows: repeat(6, 46px);
+  grid-template-areas:
+    'ring1  forehead char     char      cap      cape'
+    'ring2  eyeacc   char     char      clothes  gloves'
+    'ring3  earacc   char     char      pants    shoes'
+    'ring4  pendant1 char     char      shoulder medal'
+    'belt   pendant2 weapon   subweapon emblem   heart'
+    'pocket .        .        .         .        badge';
+  gap: 0.35rem;
+  justify-content: center;
+  margin: 0 auto;
+  /* 캐릭터 영역을 transform으로 확대하면 원래 칸 경계를 넘어서기 때문에,
+     그리드 자체가 그 넘친 부분을 잘라내지 않도록 허용한다. */
+  overflow: visible;
+}
+
+.home__equipment-grid-character {
+  grid-area: char;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--color-canvas);
+  border: 1.5px solid var(--color-line);
+  overflow: hidden;
+}
+
+/* 넥슨이 내려주는 캐릭터 이미지는 실제 캐릭터 주변에 투명 여백이 많아서,
+   칸 크기를 그대로 두고 이미지만 확대해서 여백을 잘라내고 캐릭터가 칸을
+   꽉 채우도록 한다 (캐릭터 카드에서 쓰던 것과 같은 방식). 원본이 300x300으로
+   충분히 크기 때문에 이렇게 확대해도 화질 손실은 없다. */
+.home__equipment-grid-character img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(2.2);
+}
+
+.home__equipment-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-line);
+  /* 유니온/장비 상세 패널과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
+  padding: 0;
+  cursor: default;
+}
+
+.home__equipment-cell--filled {
+  cursor: pointer;
+}
+
+.home__equipment-cell--filled:hover {
+  border-color: var(--color-accent);
+}
+
+.home__equipment-cell--selected {
+  border-color: var(--color-accent);
+  border-width: 2px;
+  box-shadow: 0 0 0 2px var(--color-accent) inset;
+}
+
+.home__equipment-cell img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.home__equipment-cell-label {
+  font-size: 0.5rem;
+  line-height: 1.1;
+  opacity: 0.45;
+  padding: 0 2px;
+  word-break: keep-all;
+}
+
+.home__equipment-cell-star {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--color-accent-2);
+  background: var(--color-page);
+  border-radius: 999px;
+  padding: 0 3px;
+}
+
+/* 선택한 장비 상세(스텟/잠재능력) 패널 */
+.home__equipment-detail {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-line);
+  /* 유니온/레벨 디자인과 통일 - 배경을 투명하게 둬서 페이지 질감이 그대로 비친다. */
+  background: transparent;
+  text-align: left;
+}
+
+/* 오른쪽 페이지에 단독으로 놓일 때는(왼쪽 그리드와 안 나눠 쓰니까) 더 넓게 쓴다 */
+.home__equipment-detail--standalone {
+  max-width: 420px;
+}
+
+.home__equipment-detail-name {
+  margin: 0 0 0.2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* 장비 프리셋 1/2/3 버튼도 동일하게 투명 배경으로 통일 (선택된 프리셋은
+   아래 --active가 나중에 선언돼서 우선 적용되므로 계속 코랄색으로 강조됨). */
+.home__scheduler-nav-button--equipment {
+  background: transparent;
+}
+
+/* 지금 보고 있는 프리셋 버튼 강조 (장비 카테고리) */
+.home__scheduler-nav-button--active {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+/* 인게임에서 지금 실제로 활성화된 프리셋 표시 */
+.home__equipment-active-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--color-line);
+  color: var(--color-page);
+}
+
+.home__scheduler-nav-button--active .home__equipment-active-badge {
+  background: var(--color-page);
+  color: var(--color-accent);
+}
+
+/* 장비 목록의 스타포스 표시 */
+.home__equipment-starforce {
+  margin-left: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-accent-2);
+}
+
+.home__equipment-detail-slot {
+  margin: 0 0 0.3rem;
+  font-size: 0.68rem;
+  opacity: 0.55;
+}
+
+/* 부위를 이름/스타포스와 한 줄에 이어 붙일 때 쓰는 인라인 버전 - 줄바꿈 없이
+   오른쪽에 붙고, 별도 마진 없이 이름 텍스트와 자연스럽게 이어진다. */
+.home__equipment-detail-slot--inline {
+  display: inline;
+  margin: 0 0 0 0.5rem;
+}
+
+.home__equipment-potential {
+  margin-bottom: 0.3rem;
+}
+
+.home__equipment-potential-label {
+  margin: 0 0 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+/* 메이플스토리 잠재능력 등급 색상 관례 그대로 - 레어(파랑)/에픽(보라)/
+   유니크(금색)/레전드리(초록). opacity를 낮춘 기본값 대신 등급색을 쓰므로
+   여기선 opacity를 1로 되돌린다. */
+.home__equipment-potential-label--rare {
+  opacity: 1;
+  color: #4a7ba6;
+}
+
+.home__equipment-potential-label--epic {
+  opacity: 1;
+  color: #8a5fb0;
+}
+
+.home__equipment-potential-label--unique {
+  opacity: 1;
+  color: #c99a2e;
+}
+
+.home__equipment-potential-label--legendary {
+  opacity: 1;
+  color: #4f9152;
+}

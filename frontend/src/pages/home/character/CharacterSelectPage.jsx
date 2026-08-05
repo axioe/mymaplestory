@@ -1,6 +1,6 @@
 import '../../../css/home-shared.css'
 import '../../../css/home-select.css'
-import '../../../css/home-archive.css'
+import '../../../css/home-archive-shared.css'
 
 /**
  * 검색해서 넣어둔 캐릭터가 아니라, API 키 계정에 실제로 연결된 캐릭터를
