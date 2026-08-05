@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useTheme } from '../../ThemeContext.jsx'
-import '../../css/home-shared.css'
-import '../../css/home-apikey.css'
+import { useTheme } from '../../../ThemeContext.jsx'
+import '../../../css/home-shared.css'
+import '../../../css/home-apikey.css'
 
 /**
  * 입력창 값은 이 컴포넌트가 직접 들고 있고, 제출 시에만 부모에게 넘긴다

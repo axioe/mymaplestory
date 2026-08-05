@@ -1,7 +1,7 @@
-import '../../css/home-shared.css'
-import '../../css/home-archive.css'
-import { mergeUnionStatLines } from '../../utils/mergeUnionStats.js'
-import MergedStatList from '../../components/MergedStatList.jsx'
+import '../../../css/home-shared.css'
+import '../../../css/home-archive.css'
+import { mergeUnionStatLines } from '../../../utils/mergeUnionStats.js'
+import MergedStatList from '../../../components/MergedStatList.jsx'
 
 const PAGE_LABEL = { raider: '공격대', artifact: '아티팩트', champion: '유니온 챔피언' }
 

@@ -1,5 +1,5 @@
-import { useTheme } from '../../ThemeContext.jsx'
-import '../../css/home-shared.css'
+import { useTheme } from '../../../ThemeContext.jsx'
+import '../../../css/home-shared.css'
 
 /**
  * API 키 페이지(오른쪽 슬롯 = ApiKeyPage)와 짝을 이루는 왼쪽 슬롯 전용 배경.

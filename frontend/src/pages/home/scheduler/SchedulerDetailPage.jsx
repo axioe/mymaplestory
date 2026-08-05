@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useSkipTracker } from '../../hooks/useSkipTracker.js'
-import '../../css/home-shared.css'
-import '../../css/home-archive.css'
+import { useSkipTracker } from '../../../hooks/useSkipTracker.js'
+import '../../../css/home-shared.css'
+import '../../../css/home-archive.css'
 
 // quest_state: "0"=미수락, "1"=진행 중(수락함), "2"=완료
 const QUEST_STATE_LABEL = { '0': '미수락', '1': '진행 중', '2': '완료' }

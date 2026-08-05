@@ -1,4 +1,4 @@
-import MergedStatList from '../../components/MergedStatList.jsx'
+import MergedStatList from '../../../components/MergedStatList.jsx'
 
 /**
  * 참고 이미지(인게임 장비창)와 같은 배치. 왼쪽엔 반지/얼굴장식류/무기류,

@@ -1,7 +1,7 @@
-import '../../css/home-shared.css'
-import '../../css/home-archive.css'
-import { mergeUnionStatLines } from '../../utils/mergeUnionStats.js'
-import MergedStatList from '../../components/MergedStatList.jsx'
+import '../../../css/home-shared.css'
+import '../../../css/home-archive.css'
+import { mergeUnionStatLines } from '../../../utils/mergeUnionStats.js'
+import MergedStatList from '../../../components/MergedStatList.jsx'
 
 /**
  * "공격대" 상세 페이지(union-raider)의 왼쪽 슬롯. 예전엔 공격대원 효과와 같이

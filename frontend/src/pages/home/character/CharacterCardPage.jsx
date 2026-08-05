@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
-import CharacterSummaryCard from '../../components/CharacterSummaryCard.jsx'
-import { downloadNodeAsJpeg } from '../../utils/downloadImage.js'
-import '../../css/home-shared.css'
-import '../../css/home-card.css'
+import CharacterSummaryCard from '../../../components/CharacterSummaryCard.jsx'
+import { downloadNodeAsJpeg } from '../../../utils/downloadImage.js'
+import '../../../css/home-shared.css'
+import '../../../css/home-card.css'
 
 function mapToCardProps(cardData) {
   if (!cardData) return null
