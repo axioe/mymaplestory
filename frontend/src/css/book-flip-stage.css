@@ -38,6 +38,15 @@
   display: inline-flex;
   justify-content: center;
   position: relative;
+  /* 표지(cover-only) <-> 스프레드 전환 시 이 wrapper의 transform(아래
+     --cover-only 규칙)이 React 상태 변경과 동시에 "즉시" 바뀌는데, 그 상태
+     변경은 페이지 넘김 애니메이션 시작과 같은 타이밍에 낙관적으로 일어난다
+     (useBookFlip.js의 flipTo 참고). transition이 없으면 페이지가 곡선으로
+     넘어가는 동안 책 전체가 옆으로 순간이동하듯 튀어 보여서, 표지에서
+     다음 페이지로 넘어가는 첫 전환에서만 pageflip 애니메이션이 깨져
+     보였다. BookFlipStage.jsx의 flippingTime(700ms)과 맞춰서 부드럽게
+     슬라이드되도록 한다. */
+  transition: transform 700ms ease;
 }
 
 /* react-pageflip이 만드는 바깥 래퍼 - 우리가 직접 크기를 잡진 않고
