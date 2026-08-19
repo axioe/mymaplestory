@@ -21,6 +21,11 @@ export function useBossSelection(characterName) {
       return
     }
     let cancelled = false
+    // 캐릭터를 바꿔도 새 응답이 오기 전까지 이전 캐릭터의 list가 그대로 남아있었다.
+    // toggle/setPartySize가 이 stale list로 주간 12마리 제한이나 현재 선택 상태를
+    // 판단해서, 전환 직후 짧은 순간 잘못 판단하거나(이전 캐릭터 기준 제한 체크)
+    // 뒤늦게 도착한 GET 응답이 그 사이의 낙관적 갱신을 통째로 덮어쓰는 문제가 있었다.
+    setList([])
     setLoading(true)
     fetchBossSelections(characterName)
       .then((data) => {

@@ -301,6 +301,7 @@ export default function Home() {
         <SchedulerDetailPage
           cycle={cycle}
           scheduler={scheduler}
+          characterName={selectedCharacter}
           onBack={() => flipTo('archive-scheduler')}
         />
       )

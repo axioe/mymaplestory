@@ -17,6 +17,9 @@ export function useSkipTracker(characterName) {
       return
     }
     let cancelled = false
+    // 캐릭터를 바꾸면 새 응답이 오기 전까지 이전 캐릭터의 스킵 목록이 잠깐 남아있어서,
+    // 그 사이 toggleSkip을 누르면 "이미 스킵됐는지"를 이전 캐릭터 기준으로 판단해버렸다.
+    setSkippedNames([])
     fetchSkips(characterName)
       .then((data) => {
         if (!cancelled) setSkippedNames((data ?? []).map((s) => s.contentName))
