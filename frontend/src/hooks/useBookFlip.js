@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export const PAGE_ORDER = [
   'start',
@@ -67,6 +67,18 @@ export function useBookFlip(initialPage) {
   const flipBookRef = useRef(null)
   const [page, setPage] = useState(initialPage)
 
+  // attemptFlip의 재시도(최대 10회 x 100ms)와 보정(900ms) setTimeout이 unmount 후에도
+  // 정리되지 않아서, flipTo() 직후 빠르게 화면을 벗어나면 이미 파괴된 StPageFlip
+  // 인스턴스를 나중에 건드려 에러를 던지거나 무의미한 DOM 조작을 시도할 수 있었다.
+  // 콜백 실행 시점에 이 값을 확인해서 unmount 이후엔 아무 것도 안 하게 막는다.
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
   const getPageFlip = () => flipBookRef.current?.pageFlip?.()
 
   const flipTo = (next) => {
@@ -92,7 +104,9 @@ export function useBookFlip(initialPage) {
     const pageFlip = getPageFlip()
     if (!pageFlip) {
       if (retryCount < 10) {
-        setTimeout(() => attemptFlip(next, nextIndex, retryCount + 1), 100)
+        setTimeout(() => {
+          if (mountedRef.current) attemptFlip(next, nextIndex, retryCount + 1)
+        }, 100)
       }
       return
     }
@@ -111,6 +125,7 @@ export function useBookFlip(initialPage) {
     // 공식 문서에 있는 정식 메서드라 확인 자체는 안전하니, 진짜 필요할 때만
     // 최소한으로 보정하는 쪽이 훨씬 안전하다.)
     setTimeout(() => {
+      if (!mountedRef.current) return
       if (typeof pageFlip.getCurrentPageIndex === 'function' && pageFlip.getCurrentPageIndex() !== targetFlipIndex) {
         pageFlip.turnToPage(targetFlipIndex)
       }
