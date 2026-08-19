@@ -1,0 +1,43 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: mymaplestory
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      # application.yml의 spring.datasource.url은 localhost 기준이라 컨테이너
+      # 네트워크에서는 안 맞음 - 서비스명 mysql로 덮어쓴다 (yml 자체는 안 고쳐도 됨,
+      # Spring Boot가 SPRING_DATASOURCE_URL 환경변수를 spring.datasource.url에
+      # 자동으로 매핑함).
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mymaplestory?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      NEXON_API_KEY: ${NEXON_API_KEY}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
