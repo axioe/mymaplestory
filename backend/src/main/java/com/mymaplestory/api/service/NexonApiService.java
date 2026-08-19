@@ -191,7 +191,7 @@ public class NexonApiService {
     public CharacterBasicDto getBasicInfo(String ocid, String requestApiKey, LocalDate date) {
         String apiKey = resolveApiKey(requestApiKey);
         try {
-            return nexonRestClient.get()
+            CharacterBasicDto body = nexonRestClient.get()
                     .uri(uriBuilder -> {
                         uriBuilder.path("/character/basic").queryParam("ocid", ocid);
                         if (date != null) {
@@ -202,6 +202,13 @@ public class NexonApiService {
                     .header(NEXON_AUTH_HEADER, apiKey)
                     .retrieve()
                     .body(CharacterBasicDto.class);
+            if (body == null) {
+                // 넥슨이 200에 빈 바디를 준 경우 - 호출부(CharacterService 등)가 null을
+                // 그대로 넘겨받아 필드 접근 시 NPE로 이어지던 문제가 있었다. 다른 실패
+                // 상황과 동일하게 명시적으로 502 처리한다.
+                throw new NexonApiException("넥슨 API가 빈 응답을 반환했습니다 (basic).");
+            }
+            return body;
         } catch (RestClientResponseException e) {
             if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
@@ -369,7 +376,9 @@ public class NexonApiService {
                     .body(NexonSchedulerResponse.class);
 
             if (raw == null) {
-                return null;
+                // null을 그대로 리턴하면 컨트롤러가 200 OK에 빈 바디를 내려보내서
+                // 프론트가 필드 접근 시 깨졌다 - 다른 실패와 동일하게 502로 명시한다.
+                throw new NexonApiException("넥슨 API가 빈 응답을 반환했습니다 (scheduler).");
             }
 
             List<ContentItem> daily = raw.dailyContents() == null
@@ -422,7 +431,8 @@ public class NexonApiService {
                     .body(NexonItemEquipmentResponse.class);
 
             if (raw == null) {
-                return null;
+                // scheduler와 동일한 이유 - null을 그대로 200으로 내려보내지 않고 502로 명시한다.
+                throw new NexonApiException("넥슨 API가 빈 응답을 반환했습니다 (item-equipment).");
             }
 
             return new EquipmentPresetResponse(

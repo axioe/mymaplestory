@@ -3,6 +3,7 @@ package com.mymaplestory.api.controller;
 import com.mymaplestory.api.dto.BossSelectionDto;
 import com.mymaplestory.api.dto.SkipDto;
 import com.mymaplestory.api.service.UserPreferenceService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ public class UserPreferenceController {
     }
 
     @PutMapping("/boss-selections")
-    public BossSelectionDto upsertBossSelection(@PathVariable String characterName, @RequestBody BossSelectionDto request) {
+    public BossSelectionDto upsertBossSelection(@PathVariable String characterName, @Valid @RequestBody BossSelectionDto request) {
         return userPreferenceService.upsertBossSelection(characterName, request);
     }
 
@@ -61,7 +62,7 @@ public class UserPreferenceController {
     public void setSkip(
             @PathVariable String characterName,
             @PathVariable String contentName,
-            @RequestBody SkipDto request
+            @Valid @RequestBody SkipDto request
     ) {
         userPreferenceService.setSkip(characterName, contentName, request.skipped());
     }
