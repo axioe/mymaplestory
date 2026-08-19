@@ -19,7 +19,16 @@ export default function Modal({ open, onClose, title, children }) {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+
+    // 잠그지 않으면 모달 안(.modal-card, overflow-y: auto)을 끝까지 스크롤한 뒤에도
+    // 계속 휠/터치 드래그하면 그 스크롤이 뒤 페이지(책 콘텐츠)로 새어나갔다.
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
   }, [open, onClose])
 
   if (!open) return null
