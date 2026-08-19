@@ -134,8 +134,12 @@ const CYCLE_LABEL = { daily: '일일 콘텐츠', weekly: '주간 콘텐츠' }
  * 들어온다 (Home.jsx의 flipTo('scheduler-daily') 등) - 보스 상세 페이지와 완전히
  * 같은 방식이라 한 책이 자연스럽게 이어지는 느낌을 준다.
  */
-export default function SchedulerDetailPage({ cycle, scheduler, onBack }) {
-  const { isSkipped, toggleSkip } = useSkipTracker(scheduler?.characterName)
+export default function SchedulerDetailPage({ cycle, scheduler, characterName, onBack }) {
+  // scheduler?.characterName(넥슨 API 응답에서 온 값)이 아니라 실제 선택된
+  // 캐릭터(characterName)로 키잉한다 - scheduler는 캐릭터를 바꾼 직후 새 응답이
+  // 도착하기 전까지 이전 캐릭터의 데이터를 잠깐 들고 있을 수 있어서, 그걸 그대로
+  // 쓰면 스킵 체크가 엉뚱한 캐릭터의 기록으로 저장될 위험이 있었다.
+  const { isSkipped, toggleSkip } = useSkipTracker(characterName)
   const items = cycle === 'daily' ? scheduler?.dailyContents : scheduler?.weeklyContents
 
   return (

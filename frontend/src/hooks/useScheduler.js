@@ -10,6 +10,11 @@ export function useScheduler(enabled, characterName) {
   useEffect(() => {
     if (!enabled) return
     let cancelled = false
+    // 캐릭터를 바꿔도 새 응답이 도착하기 전까지 이전 캐릭터의 scheduler가 그대로
+    // 남아있었다 - SchedulerDetailPage가 scheduler.characterName으로 스킵 기록을
+    // 저장하는데, 그 짧은 순간 스킵 체크박스를 누르면 이전 캐릭터의 DB 레코드가
+    // 바뀌는 버그가 있었다. 새 조회를 시작하는 시점에 바로 비워서 그 창을 없앤다.
+    setScheduler(null)
     setLoading(true)
     setError(null)
     fetchScheduler(characterName)
