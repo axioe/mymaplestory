@@ -16,9 +16,6 @@ export const PAGE_ORDER = [
   'scheduler-weekly',
   'boss-daily',
   'boss-weekly',
-  'boss-weekly-maple',
-  'boss-weekly-arcane',
-  'boss-weekly-grandis',
   'union-raider',
   'union-artifact',
   'union-champion',
@@ -39,10 +36,7 @@ export const PAGE_ORDER = [
  *   9 = 공백, 10 = scheduler-daily
  *   11 = 공백, 12 = scheduler-weekly
  *   13 = 공백, 14 = boss-daily
- *   15 = 공백, 16 = boss-weekly (지역 3개 버튼만 있는 개요 페이지)
- *   17 = 공백, 18 = boss-weekly-maple (메이플월드)
- *   19 = 공백, 20 = boss-weekly-arcane (아케인)
- *   21 = 공백, 22 = boss-weekly-grandis (그란디스, 검은 마법사 등 월간 보스도 여기 통합됨)
+ *   15 = 공백, 16 = boss-weekly (지역 구분 없이 주간+월간 보스 전체를 한 페이지로 통합)
  */
 const contentToFlipIndex = (contentIndex) => (contentIndex === 0 ? 0 : contentIndex * 2)
 

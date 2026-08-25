@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchBossSelections, upsertBossSelection, deleteBossSelection, resetBossSelections } from '../api/client.js'
+import { isWeeklyLimitExempt } from '../utils/bossHelpers.js'
 
 export const WEEKLY_BOSS_LIMIT = 12
 export const MAX_PARTY_SIZE = 6
@@ -44,13 +45,16 @@ export function useBossSelection(characterName) {
 
   const findEntry = (bossName) => list.find((s) => s.bossName === bossName)
   const selectedCount = list.length
-  const weeklySelectedCount = list.filter((s) => s.cycle === 'weekly').length
+  // "시즌 보스 메이린"(챌린저스 월드 한정 보너스 보스)은 주간 12마리 한도에서 제외한다.
+  const weeklySelectedCount = list.filter((s) => s.cycle === 'weekly' && !isWeeklyLimitExempt(s.bossName)).length
   const isWeeklyAtLimit = weeklySelectedCount >= WEEKLY_BOSS_LIMIT
 
   const isSelected = (bossName, difficulty) => findEntry(bossName)?.difficulty === difficulty
   const hasAnySelection = (bossName) => Boolean(findEntry(bossName))
   const getPartySize = (bossName) => findEntry(bossName)?.partySize ?? 1
-  const isAtLimitFor = (cycle) => cycle === 'weekly' && isWeeklyAtLimit
+  // 한도 제외 보스는 이미 12마리가 찼어도 새로 선택할 수 있어야 한다(자기 자신은 한도에
+  // 안 걸리니까).
+  const isAtLimitFor = (cycle, bossName) => cycle === 'weekly' && isWeeklyAtLimit && !isWeeklyLimitExempt(bossName)
 
   const toggle = (bossName, difficulty, cycle) => {
     const current = findEntry(bossName)
@@ -64,7 +68,7 @@ export function useBossSelection(characterName) {
     }
 
     const isNewBoss = !current
-    if (isNewBoss && cycle === 'weekly' && weeklySelectedCount >= WEEKLY_BOSS_LIMIT) {
+    if (isNewBoss && cycle === 'weekly' && !isWeeklyLimitExempt(bossName) && weeklySelectedCount >= WEEKLY_BOSS_LIMIT) {
       // 주간 보스는 이미 12마리 다 찼는데 새로 추가하려는 경우 - 무시
       return
     }

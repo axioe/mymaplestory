@@ -20,7 +20,7 @@ import CharacterCardPage from './home/character/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
 import CategorySelector from './home/CategorySelector.jsx'
 import SchedulerDetailPage from './home/scheduler/SchedulerDetailPage.jsx'
-import BossDetailPage, { BossSelectionPage, BossWeeklyOverviewPage } from './home/boss/BossDetailPage.jsx'
+import BossDetailPage, { BossSelectionPage } from './home/boss/BossDetailPage.jsx'
 import { EquipmentSelectionPage } from './home/equipment/EquipmentPage.jsx'
 import UnionDetailPage from './home/union/UnionPage.jsx'
 import UnionInfoPage from './home/union/UnionInfoPage.jsx'
@@ -204,12 +204,11 @@ export default function Home() {
   // 카테고리 버튼(보스/장비/레벨/유니온/이벤트/스케줄러)을 누르면 실제 책 페이지로 넘어간다.
   const handleSelectCategory = (key) => flipTo(`archive-${key}`)
 
-  // 보스 개요(아카이브 안)에서 일일/주간/월간 버튼을 누르면, 진짜 책 페이지로
-  // 실제 책장 넘김이 일어난다.
+  // 보스 개요(아카이브 안)에서 일일/주간 버튼을 누르면, 진짜 책 페이지로
+  // 실제 책장 넘김이 일어난다. 예전엔 주간 보스가 지역(메이플월드/아케인/
+  // 그란디스)별 페이지로 한 번 더 나뉘었는데, 지금은 지역 구분 없이 하나의
+  // 주간 보스 페이지로 합쳤다.
   const handleGoBossDetail = (cycle) => flipTo(`boss-${cycle}`)
-
-  // "주간 보스" 개요(지역 3개 버튼)에서 지역을 고르면, 그 지역의 진짜 책 페이지로 넘어간다.
-  const handleGoBossRegion = (regionKey) => flipTo(`boss-weekly-${regionKey}`)
 
   // 스케줄러 개요에서 일일/주간 버튼을 누르면 마찬가지로 진짜 책 페이지로 넘어간다.
   const handleGoSchedulerDetail = (cycle) => flipTo(`scheduler-${cycle}`)
@@ -317,21 +316,10 @@ export default function Home() {
     }
     if (p === 'boss-weekly') {
       return (
-        <BossWeeklyOverviewPage
-          scheduler={scheduler}
-          onNavigateRegion={handleGoBossRegion}
-          onBack={() => flipTo('archive-boss')}
-        />
-      )
-    }
-    if (p === 'boss-weekly-maple' || p === 'boss-weekly-arcane' || p === 'boss-weekly-grandis') {
-      const regionKey = p.replace('boss-weekly-', '')
-      return (
         <BossDetailPage
-          pageKind={regionKey}
+          pageKind="weekly"
           scheduler={scheduler}
-          onBack={() => flipTo('boss-weekly')}
-          backLabel="← 주간 보스로"
+          onBack={() => flipTo('archive-boss')}
         />
       )
     }
@@ -350,9 +338,7 @@ export default function Home() {
     return null
   }
 
-  // boss-daily / boss-weekly-maple 등의 짝(왼쪽) 페이지에는 보스 선택 목록을
-  // 넣는다. "주간 보스" 개요(지역 3개 버튼만 있는 페이지)는 왼쪽에 특별히 넣을
-  // 게 없어서 다른 페이지들처럼 빈 페이지로 둔다.
+  // boss-daily / boss-weekly의 짝(왼쪽) 페이지에는 보스 선택 목록을 넣는다.
   function renderLeftPageContent(p) {
     if (p === 'apikey') {
       return <ApiKeyLeftPage />
@@ -360,9 +346,8 @@ export default function Home() {
     if (p === 'boss-daily') {
       return <BossSelectionPage pageKind="daily" scheduler={scheduler} />
     }
-    if (p === 'boss-weekly-maple' || p === 'boss-weekly-arcane' || p === 'boss-weekly-grandis') {
-      const regionKey = p.replace('boss-weekly-', '')
-      return <BossSelectionPage pageKind={regionKey} scheduler={scheduler} />
+    if (p === 'boss-weekly') {
+      return <BossSelectionPage pageKind="weekly" scheduler={scheduler} />
     }
     if (p === 'archive-loot') {
       return (

@@ -19,30 +19,20 @@ export function resolveBossPrice(item) {
   return item.price ?? null
 }
 
-export function resolveBossRegion(item) {
-  return item.region ?? null
-}
-
 export function formatMeso(price) {
   return price == null ? null : `${Math.floor(price).toLocaleString('ko-KR')}메소`
 }
-
-/**
- * 주간 보스를 세부적으로 나누는 지역 카테고리. 검은 마법사 같은 월간 보스도
- * region이 있으면 해당 지역 페이지에 같이 섞여서 나온다.
- * region 값은 bossCycleData.js에 영문 slug로 저장되어 있다(cycle과 같은 표기 방식).
- */
-export const WEEKLY_REGIONS = [
-  { key: 'maple', label: '메이플월드' },
-  { key: 'arcane', label: '아케인' },
-  { key: 'grandis', label: '그란디스' },
-]
 
 export function getDailyBossItems(scheduler) {
   return getValidBossContents(scheduler).filter((b) => resolveBossCycle(b) === 'daily')
 }
 
-/** cycle이 주간이거나 월간인 항목 전체 (일일 제외) - 지역 구분 없이. */
+/**
+ * cycle이 주간이거나 월간인 항목 전체 (일일 제외).
+ * 예전엔 지역(메이플월드/아케인/그란디스)별로 페이지를 나눠서 보여줬는데,
+ * "일일보스/주간보스로만 나오게 해달라"는 요청으로 지역 구분 없이 하나의
+ * 목록으로 합쳤다.
+ */
 export function getWeeklyLikeBossItems(scheduler) {
   return getValidBossContents(scheduler).filter((b) => {
     const c = resolveBossCycle(b)
@@ -50,24 +40,27 @@ export function getWeeklyLikeBossItems(scheduler) {
   })
 }
 
-/** 특정 지역(regionKey: 'mapleworld'|'arcane'|'grandis')에 속하는 주간/월간 보스만. */
-export function getRegionBossItems(scheduler, regionKey) {
-  return getWeeklyLikeBossItems(scheduler).filter((b) => resolveBossRegion(b) === regionKey)
-}
-
 // 챌린저스 월드(챌린저스1~4)에서만 등장하는 시즌 전용 보스.
 const CHALLENGERS_WORLDS = ['챌린저스1', '챌린저스2', '챌린저스3', '챌린저스4']
-const CHALLENGERS_ONLY_BOSS = '시즌보스메이린'
+const SEASON_BOSS_MAYRIN = '시즌보스메이린' // 공백 제거 후 비교용 정규화 이름
 
 /**
  * 챌린저스 월드가 아니면 "시즌 보스 메이린"은 안 보이게 걸러낸다.
  */
 export function isBossVisibleForWorld(item, worldName) {
   const name = (item.contentName ?? '').replace(/\s/g, '')
-  if (name === CHALLENGERS_ONLY_BOSS) {
+  if (name === SEASON_BOSS_MAYRIN) {
     return CHALLENGERS_WORLDS.includes(worldName)
   }
   return true
+}
+
+/**
+ * "시즌 보스 메이린"은 챌린저스 월드 한정 보너스 보스라, 주간 12마리 선택
+ * 한도에는 포함하지 않는다(선택해도 다른 주간 보스를 고를 자리를 깎아먹지 않음).
+ */
+export function isWeeklyLimitExempt(bossName) {
+  return (bossName ?? '').replace(/\s/g, '') === SEASON_BOSS_MAYRIN
 }
 
 /**
