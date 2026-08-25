@@ -5,8 +5,7 @@ import {
   formatMeso,
   getValidBossContents,
   getDailyBossItems,
-  getRegionBossItems,
-  WEEKLY_REGIONS,
+  getWeeklyLikeBossItems,
 } from '../../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../../context/BossSelectionContext.jsx'
 import '../../../css/home-shared.css'
@@ -63,7 +62,7 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
                 {difficulties.map((d) => {
                   const itemCycle = resolveBossCycle(d)
                   const checked = isSelected(bossName, d.difficulty)
-                  const disableNew = isAtLimitFor(itemCycle) && !selected
+                  const disableNew = isAtLimitFor(itemCycle, bossName) && !selected
                   const price = resolveBossPrice(d)
                   const perPersonLabel = checked && price != null ? formatMeso(price / partySize) : formatMeso(price)
                   return (
@@ -84,7 +83,7 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
                         disabled={disableNew && !checked}
                       />
                       <span>
-                        {d.difficulty}
+                        {d.difficulty.toUpperCase()}
                         {perPersonLabel && <span className="home__boss-difficulty-price">{perPersonLabel}</span>}
                       </span>
                     </label>
@@ -147,7 +146,7 @@ function BossStatsGroup({ title, entries, subtotal }) {
           {entries.map((e) => (
             <div key={e.bossName} className="home__boss-stats-row">
               <span className="home__boss-stats-row-name">
-                {e.bossName} ({e.difficulty}) · {e.partySize}명
+                {e.bossName} ({e.difficulty.toUpperCase()}) · {e.partySize}명
               </span>
               <span className="home__boss-stats-row-value">
                 {e.perPerson != null ? formatMeso(e.perPerson) : '-'}
@@ -208,78 +207,33 @@ function BossStatsPanel({ items, bossSelection }) {
 }
 
 /**
- * pageKind: 'daily' | 'maple' | 'arcane' | 'grandis'
+ * pageKind: 'daily' | 'weekly'
  * 각 pageKind에 맞는 보스 목록과 제목을 계산해준다.
+ * 예전엔 주간 보스를 지역(메이플월드/아케인/그란디스)별로 페이지를 나눠서
+ * 보여줬는데, 일일/주간 두 갈래로만 나오게 해달라는 요청으로 지역 구분 없이
+ * 하나의 목록으로 합쳤다.
  */
 function resolvePageItemsAndLabel(pageKind, scheduler) {
   if (pageKind === 'daily') {
     return { items: getDailyBossItems(scheduler), label: '일일 보스' }
   }
-  const region = WEEKLY_REGIONS.find((r) => r.key === pageKind)
-  return { items: getRegionBossItems(scheduler, pageKind), label: region?.label ?? '주간 보스' }
+  return { items: getWeeklyLikeBossItems(scheduler), label: '주간 보스' }
 }
 
 /**
- * 일일/지역별 선택 현황 문구. 주간(지역) 페이지는 전체 주간 선택 개수 기준으로
- * 12마리 한도를 보여주고(지역별로 따로 세지 않음), 일일은 한도가 없다.
+ * 일일/주간 선택 현황 문구. 주간은 12마리 한도를 보여주고(시즌 보스 메이린은
+ * 한도에서 제외), 일일은 한도가 없다.
  */
 function selectionSummaryText(pageKind, bossSelection) {
   if (pageKind === 'daily') {
     return '일일 보스는 선택 개수 제한이 없어요'
   }
-  return `주간 선택 ${bossSelection.weeklySelectedCount}/${bossSelection.limit} (전체 지역 합산, 월간 보스 제외)`
-}
-
-/**
- * "주간 보스" 개요 페이지 - 예전엔 여기서 바로 보스 목록을 보여줬는데, 이제는
- * 지역(메이플월드/아케인/그란디스) 버튼 3개만 보여주고, 버튼을 누르면 그
- * 지역의 선택/통계 페이지로 진짜 책장 넘김을 통해 들어간다.
- */
-export function BossWeeklyOverviewPage({ scheduler, onNavigateRegion, onBack }) {
-  const bossSelection = useBossSelectionContext()
-  const regionCounts = WEEKLY_REGIONS.map((r) => ({
-    ...r,
-    count: getRegionBossItems(scheduler, r.key).length,
-  }))
-
-  return (
-    <>
-      <div className="home__level-content">
-        <h2 className="display home__select-title">주간 보스</h2>
-        <p className="home__select-hint">
-          {scheduler?.characterName} · {scheduler?.worldName} · 주간 선택 {bossSelection.weeklySelectedCount}/
-          {bossSelection.limit}마리
-        </p>
-        <div className="home__scheduler-nav">
-          {regionCounts.map((r) => (
-            <button
-              key={r.key}
-              type="button"
-              onClick={() => onNavigateRegion(r.key)}
-              className="home__scheduler-nav-button home__scheduler-nav-button--boss"
-            >
-              {r.label}
-              <span className="home__scheduler-nav-count">{r.count}</span>
-            </button>
-          ))}
-        </div>
-        {bossSelection.selectedCount > 0 && (
-          <button type="button" onClick={bossSelection.reset} className="home__boss-reset">
-            선택 초기화
-          </button>
-        )}
-      </div>
-
-      <button onClick={onBack} className="home__archive-back home__archive-back--standalone home__archive-back--boss">
-        ← 보스로
-      </button>
-    </>
-  )
+  return `주간 선택 ${bossSelection.weeklySelectedCount}/${bossSelection.limit} (월간 보스·시즌 보스 메이린 제외)`
 }
 
 /**
  * 왼쪽 페이지 - 보스 선택 목록. BookFlipStage의 renderLeftPageContent가
- * boss-daily / boss-weekly-maple 등 페이지의 "짝(왼쪽) 페이지"에 이 내용을
+ * boss-daily / boss-weekly 페이지의 "짝(왼쪽) 페이지"에 이 내용을
  * 얹어준다 (다른 페이지들처럼 빈 페이지로 두지 않고).
  */
 export function BossSelectionPage({ pageKind, scheduler }) {
