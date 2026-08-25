@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import EquipmentDetailPanel from './equipment/EquipmentPage.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
@@ -12,6 +13,66 @@ import '../../css/home-boss.css'
 import '../../css/home-scheduler.css'
 import '../../css/home-union.css'
 import '../../css/home-event.css'
+
+const EVENT_PAGE_SIZE = 12 // 3열 x 4행
+
+/**
+ * 이벤트 목록을 3x4 격자로 12개씩 끊어서 보여주고, 그보다 많으면 하단에
+ * 이전/다음 페이지 버튼을 보여준다. notices가 바뀌면(카테고리 재진입 등)
+ * 항상 1페이지부터 다시 보여준다.
+ */
+function EventNoticeGrid({ notices }) {
+  const [page, setPage] = useState(0)
+
+  useEffect(() => {
+    setPage(0)
+  }, [notices])
+
+  const totalPages = Math.max(1, Math.ceil(notices.length / EVENT_PAGE_SIZE))
+  const pageItems = notices.slice(page * EVENT_PAGE_SIZE, page * EVENT_PAGE_SIZE + EVENT_PAGE_SIZE)
+
+  return (
+    <>
+      <div className="home__notice-grid">
+        {pageItems.map((n) => (
+          <a
+            key={n.noticeId ?? n.title}
+            href={n.url}
+            target="_blank"
+            rel="noreferrer"
+            className="home__notice-card"
+          >
+            <span className="home__notice-card-title">{n.title}</span>
+          </a>
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="home__notice-pagination">
+          <button
+            type="button"
+            className="home__notice-page-button"
+            onClick={() => setPage((p) => p - 1)}
+            disabled={page === 0}
+          >
+            ← 이전
+          </button>
+          <span className="home__notice-page-indicator">
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            type="button"
+            className="home__notice-page-button"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= totalPages - 1}
+          >
+            다음 →
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
 
 /**
  * 아카이브 페이지 콘텐츠. BookFlipStage 안의 <Page>에 그대로 얹히는
@@ -118,19 +179,7 @@ export default function ArchivePage({
 
           {!eventNoticesLoading && !eventNoticesError && eventNotices && (
             eventNotices.length > 0 ? (
-              <div className="home__notice-bookmarks">
-                {eventNotices.map((n) => (
-                  <a
-                    key={n.noticeId ?? n.title}
-                    href={n.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="home__notice-bookmark"
-                  >
-                    <span className="home__notice-bookmark-title">{n.title}</span>
-                  </a>
-                ))}
-              </div>
+              <EventNoticeGrid notices={eventNotices} />
             ) : (
               <p className="home__select-hint">지금은 표시할 항목이 없어요.</p>
             )
