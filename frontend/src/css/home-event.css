@@ -12,40 +12,91 @@
   text-align: center;
 }
 
-.home__notice-bookmarks {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.6rem;
+/* 이벤트 카드 - 3열 x 4행 격자로 한 페이지에 최대 12개.
+   기존엔 리본 모양(clip-path) 태그가 개수만큼 줄바꿈되며 늘어나서 페이지마다
+   높이가 들쭉날쭉하고 화면 대비 밀도가 낮아 "투박하다"는 요청이 있었다.
+   다른 격자(유니온 아티팩트/챔피언, home-union.css)와 같은 카드 스타일로
+   통일하고, 페이지네이션으로 12개씩 끊어서 항상 같은 밀도로 보여준다. */
+.home__notice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 0.55rem;
   width: 100%;
   max-width: 400px;
-  max-height: 70%;
+  max-height: 62%;
   overflow-y: auto;
   padding-top: 0.5rem;
 }
 
-/* 북마크 리본 모양 - 아래쪽이 뾰족하게 잘린 태그 형태 */
-.home__notice-bookmark {
-  flex: 0 0 88px;
-  padding: 0.65rem 0.4rem 1.1rem;
-  background: var(--color-accent);
-  color: var(--color-page);
+.home__notice-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  padding: 0.5rem 0.4rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-ink);
   text-decoration: none;
   font-size: 0.68rem;
   font-weight: 700;
   text-align: center;
-  clip-path: polygon(0 0, 100% 0, 100% 76%, 50% 100%, 0 76%);
-  box-shadow: 0 3px 6px rgba(23, 20, 15, 0.2);
+  line-height: 1.3;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.home__notice-bookmark:nth-child(even) {
-  background: var(--color-accent-2);
+.home__notice-card:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-page);
 }
 
-.home__notice-bookmark-title {
+.home__notice-card-title {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 페이지네이션 - 12개 넘게 있을 때만 ArchivePage.jsx가 렌더링한다 */
+.home__notice-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.home__notice-page-button {
+  border: 1.5px solid var(--color-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-ink);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.home__notice-page-button:hover:not(:disabled) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-page);
+}
+
+.home__notice-page-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.home__notice-page-indicator {
+  min-width: 3.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0.75;
+  text-align: center;
 }
