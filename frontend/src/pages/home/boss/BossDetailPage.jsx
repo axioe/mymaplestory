@@ -12,18 +12,22 @@ import '../../../css/home-shared.css'
 import '../../../css/home-archive-shared.css'
 import '../../../css/home-boss.css'
 
+const BOSS_GROUPS_PER_PAGE = 6
+
 /**
  * 보스 목록 - 같은 보스 이름 아래 난이도별로 묶어서, 난이도는 라디오 버튼처럼
  * 하나만 고를 수 있게 한다(같은 보스를 여러 난이도로 중복해서 잡을 일은 없으니까).
  * 선택된 난이도 옆에는 인원수(1~6명) 선택이 나타나고, 결정석 가격은 인원수만큼
  * 나눠서 받으므로(가격/인원수) 그 기준으로 계산해서 보여준다.
  *
- * 지역(메이플월드/아케인/그란디스) 페이지에는 월간 보스(검은 마법사 등)도 그
- * 지역에 속하면 같이 섞여서 나온다. 다만 주간 처치 가능 횟수(12) 제한은
- * 실제로 "주간" 항목에만 적용돼야 하므로, 페이지 단위가 아니라 항목 하나하나의
- * 실제 cycle(resolveBossCycle)로 판단한다.
+ * 주간 보스는 여러 지역 보스가 한 목록에 다 섞여 있어서 항목이 많다. 예전엔
+ * 마우스 휠로 내려서 봐야 했는데(내부 스크롤), 6개씩 페이지로 끊어서 보여주고
+ * 하단에 이전/다음 버튼을 두는 방식으로 바꿨다. 월간 보스(검은 마법사 등)
+ * 그룹은 여전히 맨 뒤로 보내고, 그 경계가 있는 페이지에서만 구분선을 보여준다.
  */
 function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
+  const [page, setPage] = useState(0)
+
   if (!items || items.length === 0) {
     return <p className="home__select-hint">표시할 항목이 없어요.</p>
   }
@@ -43,75 +47,111 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
   ]
   const firstMonthlyIndex = sortedEntries.findIndex(([, difficulties]) => isMonthlyGroup(difficulties))
 
+  // 목록 길이가 바뀌어서(예: 데이터가 늦게 도착) 지금 페이지가 범위를 벗어나면
+  // 자동으로 보정한다 - 별도 reset useEffect 없이 렌더링 시점에 바로 clamp한다.
+  const totalPages = Math.max(1, Math.ceil(sortedEntries.length / BOSS_GROUPS_PER_PAGE))
+  const currentPage = Math.min(page, totalPages - 1)
+  const pageEntries = sortedEntries.slice(
+    currentPage * BOSS_GROUPS_PER_PAGE,
+    currentPage * BOSS_GROUPS_PER_PAGE + BOSS_GROUPS_PER_PAGE
+  )
+
   return (
-    <div className="home__scheduler-list">
-      {sortedEntries.map(([bossName, difficulties], index) => {
-        const selected = hasAnySelection(bossName)
-        const partySize = getPartySize(bossName)
+    <>
+      <div className="home__scheduler-list home__scheduler-list--boss">
+        {pageEntries.map(([bossName, difficulties], indexInPage) => {
+          const index = currentPage * BOSS_GROUPS_PER_PAGE + indexInPage
+          const selected = hasAnySelection(bossName)
+          const partySize = getPartySize(bossName)
 
-        return (
-          <Fragment key={bossName}>
-            {index === firstMonthlyIndex && (
-              <div className="home__boss-monthly-divider">
-                <span>월간 보스</span>
-              </div>
-            )}
-            <div className="home__boss-group">
-              <p className="home__boss-group-name">{bossName}</p>
-              <div className="home__boss-difficulty-row">
-                {difficulties.map((d) => {
-                  const itemCycle = resolveBossCycle(d)
-                  const checked = isSelected(bossName, d.difficulty)
-                  const disableNew = isAtLimitFor(itemCycle, bossName) && !selected
-                  const price = resolveBossPrice(d)
-                  const perPersonLabel = checked && price != null ? formatMeso(price / partySize) : formatMeso(price)
-                  return (
-                    <label
-                      key={d.difficulty}
-                      className={'home__boss-difficulty-option' + (checked ? ' home__boss-difficulty-option--checked' : '')}
-                    >
-                      <input
-                        type="radio"
-                        name={`boss-${bossName}`}
-                        checked={checked}
-                        onChange={() => {}}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={(e) => {
-                          e.currentTarget.blur()
-                          onToggle(bossName, d.difficulty, itemCycle)
-                        }}
-                        disabled={disableNew && !checked}
-                      />
-                      <span>
-                        {d.difficulty.toUpperCase()}
-                        {perPersonLabel && <span className="home__boss-difficulty-price">{perPersonLabel}</span>}
-                      </span>
-                    </label>
-                  )
-                })}
-              </div>
-
-              {selected && (
-                <div className="home__boss-party-row">
-                  <span className="home__boss-party-label">인원수</span>
-                  <select
-                    value={partySize}
-                    onChange={(e) => onSetPartySize(bossName, Number(e.target.value))}
-                    className="home__boss-party-select"
-                  >
-                    {Array.from({ length: maxPartySize }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n}>
-                        {n}명
-                      </option>
-                    ))}
-                  </select>
+          return (
+            <Fragment key={bossName}>
+              {index === firstMonthlyIndex && (
+                <div className="home__boss-monthly-divider">
+                  <span>월간 보스</span>
                 </div>
               )}
-            </div>
-          </Fragment>
-        )
-      })}
-    </div>
+              <div className="home__boss-group">
+                <p className="home__boss-group-name">{bossName}</p>
+                <div className="home__boss-difficulty-row">
+                  {difficulties.map((d) => {
+                    const itemCycle = resolveBossCycle(d)
+                    const checked = isSelected(bossName, d.difficulty)
+                    const disableNew = isAtLimitFor(itemCycle, bossName) && !selected
+                    const price = resolveBossPrice(d)
+                    const perPersonLabel = checked && price != null ? formatMeso(price / partySize) : formatMeso(price)
+                    return (
+                      <label
+                        key={d.difficulty}
+                        className={'home__boss-difficulty-option' + (checked ? ' home__boss-difficulty-option--checked' : '')}
+                      >
+                        <input
+                          type="radio"
+                          name={`boss-${bossName}`}
+                          checked={checked}
+                          onChange={() => {}}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.currentTarget.blur()
+                            onToggle(bossName, d.difficulty, itemCycle)
+                          }}
+                          disabled={disableNew && !checked}
+                        />
+                        <span>
+                          {d.difficulty.toUpperCase()}
+                          {perPersonLabel && <span className="home__boss-difficulty-price">{perPersonLabel}</span>}
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+
+                {selected && (
+                  <div className="home__boss-party-row">
+                    <span className="home__boss-party-label">인원수</span>
+                    <select
+                      value={partySize}
+                      onChange={(e) => onSetPartySize(bossName, Number(e.target.value))}
+                      className="home__boss-party-select"
+                    >
+                      {Array.from({ length: maxPartySize }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>
+                          {n}명
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </Fragment>
+          )
+        })}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="home__boss-pagination">
+          <button
+            type="button"
+            className="home__boss-page-button"
+            onClick={() => setPage(currentPage - 1)}
+            disabled={currentPage === 0}
+          >
+            ← 이전
+          </button>
+          <span className="home__boss-page-indicator">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <button
+            type="button"
+            className="home__boss-page-button"
+            onClick={() => setPage(currentPage + 1)}
+            disabled={currentPage >= totalPages - 1}
+          >
+            다음 →
+          </button>
+        </div>
+      )}
+    </>
   )
 }
 
