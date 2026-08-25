@@ -6,6 +6,53 @@
   bottom: calc(1rem - 15px);
 }
 
+/* 보스 목록만 내부 스크롤(휠) 대신 페이지네이션으로 넘겨보게 한다 - 공용
+   .home__scheduler-list(스케줄러 콘텐츠 목록과 공유)의 max-height/overflow를
+   여기서 무효화한다. 한 페이지 분량(6개)만 보여주므로 스크롤이 필요 없다. */
+.home__scheduler-list--boss {
+  max-height: none;
+  overflow-y: visible;
+}
+
+.home__boss-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.home__boss-page-button {
+  border: 1.5px solid var(--color-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-ink);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.home__boss-page-button:hover:not(:disabled) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-page);
+}
+
+.home__boss-page-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.home__boss-page-indicator {
+  min-width: 3.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0.75;
+  text-align: center;
+}
+
 /* 보스/스케줄러 개요(일일/주간, 지역 선택) 버튼도 동일하게 투명 배경으로 통일 */
 .home__scheduler-nav-button--boss {
   background: transparent;
