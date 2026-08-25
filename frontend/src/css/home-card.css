@@ -97,9 +97,14 @@
 .home__card-link {
   background: transparent;
   border: none;
-  color: var(--color-ink);
-  opacity: 0.6;
+  color: var(--color-accent);
+  opacity: 0.85;
   font-size: 0.78rem;
+  font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.home__card-link:hover {
+  opacity: 1;
 }
