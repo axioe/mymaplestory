@@ -144,11 +144,16 @@
 .home__archive-back {
   background: transparent;
   border: none;
-  color: var(--color-ink);
-  opacity: 0.55;
+  color: var(--color-accent);
+  opacity: 0.85;
   font-size: 0.78rem;
+  font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.home__archive-back:hover {
+  opacity: 1;
 }
 
 /* 스케줄러/보스 상세 페이지 등, 페이지마다 단독으로 쓰이는 뒤로가기 링크 위치 */
