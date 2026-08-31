@@ -139,8 +139,7 @@
   font-weight: 800;
 }
 
-/* 공지사항 전용 - 페이지 하단에 붙는 한 줄짜리 자동 슬라이드 티커 */
-/* 카테고리 선택과 무관하게 페이지 하단에 항상 고정되는 공지사항 티커 래퍼 */
+/* 페이지 하단의 "← ~~로" 뒤로가기 링크 공용 스타일 */
 .home__archive-back {
   background: transparent;
   border: none;
