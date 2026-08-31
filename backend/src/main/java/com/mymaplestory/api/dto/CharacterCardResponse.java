@@ -10,6 +10,7 @@ public record CharacterCardResponse(
         String worldName,
         String characterClass,
         Integer characterLevel,
+        String expRate,
         String characterImage,
         Integer popularity,
         String guildName
@@ -20,6 +21,7 @@ public record CharacterCardResponse(
                 basic.worldName(),
                 basic.characterClass(),
                 basic.characterLevel(),
+                basic.characterExpRate(),
                 basic.characterImage(),
                 popularity != null ? popularity.popularity() : null,
                 basic.characterGuildName()

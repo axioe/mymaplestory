@@ -14,10 +14,14 @@ const MOCK_CHARACTER = {
   popularity: 135,
   guildName: '밍밍',
   imageUrl: null,
+  expRate: '42.17',
 }
 
 export default function CharacterSummaryCard({ character = MOCK_CHARACTER, bare = false }) {
-  const { nickname, worldName, level, jobName, popularity, guildName, imageUrl } = character
+  const { nickname, worldName, level, jobName, popularity, guildName, imageUrl, expRate } = character
+  const expPercent = expRate != null && !Number.isNaN(Number(expRate))
+    ? Math.min(100, Math.max(0, Number(expRate)))
+    : null
 
   return (
     <div className={bare ? 'char-card char-card--bare' : 'char-card'}>
@@ -49,6 +53,15 @@ export default function CharacterSummaryCard({ character = MOCK_CHARACTER, bare 
         {worldName} <span className="char-card__subtitle-sep">·</span> {jobName}
         {bare && <> <span className="char-card__subtitle-sep">·</span> Lv.{level}</>}
       </p>
+
+      {expPercent != null && (
+        <div className="char-card__exp">
+          <div className="char-card__exp-track">
+            <div className="char-card__exp-fill" style={{ width: `${expPercent}%` }} />
+          </div>
+          <span className="char-card__exp-label">EXP {expPercent.toFixed(2)}%</span>
+        </div>
+      )}
 
       <div className="char-card__divider" aria-hidden="true">
         <span />

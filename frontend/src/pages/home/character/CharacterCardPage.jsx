@@ -11,6 +11,7 @@ function mapToCardProps(cardData) {
     worldName: cardData.worldName,
     level: cardData.characterLevel,
     jobName: cardData.characterClass,
+    expRate: cardData.expRate,
     popularity: cardData.popularity,
     guildName: cardData.guildName,
     imageUrl: cardData.characterImage,
