@@ -80,13 +80,20 @@ function useBookSize() {
  * 항상 "왼쪽 페이지 배경 이미지"(제본선이 오른쪽에 그려진 이미지)를 써야
  * 책이 자연스럽게 이어져 보인다. blank로만 구분하면 콘텐츠가 채워진 왼쪽
  * 페이지가 오른쪽 페이지용 이미지를 잘못 쓰게 되는 문제가 있었다.
+ *
+ * 왼쪽 슬롯에 실제 콘텐츠가 있을 때는(!blank && left) flip-page--left-content를
+ * 추가로 붙인다 - 기존 page-left.png 하단에 그려진 펜/잉크병 일러스트가
+ * 보스 선택 목록 등 실제 내용과 겹쳐 보이는 문제가 있어서, 그 일러스트를 뺀
+ * page-left-content.png로 배경만 교체한 버전(book-flip-stage.css 참고).
  */
 const Page = forwardRef(function Page({ children, blank = false, left = false }, ref) {
+  const className =
+    'flip-page' +
+    (blank ? ' flip-page--blank' : '') +
+    (left ? ' flip-page--left' : '') +
+    (left && !blank ? ' flip-page--left-content' : '')
   return (
-    <div
-      className={'flip-page' + (blank ? ' flip-page--blank' : '') + (left ? ' flip-page--left' : '')}
-      ref={ref}
-    >
+    <div className={className} ref={ref}>
       {children}
     </div>
   )
