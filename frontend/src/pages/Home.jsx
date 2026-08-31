@@ -23,6 +23,7 @@ import ArchivePage from './home/ArchivePage.jsx'
 import CategorySelector from './home/CategorySelector.jsx'
 import SchedulerDetailPage from './home/scheduler/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage } from './home/boss/BossDetailPage.jsx'
+import BossOverviewLeftPage from './home/boss/BossOverviewLeftPage.jsx'
 import { EquipmentSelectionPage } from './home/equipment/EquipmentPage.jsx'
 import UnionDetailPage from './home/union/UnionPage.jsx'
 import UnionInfoPage from './home/union/UnionInfoPage.jsx'
@@ -360,6 +361,9 @@ export default function Home() {
   function renderLeftPageContent(p) {
     if (p === 'apikey') {
       return <ApiKeyLeftPage />
+    }
+    if (p === 'archive-boss') {
+      return <BossOverviewLeftPage scheduler={scheduler} />
     }
     if (p === 'boss-daily') {
       return <BossSelectionPage pageKind="daily" scheduler={scheduler} />
