@@ -301,11 +301,10 @@ export function BossSelectionPage({ pageKind, scheduler }) {
 /**
  * 오른쪽 페이지 - 메소 합계 통계(전체 합산) + 뒤로가기. BookFlipStage 안의
  * <Page>에 그대로 얹히는 "내용물"이다. 아카이브/개요 페이지에서 버튼을 누르면
- * 여기로 실제 책장 넘김을 통해 들어온다.
- * onBack의 목적지는 pageKind에 따라 다르다 - 일일은 아카이브(보스 개요)로,
- * 지역 페이지는 "주간 보스" 개요 페이지로 돌아간다 (Home.jsx에서 결정).
+ * 여기로 실제 책장 넘김을 통해 들어온다. onBack은 일일/주간 둘 다 아카이브
+ * (보스 개요)로 돌아간다 (Home.jsx에서 flipTo('archive-boss')로 연결).
  */
-export default function BossDetailPage({ pageKind, scheduler, onBack, backLabel }) {
+export default function BossDetailPage({ pageKind, scheduler, onBack }) {
   const bossSelection = useBossSelectionContext()
   const { label } = resolvePageItemsAndLabel(pageKind, scheduler)
   const allItems = getValidBossContents(scheduler)
@@ -330,7 +329,7 @@ export default function BossDetailPage({ pageKind, scheduler, onBack, backLabel 
       </div>
 
       <button onClick={onBack} className="home__archive-back home__archive-back--standalone home__archive-back--boss">
-        {backLabel ?? '← 보스로'}
+        ← 보스로
       </button>
     </>
   )
