@@ -40,13 +40,13 @@
   right: 0.9rem;
   border: none;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--color-ink-muted);
   font-size: 1.4rem;
   line-height: 1;
-  opacity: 0.6;
   padding: 0.25rem;
+  transition: color 0.15s ease;
 }
 
 .modal-close:hover {
-  opacity: 1;
+  color: var(--color-ink);
 }

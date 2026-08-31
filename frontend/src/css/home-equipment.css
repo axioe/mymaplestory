@@ -81,7 +81,7 @@
 .home__equipment-cell-label {
   font-size: 0.5rem;
   line-height: 1.1;
-  opacity: 0.45;
+  color: var(--color-ink-muted);
   padding: 0 2px;
   word-break: keep-all;
 }
@@ -159,7 +159,7 @@
 .home__equipment-detail-slot {
   margin: 0 0 0.3rem;
   font-size: 0.68rem;
-  opacity: 0.55;
+  color: var(--color-ink-muted);
 }
 
 /* 부위를 이름/스타포스와 한 줄에 이어 붙일 때 쓰는 인라인 버전 - 줄바꿈 없이
@@ -177,7 +177,7 @@
   margin: 0 0 0.15rem;
   font-size: 0.68rem;
   font-weight: 700;
-  opacity: 0.6;
+  color: var(--color-ink-muted);
 }
 
 /* 메이플스토리 잠재능력 등급 색상 관례 그대로 - 레어(파랑)/에픽(보라)/
@@ -241,5 +241,5 @@
 .home__equipment-seteffect-next {
   margin: 0.25rem 0 0;
   font-size: 0.66rem;
-  opacity: 0.55;
+  color: var(--color-ink-muted);
 }

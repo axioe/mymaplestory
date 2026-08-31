@@ -92,7 +92,7 @@
   overflow: hidden;
   white-space: nowrap;
   font-size: 0.78rem;
-  opacity: 0.65;
+  color: var(--color-ink-muted);
   letter-spacing: 0.03em;
   /* 유니온 정보 박스와 통일 - 라벨과 값 사이를 점선으로 잇는 장부 스타일. */
   border-bottom: 1.5px dashed var(--color-line);
@@ -125,7 +125,7 @@
 .home__level-chart-tooltip-date {
   margin: 0 0 0.15rem;
   font-size: 0.68rem;
-  opacity: 0.65;
+  color: var(--color-ink-muted);
 }
 
 .home__level-chart-tooltip-level {
@@ -138,14 +138,14 @@
 .home__level-chart-tooltip-exp {
   margin: 0.1rem 0 0;
   font-size: 0.7rem;
-  opacity: 0.75;
+  color: var(--color-ink-muted);
 }
 
 .home__level-note {
   margin: 0.4rem 0 0;
   font-size: 0.72rem;
   line-height: 1.4;
-  opacity: 0.6;
+  color: var(--color-ink-muted);
   text-align: left;
 }
 
