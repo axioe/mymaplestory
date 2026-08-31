@@ -166,21 +166,6 @@
   cursor: pointer;
 }
 
-/* 보스 개요에서 우리 앱의 "선택" 카운트(계획) 바로 아래에 보여주는, 넥슨이
-   실제로 기록한 이번 주 보스 처치 수 - 서로 다른 두 숫자를 나란히 보여줘서
-   계획과 실제 처치 현황을 한눈에 비교할 수 있게 한다. */
-.home__boss-nexon-clear {
-  margin: 0.3rem 0 0;
-  font-size: 0.74rem;
-  opacity: 0.65;
-}
-
-.home__boss-nexon-clear-value {
-  font-weight: 700;
-  color: var(--color-accent);
-  opacity: 1;
-}
-
 /* 주간 보스 "이번 주 완료" 체크 - 인원수 선택과 같은 자리(선택된 보스에서만
    나타남)에 이어서 보여준다. */
 .home__boss-clear-row {

@@ -253,14 +253,6 @@ export default function ArchivePage({
                 {scheduler.characterName} · {scheduler.worldName} · 이번 주 보스 선택 {bossSelection.weeklySelectedCount}/
                 {bossSelection.limit}마리 (주간 보스 기준)
               </p>
-              {scheduler.weeklyBossClearCount != null && scheduler.weeklyBossClearLimitCount != null && (
-                <p className="home__boss-nexon-clear">
-                  넥슨 기록: 이번 주 보스 처치{' '}
-                  <span className="home__boss-nexon-clear-value">
-                    {scheduler.weeklyBossClearCount}/{scheduler.weeklyBossClearLimitCount}마리
-                  </span>
-                </p>
-              )}
               <div className="home__scheduler-nav">
                 <button
                   type="button"
