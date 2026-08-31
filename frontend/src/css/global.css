@@ -27,6 +27,14 @@
   --color-accent-2: #d4a017;    /* 금색 - 보조 강조 */
   --color-line: #4e342e;
   --shadow-book: 0 24px 50px rgba(78, 52, 46, 0.22);
+  /* 라벨/힌트/보조 설명처럼 본문보다 덜 강조하고 싶은 글씨용 - 예전엔 이런
+     자리마다 color: var(--color-ink)에 opacity: 0.5~0.65를 걸어서 흐리게
+     했는데, 종이 배경(--color-page)이 이미 밝아서 그 위에서 대비가
+     4.5:1(WCAG AA 본문 기준) 밑으로 떨어져 글씨가 잘 안 보인다는 피드백을
+     받았다. opacity로 배경과 섞는 대신, 처음부터 대비를 계산해서 만든
+     색을 직접 쓴다(라이트: 약 7:1, 다크: 약 7.7:1) - 톤은 --color-ink와
+     같은 갈색 계열이라 회색으로 붕 뜨지 않고 종이 질감과 어울린다. */
+  --color-ink-muted: #6b4f45;
 
   /* 하위 호환용 별칭 */
   --color-bg: var(--color-canvas);
@@ -49,6 +57,7 @@
 
   --color-bg: var(--color-canvas);
   --color-accent-soft: #c97350;
+  --color-ink-muted: #c9b6a3;
 
   color-scheme: dark;
 }

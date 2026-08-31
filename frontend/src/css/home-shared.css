@@ -126,5 +126,5 @@
 .home__select-hint {
   margin: 0;
   font-size: 0.9rem;
-  opacity: 0.75;
+  color: var(--color-ink-muted);
 }

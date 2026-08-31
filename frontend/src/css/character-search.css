@@ -42,5 +42,5 @@
 }
 
 .character-card__stats dt {
-  opacity: 0.7;
+  color: var(--color-ink-muted);
 }

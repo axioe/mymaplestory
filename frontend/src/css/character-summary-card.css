@@ -4,6 +4,7 @@
   --char-card-border: var(--color-accent-2);
   --char-card-accent: var(--color-accent);
   --char-card-text: var(--color-ink);
+  --char-card-text-muted: var(--color-ink-muted);
   --char-card-portrait-bg: var(--color-canvas);
 }
 
@@ -191,8 +192,7 @@
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: var(--char-card-text);
-  opacity: 0.6;
+  color: var(--char-card-text-muted);
 }
 
 /* 소제목과 통계 사이 장식용 구분선 - 가운데 마름모 장식 */
@@ -239,8 +239,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--char-card-text);
-  opacity: 0.5;
+  color: var(--char-card-text-muted);
 }
 
 .char-card__stat-value {

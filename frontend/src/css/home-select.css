@@ -56,7 +56,10 @@
 .home__select-chip-class {
   font-size: 0.7rem;
   font-weight: 400;
-  opacity: 0.7;
+  /* --color-ink-muted 같은 고정 색 대신 opacity를 쓴다 - 부모(.home__select-chip)가
+     호버 시 색을 var(--color-page)로 바꾸는데, 여기서 고정 색을 주면 그 상속이
+     끊겨 호버 중에도 계속 흐린 갈색으로 보이는 문제가 생긴다. */
+  opacity: 0.85;
 }
 
 /* 서버 선택 화면의 월드(서버) 버튼 - 스케줄러/장비 등과 공유하는
