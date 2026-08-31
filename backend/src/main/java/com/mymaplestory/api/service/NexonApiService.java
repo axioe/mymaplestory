@@ -11,6 +11,7 @@ import com.mymaplestory.api.dto.ContentItem;
 import com.mymaplestory.api.dto.EquipmentItem;
 import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
+import com.mymaplestory.api.dto.LevelPoint;
 import com.mymaplestory.api.dto.NexonAccountListResponse;
 import com.mymaplestory.api.dto.NexonErrorResponse;
 import com.mymaplestory.api.dto.NexonEquipmentItem;
@@ -43,6 +44,8 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -245,9 +248,15 @@ public class NexonApiService {
      * days가 클수록 넥슨 API를 그만큼 여러 번 순차 호출하므로 응답이 느려질 수 있다.
      */
     /**
-     * "가장 최근 레벨업이 언제였는지"를 찾는다.
-     * 오늘 레벨을 기준으로, 어제부터 하루씩 거슬러 올라가면서 레벨이 달라지는(=아직 그
-     * 레벨이 아니었던) 첫 날짜를 찾는다. 그 다음 날이 바로 레벨업한 날짜가 된다.
+     * "가장 최근 레벨업이 언제였는지"를 찾고, 그 과정에서 조회한 날짜별 레벨/경험치도
+     * 함께 모아 진척도 차트용 history로 내려준다.
+     *
+     * 오늘 레벨을 기준으로, 어제부터 하루씩 거슬러 올라가며 조회한다. 레벨이 달라지는
+     * (=아직 그 레벨이 아니었던) 첫 날짜를 "가장 최근 레벨업" 신호로 기록해두되,
+     * 거기서 멈추지 않고 계속 거슬러 올라간다 - 그래야 이전 레벨업들까지 포함한
+     * 여러 날짜의 점을 모아 진짜 "진척도" 곡선을 그릴 수 있다. 실제로는 넥슨이
+     * 조회를 거부하기 시작하는 시점(며칠 정도로 추정)에서 자연히 멈추므로,
+     * maxLookbackDays까지 다 채워지는 경우는 드물다.
      *
      * maxLookbackDays를 넘어서도 레벨이 그대로라면(오래 정체 중이거나 만렙 등),
      * 이 조회 범위 안에서는 레벨업 시점을 못 찾았다는 뜻으로 levelUpDate=null을 반환한다.
@@ -262,8 +271,11 @@ public class NexonApiService {
 
         String levelUpDate = null;
         Long daysSinceLevelUp = null;
+        List<LevelPoint> history = new ArrayList<>();
 
         if (currentLevel != null) {
+            history.add(new LevelPoint(LocalDate.now().toString(), currentLevel, expRate));
+
             LocalDate cursor = LocalDate.now().minusDays(1);
             LocalDate earliestAllowed = LocalDate.now().minusDays(maxLookbackDays);
 
@@ -287,18 +299,20 @@ public class NexonApiService {
                     break;
                 }
 
-                if (!levelAtCursor.equals(currentLevel)) {
-                    // 실제로 레벨이 달랐던 날을 확인했다 - 이건 진짜 신호다.
+                history.add(new LevelPoint(cursor.toString(), levelAtCursor, basic.characterExpRate()));
+
+                if (levelUpDate == null && !levelAtCursor.equals(currentLevel)) {
+                    // 실제로 레벨이 달랐던 날을 처음 확인했다 - 이건 진짜 신호다.
                     LocalDate foundDate = cursor.plusDays(1);
                     levelUpDate = foundDate.toString();
                     daysSinceLevelUp = ChronoUnit.DAYS.between(foundDate, LocalDate.now());
-                    break;
                 }
                 cursor = cursor.minusDays(1);
             }
         }
 
-        return new LevelHistoryResponse(characterName, currentLevel, expRate, levelUpDate, daysSinceLevelUp, maxLookbackDays);
+        Collections.reverse(history); // 차트에서 왼쪽(과거) -> 오른쪽(오늘) 순으로 보이도록.
+        return new LevelHistoryResponse(characterName, currentLevel, expRate, levelUpDate, daysSinceLevelUp, maxLookbackDays, history);
     }
 
     private static final String NOTICE_BOARD_URL = "https://maplestory.nexon.com/News/Notice";
