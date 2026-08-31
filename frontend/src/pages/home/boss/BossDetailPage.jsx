@@ -8,6 +8,7 @@ import {
   getWeeklyLikeBossItems,
 } from '../../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../../context/BossSelectionContext.jsx'
+import { useBossClearTracker } from '../../../hooks/useBossClearTracker.js'
 import '../../../css/home-shared.css'
 import '../../../css/home-archive-shared.css'
 import '../../../css/home-boss.css'
@@ -25,7 +26,18 @@ const BOSS_GROUPS_PER_PAGE = 6
  * 하단에 이전/다음 버튼을 두는 방식으로 바꿨다. 월간 보스(검은 마법사 등)
  * 그룹은 여전히 맨 뒤로 보내고, 그 경계가 있는 페이지에서만 구분선을 보여준다.
  */
-function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onToggle, getPartySize, onSetPartySize, maxPartySize }) {
+function BossGroupList({
+  items,
+  isSelected,
+  hasAnySelection,
+  isAtLimitFor,
+  onToggle,
+  getPartySize,
+  onSetPartySize,
+  maxPartySize,
+  isCleared,
+  onToggleCleared,
+}) {
   const [page, setPage] = useState(0)
 
   if (!items || items.length === 0) {
@@ -121,6 +133,17 @@ function BossGroupList({ items, isSelected, hasAnySelection, isAtLimitFor, onTog
                       ))}
                     </select>
                   </div>
+                )}
+
+                {selected && onToggleCleared && (
+                  <label className="home__boss-clear-row">
+                    <input
+                      type="checkbox"
+                      checked={isCleared(bossName)}
+                      onChange={() => onToggleCleared(bossName)}
+                    />
+                    <span>이번 주 완료</span>
+                  </label>
                 )}
               </div>
             </Fragment>
@@ -276,9 +299,13 @@ function selectionSummaryText(pageKind, bossSelection) {
  * boss-daily / boss-weekly 페이지의 "짝(왼쪽) 페이지"에 이 내용을
  * 얹어준다 (다른 페이지들처럼 빈 페이지로 두지 않고).
  */
-export function BossSelectionPage({ pageKind, scheduler }) {
+export function BossSelectionPage({ pageKind, scheduler, characterName }) {
   const bossSelection = useBossSelectionContext()
   const { items, label } = resolvePageItemsAndLabel(pageKind, scheduler)
+  // 완료 체크는 주간 보스에서만 의미가 있다(넥슨 초기화 주기와 맞물린 개념이라
+  // 매일 초기화되는 일일 보스에는 적용하지 않는다) - characterName이 없는
+  // (=일일 페이지) 호출부에서는 훅이 빈 상태로 동작해 아무 영향이 없다.
+  const bossClear = useBossClearTracker(pageKind === 'weekly' ? characterName : null)
 
   return (
     <div className="home__level-content home__level-content--left">
@@ -293,6 +320,8 @@ export function BossSelectionPage({ pageKind, scheduler }) {
         getPartySize={bossSelection.getPartySize}
         onSetPartySize={bossSelection.setPartySize}
         maxPartySize={bossSelection.maxPartySize}
+        isCleared={pageKind === 'weekly' ? bossClear.isCleared : undefined}
+        onToggleCleared={pageKind === 'weekly' ? bossClear.toggleCleared : undefined}
       />
     </div>
   )

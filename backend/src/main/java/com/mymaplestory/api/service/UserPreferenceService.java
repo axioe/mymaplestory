@@ -1,14 +1,20 @@
 package com.mymaplestory.api.service;
 
+import com.mymaplestory.api.dto.BossClearDto;
 import com.mymaplestory.api.dto.BossSelectionDto;
 import com.mymaplestory.api.dto.SkipDto;
+import com.mymaplestory.api.entity.BossClearRecordEntity;
 import com.mymaplestory.api.entity.BossSelectionEntity;
 import com.mymaplestory.api.entity.SkipRecordEntity;
+import com.mymaplestory.api.repository.BossClearRecordRepository;
 import com.mymaplestory.api.repository.BossSelectionRepository;
 import com.mymaplestory.api.repository.SkipRecordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 /**
@@ -22,10 +28,16 @@ public class UserPreferenceService {
 
     private final BossSelectionRepository bossSelectionRepository;
     private final SkipRecordRepository skipRecordRepository;
+    private final BossClearRecordRepository bossClearRecordRepository;
 
-    public UserPreferenceService(BossSelectionRepository bossSelectionRepository, SkipRecordRepository skipRecordRepository) {
+    public UserPreferenceService(
+            BossSelectionRepository bossSelectionRepository,
+            SkipRecordRepository skipRecordRepository,
+            BossClearRecordRepository bossClearRecordRepository
+    ) {
         this.bossSelectionRepository = bossSelectionRepository;
         this.skipRecordRepository = skipRecordRepository;
+        this.bossClearRecordRepository = bossClearRecordRepository;
     }
 
     // ---- 보스 선택 ----
@@ -85,6 +97,43 @@ public class UserPreferenceService {
             }
         } else {
             existing.ifPresent(skipRecordRepository::delete);
+        }
+    }
+
+    // ---- 주간 보스 완료 체크 ----
+
+    /**
+     * 메이플스토리 주간 보스 초기화 요일(목요일) 기준으로, 오늘이 속한 보스
+     * 주간의 시작일을 계산한다. 오늘이 목요일이면 오늘 자신이 시작일이다.
+     * 이 값으로 완료 기록을 조회/저장하므로, 다음 목요일이 지나면 자연히
+     * 새로운 weekStartDate를 쓰게 되어(그 날짜의 행이 없으니) 별도 초기화
+     * 배치 없이도 "이번 주 완료" 상태가 매주 자동으로 초기화된다.
+     */
+    private LocalDate currentBossWeekStart() {
+        return LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.THURSDAY));
+    }
+
+    public List<BossClearDto> getBossClears(String characterName) {
+        return bossClearRecordRepository
+                .findByCharacterNameAndWeekStartDate(characterName, currentBossWeekStart()).stream()
+                .map(e -> new BossClearDto(e.getBossName(), true))
+                .toList();
+    }
+
+    /**
+     * 존재 여부 자체가 "이번 주 완료"를 의미한다 - setSkip과 같은 방식.
+     */
+    @Transactional
+    public void setBossClear(String characterName, String bossName, boolean cleared) {
+        LocalDate weekStart = currentBossWeekStart();
+        var existing = bossClearRecordRepository
+                .findByCharacterNameAndBossNameAndWeekStartDate(characterName, bossName, weekStart);
+        if (cleared) {
+            if (existing.isEmpty()) {
+                bossClearRecordRepository.save(new BossClearRecordEntity(characterName, bossName, weekStart));
+            }
+        } else {
+            existing.ifPresent(bossClearRecordRepository::delete);
         }
     }
 }

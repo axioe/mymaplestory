@@ -356,7 +356,7 @@ export default function Home() {
       return <BossSelectionPage pageKind="daily" scheduler={scheduler} />
     }
     if (p === 'boss-weekly') {
-      return <BossSelectionPage pageKind="weekly" scheduler={scheduler} />
+      return <BossSelectionPage pageKind="weekly" scheduler={scheduler} characterName={selectedCharacter} />
     }
     if (p === 'archive-loot') {
       return (

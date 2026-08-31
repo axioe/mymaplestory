@@ -1,5 +1,6 @@
 package com.mymaplestory.api.controller;
 
+import com.mymaplestory.api.dto.BossClearDto;
 import com.mymaplestory.api.dto.BossSelectionDto;
 import com.mymaplestory.api.dto.SkipDto;
 import com.mymaplestory.api.service.UserPreferenceService;
@@ -65,5 +66,21 @@ public class UserPreferenceController {
             @Valid @RequestBody SkipDto request
     ) {
         userPreferenceService.setSkip(characterName, contentName, request.skipped());
+    }
+
+    // ---- 주간 보스 완료 체크 ----
+
+    @GetMapping("/boss-clears")
+    public List<BossClearDto> getBossClears(@PathVariable String characterName) {
+        return userPreferenceService.getBossClears(characterName);
+    }
+
+    @PutMapping("/boss-clears/{bossName}")
+    public void setBossClear(
+            @PathVariable String characterName,
+            @PathVariable String bossName,
+            @Valid @RequestBody BossClearDto request
+    ) {
+        userPreferenceService.setBossClear(characterName, bossName, request.cleared());
     }
 }
