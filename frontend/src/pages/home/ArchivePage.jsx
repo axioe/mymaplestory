@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import EquipmentDetailPanel from './equipment/EquipmentPage.jsx'
 import LevelProgressChart from './LevelProgressChart.jsx'
+import CharacterStatPanel from './CharacterStatPanel.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
 import '../../css/home-shared.css'
@@ -14,6 +15,7 @@ import '../../css/home-boss.css'
 import '../../css/home-scheduler.css'
 import '../../css/home-union.css'
 import '../../css/home-event.css'
+import '../../css/home-stat.css'
 
 const EVENT_PAGE_SIZE = 12 // 3열 x 4행
 
@@ -102,6 +104,9 @@ export default function ArchivePage({
   levelHistory,
   levelHistoryLoading,
   levelHistoryError,
+  characterStat,
+  characterStatLoading,
+  characterStatError,
   eventNotices,
   eventNoticesLoading,
   eventNoticesError,
@@ -173,6 +178,17 @@ export default function ArchivePage({
                 </p>
               )}
             </div>
+          )}
+        </div>
+      ) : active === 'stat' ? (
+        <div className="home__level-content home__level-content--stats">
+          <h2 className="display home__select-title">능력치</h2>
+
+          {characterStatLoading && <p>불러오는 중...</p>}
+          {characterStatError && <p className="home__apikey-error">{characterStatError}</p>}
+
+          {!characterStatLoading && !characterStatError && characterStat && (
+            <CharacterStatPanel characterStat={characterStat} />
           )}
         </div>
       ) : active === 'event' ? (

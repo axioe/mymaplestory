@@ -9,6 +9,7 @@ export const PAGE_ORDER = [
   'archive-boss',
   'archive-loot',
   'archive-level',
+  'archive-stat',
   'archive-union',
   'archive-event',
   'archive-scheduler',

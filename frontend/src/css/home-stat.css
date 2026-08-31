@@ -1,0 +1,120 @@
+/* 능력치 카테고리 전용 스타일 (CharacterStatPanel.jsx). */
+
+.home__stat-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.home__stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.home__stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.7rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  background: transparent;
+}
+
+/* 전투력은 다른 스탯보다 더 중요하게 보이도록 두 칸을 다 차지하고 강조색을 쓴다. */
+.home__stat-card--power {
+  grid-column: 1 / -1;
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.home__stat-card-label {
+  font-size: 0.68rem;
+  opacity: 0.65;
+}
+
+.home__stat-card--power .home__stat-card-label {
+  color: var(--color-page);
+  opacity: 0.85;
+}
+
+.home__stat-card-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.home__stat-card--power .home__stat-card-value {
+  color: var(--color-page);
+  font-size: 1.2rem;
+}
+
+.home__stat-more {
+  width: 100%;
+  max-width: 320px;
+}
+
+.home__stat-more-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  opacity: 0.7;
+  cursor: pointer;
+  text-align: left;
+}
+
+.home__stat-more-caret {
+  display: inline-block;
+  font-size: 0.65rem;
+  transition: transform 0.15s ease;
+}
+
+.home__stat-more-caret--open {
+  transform: rotate(90deg);
+}
+
+.home__stat-more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+}
+
+.home__stat-more-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+}
+
+.home__stat-more-row-name {
+  flex: 1;
+  min-width: 0;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-bottom: 1.5px dashed var(--color-line);
+  padding-bottom: 0.1rem;
+}
+
+.home__stat-more-row-value {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--color-accent);
+}
