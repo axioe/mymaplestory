@@ -112,6 +112,9 @@ export default function ArchivePage({
   equipment,
   equipmentLoading,
   equipmentError,
+  setEffect,
+  setEffectLoading,
+  setEffectError,
   selectedPreset,
   selectedSlot,
   union,
@@ -268,6 +271,9 @@ export default function ArchivePage({
               equipment={equipment}
               selectedPreset={selectedPreset}
               selectedSlot={selectedSlot}
+              setEffect={setEffect}
+              setEffectLoading={setEffectLoading}
+              setEffectError={setEffectError}
             />
           )}
         </div>

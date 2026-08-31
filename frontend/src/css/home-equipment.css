@@ -202,3 +202,44 @@
   opacity: 1;
   color: #4f9152;
 }
+
+/* 적용 세트효과 - 특정 장비를 선택하지 않아도 항상 보이는, 상세 패널 맨 위
+   섹션이다. 아래(선택한 장비 상세)와 시각적으로 구분되도록 점선으로 나눈다. */
+.home__equipment-seteffect {
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed var(--color-line);
+}
+
+.home__equipment-seteffect-item {
+  margin-bottom: 0.5rem;
+}
+
+.home__equipment-seteffect-item:last-child {
+  margin-bottom: 0;
+}
+
+.home__equipment-seteffect-name {
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.home__equipment-seteffect-count {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+/* 다음 단계 세트효과까지 몇 개 더 필요한지 - 지금 활성화된 효과는 아니므로 흐리게 */
+.home__equipment-seteffect-next {
+  margin: 0.25rem 0 0;
+  font-size: 0.66rem;
+  opacity: 0.55;
+}

@@ -155,14 +155,68 @@ function potentialGradeClass(grade) {
   }
 }
 
-export default function EquipmentDetailPanel({ equipment, selectedPreset, selectedSlot }) {
+/**
+ * 세트효과 응답(SetEffectItem[])에서, 지금 착용 개수(totalSetCount) 기준으로
+ * "이미 적용된" 효과만 골라내고, 다음 단계 효과가 있으면 몇 개 더 모아야
+ * 하는지도 같이 계산한다. 한 조각도 안 맞춰서 활성화된 효과가 없는 세트는
+ * (착용 중이라도) 보여줄 게 없으므로 걸러낸다.
+ */
+function resolveActiveSets(setEffect) {
+  const items = setEffect?.setEffects ?? []
+  return items
+    .map((item) => {
+      const infos = item.setEffectInfo ?? []
+      const activeInfos = infos
+        .filter((i) => i.setCount <= item.totalSetCount)
+        .sort((a, b) => a.setCount - b.setCount)
+      const nextInfo = infos
+        .filter((i) => i.setCount > item.totalSetCount)
+        .sort((a, b) => a.setCount - b.setCount)[0]
+      return { setName: item.setName, totalSetCount: item.totalSetCount, activeInfos, nextInfo }
+    })
+    .filter((item) => item.activeInfos.length > 0)
+}
+
+export default function EquipmentDetailPanel({
+  equipment,
+  selectedPreset,
+  selectedSlot,
+  setEffect,
+  setEffectLoading,
+  setEffectError,
+}) {
   const effectivePreset = resolveEffectivePreset(equipment, selectedPreset)
   const items = getPresetItems(equipment, effectivePreset)
   const bySlot = new Map(items.map((item) => [item.slot, item]))
   const selectedItem = selectedSlot ? bySlot.get(selectedSlot) : null
+  const activeSets = resolveActiveSets(setEffect)
 
   return (
     <div className="home__equipment-detail home__equipment-detail--standalone">
+      {/* 특정 장비를 고르지 않아도 항상 보여준다 - 세트효과는 슬롯 하나가 아니라
+          지금 착용 중인 전체 장비 조합에서 나오는 보너스라서다. */}
+      {setEffectLoading && <p className="home__select-hint">세트효과 불러오는 중...</p>}
+      {setEffectError && <p className="home__apikey-error">{setEffectError}</p>}
+      {!setEffectLoading && !setEffectError && activeSets.length > 0 && (
+        <div className="home__equipment-seteffect">
+          <p className="home__equipment-potential-label">적용 세트효과</p>
+          {activeSets.map((item) => (
+            <div key={item.setName} className="home__equipment-seteffect-item">
+              <p className="home__equipment-seteffect-name">
+                {item.setName}
+                <span className="home__equipment-seteffect-count">{item.totalSetCount}세트</span>
+              </p>
+              <MergedStatList lines={item.activeInfos.map((i) => i.setOption)} />
+              {item.nextInfo && (
+                <p className="home__equipment-seteffect-next">
+                  {item.nextInfo.setCount}세트 달성 시 효과 추가
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {!selectedItem ? (
         <p className="home__select-hint">왼쪽 페이지에서 장비를 눌러서 스텟과 잠재능력을 확인해보세요.</p>
       ) : (
