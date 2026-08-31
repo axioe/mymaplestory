@@ -6,6 +6,7 @@ import com.mymaplestory.api.dto.BossContentItem;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterListResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
+import com.mymaplestory.api.dto.CharacterStatResponse;
 import com.mymaplestory.api.dto.CharacterSummary;
 import com.mymaplestory.api.dto.ContentItem;
 import com.mymaplestory.api.dto.EquipmentItem;
@@ -13,6 +14,7 @@ import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.LevelPoint;
 import com.mymaplestory.api.dto.NexonAccountListResponse;
+import com.mymaplestory.api.dto.NexonCharacterStatResponse;
 import com.mymaplestory.api.dto.NexonErrorResponse;
 import com.mymaplestory.api.dto.NexonEquipmentItem;
 import com.mymaplestory.api.dto.NexonEventNoticeListResponse;
@@ -496,6 +498,32 @@ public class NexonApiService {
                 throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
             }
             throw new NexonApiException("넥슨 API 조회 실패 (set-effect): " + e.getStatusCode(), e);
+        }
+    }
+
+    /**
+     * 종합 능력치(STR/DEX/INT/LUK, 공격력/마력, 보스 몬스터 데미지 %, 전투력 등) 조회.
+     * 경로: /character/stat (문서: https://openapi.nexon.com/ko/game/maplestory/?id=13)
+     */
+    public CharacterStatResponse getCharacterStat(String characterName, String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        String ocid = getOcid(characterName, requestApiKey);
+        try {
+            NexonCharacterStatResponse raw = nexonRestClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/character/stat")
+                            .queryParam("ocid", ocid)
+                            .build())
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(NexonCharacterStatResponse.class);
+
+            return CharacterStatResponse.of(characterName, raw);
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (stat): " + e.getStatusCode(), e);
         }
     }
 

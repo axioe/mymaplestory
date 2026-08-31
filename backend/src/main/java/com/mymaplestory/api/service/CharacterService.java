@@ -3,6 +3,7 @@ package com.mymaplestory.api.service;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterCardResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
+import com.mymaplestory.api.dto.CharacterStatResponse;
 import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
@@ -38,6 +39,13 @@ public class CharacterService {
      */
     public LevelHistoryResponse getLevelHistory(String characterName, String apiKey, int days) {
         return nexonApiService.getLevelHistory(characterName, apiKey, days);
+    }
+
+    /**
+     * 아카이브 - 능력치 카테고리용 종합 능력치(STR/DEX/INT/LUK, 전투력 등).
+     */
+    public CharacterStatResponse getCharacterStat(String characterName, String apiKey) {
+        return nexonApiService.getCharacterStat(characterName, apiKey);
     }
 
     /**
