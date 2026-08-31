@@ -105,6 +105,42 @@
   color: var(--color-ink);
 }
 
+/* 레벨 진척도 차트(LevelProgressChart) - .home__level-summary 박스 안에서
+   글씨보다 먼저(위쪽에) 나오므로, 박스 패딩을 넘어 양옆 끝까지 넓게 쓰도록
+   음수 마진으로 상쇄한다(LevelProgressChart의 margin.left도 같은 이유). */
+.home__level-chart {
+  width: calc(100% + 1.6rem);
+  margin: -0.4rem -0.8rem 0;
+}
+
+.home__level-chart-tooltip {
+  padding: 0.5rem 0.7rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-page);
+  box-shadow: var(--shadow-book);
+  text-align: left;
+}
+
+.home__level-chart-tooltip-date {
+  margin: 0 0 0.15rem;
+  font-size: 0.68rem;
+  opacity: 0.65;
+}
+
+.home__level-chart-tooltip-level {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.home__level-chart-tooltip-exp {
+  margin: 0.1rem 0 0;
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
 .home__level-note {
   margin: 0.4rem 0 0;
   font-size: 0.72rem;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import EquipmentDetailPanel from './equipment/EquipmentPage.jsx'
+import LevelProgressChart from './LevelProgressChart.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
 import '../../css/home-shared.css'
@@ -144,6 +145,7 @@ export default function ArchivePage({
 
           {!levelHistoryLoading && !levelHistoryError && levelHistory && (
             <div className="home__level-summary">
+              <LevelProgressChart history={levelHistory.history} />
               <p className="home__level-current">현재 Lv.{levelHistory.currentLevel}</p>
               <div className="home__level-summary-row">
                 <span className="home__level-summary-label">경험치</span>
