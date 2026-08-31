@@ -143,16 +143,19 @@
    .flip-page--left의 펜/잉크병 일러스트가 실제 내용과 겹쳐 보이는 문제가
    있어서, 그 일러스트를 뺀 버전으로 교체한다(테두리/모서리 낙엽 장식은 동일).
    .flip-page--left와 클래스 등급(specificity)이 같으므로 아래에 와야
-   우선 적용된다.
-   다크모드 버전 이미지는 아직 없어서(원본을 라이트 버전만 받음), 다크모드는
-   당분간 계속 기존 page-left-dark.png(펜/잉크병 있는 버전)를 쓴다 - 위
-   [data-theme='dark'] .flip-page--left 규칙이 클래스 2개 조합이라 이
-   규칙보다 우선순위가 높아서 자동으로 그렇게 된다. 다크 버전 이미지를
-   받으면 여기에 [data-theme='dark'] .flip-page--left-content 규칙을 추가하면 된다. */
+   우선 적용된다. */
 .flip-page--left-content {
   background-image:
     url('/page-left-content.png'),
     radial-gradient(circle, rgba(78, 52, 46, 0.05) 0.6px, transparent 0.6px);
+}
+
+/* 다크모드 콘텐츠 배경 - [data-theme='dark'] .flip-page--left(클래스 2개
+   조합, 등급이 더 높음)보다 반드시 뒤에 와야 우선 적용된다. */
+[data-theme='dark'] .flip-page--left-content {
+  background-image:
+    url('/page-left-content-dark.png'),
+    radial-gradient(circle, rgba(245, 236, 223, 0.05) 0.6px, transparent 0.6px);
 }
 
 /* HTMLFlipBook은 표지(showCover 단독 페이지)일 때도 내부적으로 "두 페이지짜리
