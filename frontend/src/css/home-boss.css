@@ -166,6 +166,22 @@
   cursor: pointer;
 }
 
+/* 주간 보스 "이번 주 완료" 체크 - 인원수 선택과 같은 자리(선택된 보스에서만
+   나타남)에 이어서 보여준다. */
+.home__boss-clear-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.home__boss-clear-row input {
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
 /* 오른쪽 메소 합계 통계 패널 */
 .home__boss-stats {
   width: 100%;

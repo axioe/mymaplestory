@@ -114,6 +114,19 @@ export async function setSkip(characterName, contentName, skipped) {
   )
 }
 
+// ---- 주간 보스 완료 체크 (DB 저장) ----
+export async function fetchBossClears(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/boss-clears`)
+  return data
+}
+
+export async function setBossClear(characterName, bossName, cleared) {
+  await apiClient.put(
+    `/characters/${encodeURIComponent(characterName)}/boss-clears/${encodeURIComponent(bossName)}`,
+    { bossName, cleared }
+  )
+}
+
 // 아직 localStorage에 저장되지 않은 키를 검증할 때 쓰므로,
 // 인터셉터에 기대지 않고 헤더를 직접 지정한다.
 export async function validateApiKey(apiKey) {
