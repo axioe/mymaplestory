@@ -116,8 +116,10 @@ export default function Home() {
   )
   const { scheduler, loading: schedulerLoading, error: schedulerError } = useScheduler(
     // "스케줄러"/"보스" 카테고리와 그 상세 페이지들은 전부 같은 API(scheduler
-    // 응답)를 재사용한다.
-    (page === 'archive-scheduler' || page === 'archive-boss' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
+    // 응답)를 재사용한다. 카드 페이지도 포함하는 이유: TodoReminderBanner가
+    // "오늘 아직 안 한 일일 콘텐츠/이번 주 안 잡은 보스"를 캐릭터 카드에서
+    // 바로 보여주려면 이 데이터가 필요하다.
+    (page === 'card' || page === 'archive-scheduler' || page === 'archive-boss' || page.startsWith('scheduler-') || page.startsWith('boss-')) &&
       hasSelectedCharacter,
     selectedCharacter
   )
@@ -270,6 +272,10 @@ export default function Home() {
           onGoArchive={() => flipTo('archive-boss')}
           onBackToSelect={handleBackToSelect}
           onReset={handleReset}
+          characterName={selectedCharacter}
+          scheduler={scheduler}
+          onGoDaily={() => flipTo('scheduler-daily')}
+          onGoBossWeekly={() => flipTo('boss-weekly')}
         />
       )
     }

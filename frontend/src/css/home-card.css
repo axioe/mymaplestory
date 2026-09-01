@@ -7,6 +7,13 @@
   justify-content: center;
   padding-top: 1.5rem;
   gap: 1.1rem;
+  /* TodoReminderBanner가 추가되면서 내용이 이 페이지 높이보다 길어질 수 있게
+     됐다(예전엔 항상 다 들어갔음). overflow: hidden이면 justify-content:
+     center가 초과분을 위아래로 똑같이 밀어내면서 아래쪽(리마인더/버튼들)이
+     화면 밖으로 잘려 아예 손 댈 수 없게 되는 문제가 있었다. 다른 아카이브
+     페이지(home__level-content)와 같은 해결책 - 세로 스크롤을 허용한다.
+     내용이 짧을 땐(리마인더 없음) 지금처럼 그대로 중앙 정렬된다. */
+  overflow-y: auto;
 }
 
 /* JPG로 캡쳐되는 영역 - 카드 주변에 여백을 둬서 저장된 이미지가 딱 붙어 잘려 보이지
@@ -34,6 +41,59 @@
 
 [data-theme='dark'] .home__card-capture--with-bg {
   background-image: url('/page-right-dark.png');
+}
+
+/* "오늘의 할 일" 리마인더(TodoReminderBanner.jsx) - 이메일/푸시 알림 없이,
+   캐릭터 카드를 열 때마다 바로 눈에 띄도록 카드 바로 아래에 얹는다. 항목을
+   누르면 해당 화면(일일 콘텐츠/주간 보스)으로 실제 책장 넘김으로 이동한다. */
+.home__card-todo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 280px;
+  margin-top: -0.4rem;
+}
+
+.home__card-todo-title {
+  margin: 0 0 0.1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-muted);
+  text-align: center;
+}
+
+.home__card-todo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.home__card-todo-item:hover {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+.home__card-todo-count {
+  flex-shrink: 0;
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+.home__card-todo-item:hover .home__card-todo-count {
+  color: var(--color-page);
 }
 
 .home__card-download {
