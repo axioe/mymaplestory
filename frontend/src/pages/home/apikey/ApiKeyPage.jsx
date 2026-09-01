@@ -66,10 +66,15 @@ export default function ApiKeyPage({ onSubmit, checking, disabled, error }) {
           넥슨 오픈 API(openapi.nexon.com)에서 발급받은 개인 API 키를 입력하면
           내 캐릭터 카드와 아카이브 카테고리를 볼 수 있어요. 이 브라우저에만 저장됩니다.
         </p>
-        <button type="button" className="home__apikey-guide-link" onClick={() => setShowGuide(true)}>
-          API 키는 어떻게 받나요? →
-        </button>
       </div>
+
+      <button
+        type="button"
+        className="home__apikey-guide-link home__apikey-guide-link--bottom"
+        onClick={() => setShowGuide(true)}
+      >
+        API 키는 어떻게 받나요? →
+      </button>
 
       <ApiKeyGuideModal open={showGuide} onClose={() => setShowGuide(false)} />
     </div>

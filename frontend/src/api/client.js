@@ -24,11 +24,6 @@ export async function fetchCharacterCard(characterName) {
   return data
 }
 
-export async function fetchCharacterStat(characterName) {
-  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/stat`)
-  return data
-}
-
 export async function fetchLevelHistory(characterName, days = 30) {
   const { data } = await apiClient.get(
     `/characters/${encodeURIComponent(characterName)}/level-history`,

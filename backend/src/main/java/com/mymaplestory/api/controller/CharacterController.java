@@ -2,7 +2,6 @@ package com.mymaplestory.api.controller;
 
 import com.mymaplestory.api.dto.CashItemEquipmentResponse;
 import com.mymaplestory.api.dto.CharacterCardResponse;
-import com.mymaplestory.api.dto.CharacterStatResponse;
 import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
@@ -39,18 +38,6 @@ public class CharacterController {
             @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
     ) {
         return characterService.getCharacterCard(characterName, apiKey);
-    }
-
-    /**
-     * 예: GET /api/characters/체리톡톡/stat
-     * 종합 능력치(STR/DEX/INT/LUK, 공격력/마력, 보스 몬스터 데미지 %, 전투력 등) 조회.
-     */
-    @GetMapping("/{characterName}/stat")
-    public CharacterStatResponse getCharacterStat(
-            @PathVariable String characterName,
-            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
-    ) {
-        return characterService.getCharacterStat(characterName, apiKey);
     }
 
     /**

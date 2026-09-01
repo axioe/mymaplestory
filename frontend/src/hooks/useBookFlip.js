@@ -23,7 +23,6 @@ export const PAGE_ORDER = [
   'loot-equipment',
   'loot-cash',
   'archive-level',
-  'archive-stat',
   'archive-union',
   'union-raider',
   'union-artifact',

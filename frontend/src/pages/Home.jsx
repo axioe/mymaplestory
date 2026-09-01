@@ -6,7 +6,6 @@ import { useBookFlip, PAGE_ORDER } from '../hooks/useBookFlip.js'
 import { useAccountCharacters } from '../hooks/useAccountCharacters.js'
 import { useCharacterCardData } from '../hooks/useCharacterCardData.js'
 import { useLevelHistory } from '../hooks/useLevelHistory.js'
-import { useCharacterStat } from '../hooks/useCharacterStat.js'
 import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
 import { useEquipment } from '../hooks/useEquipment.js'
@@ -41,7 +40,6 @@ const CATEGORIES = [
   { key: 'boss', label: '보스' },
   { key: 'loot', label: '장비' },
   { key: 'level', label: '레벨' },
-  { key: 'stat', label: '능력치' },
   { key: 'union', label: '유니온' },
   { key: 'event', label: '이벤트' },
   // 공지사항은 카테고리로 따로 안 두고, 아카이브 페이지 하단에 항상 떠 있는
@@ -102,10 +100,6 @@ export default function Home() {
   )
   const { levelHistory, loading: levelHistoryLoading, error: levelHistoryError } = useLevelHistory(
     page === 'archive-level' && hasSelectedCharacter,
-    selectedCharacter
-  )
-  const { characterStat, loading: characterStatLoading, error: characterStatError } = useCharacterStat(
-    page === 'archive-stat' && hasSelectedCharacter,
     selectedCharacter
   )
   // 이벤트: "이벤트" 카테고리를 선택했을 때만 조회
@@ -311,9 +305,6 @@ export default function Home() {
           levelHistory={levelHistory}
           levelHistoryLoading={levelHistoryLoading}
           levelHistoryError={levelHistoryError}
-          characterStat={characterStat}
-          characterStatLoading={characterStatLoading}
-          characterStatError={characterStatError}
           eventNotices={eventNotices}
           eventNoticesLoading={eventNoticesLoading}
           eventNoticesError={eventNoticesError}

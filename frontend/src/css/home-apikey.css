@@ -91,9 +91,8 @@
   text-align: center;
 }
 
-/* 힌트 문구 아래, "API 키는 어떻게 받나요?" 안내 모달을 여는 링크 버튼 */
+/* "API 키는 어떻게 받나요?" 안내 모달을 여는 링크 버튼 */
 .home__apikey-guide-link {
-  margin-top: 0.5rem;
   border: none;
   background: transparent;
   color: var(--color-accent);
@@ -106,6 +105,16 @@
 
 .home__apikey-guide-link:hover {
   opacity: 0.8;
+}
+
+/* 원래 점선 칸 바로 아래(힌트 문구 옆)에 있었는데, 배경 이미지의 나뭇잎/열쇠
+   장식과 겹쳐 보이는 문제가 있었다. 다른 페이지의 "← 뒤로" 링크들과 같은
+   방식(home__archive-back--standalone)으로, 배경과 안 겹치는 책 하단 중앙으로 옮긴다. */
+.home__apikey-guide-link--bottom {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* ApiKeyGuideModal 내용 - mapleaudit.com/guide의 "번호 매긴 단계 + 등록 폼에
