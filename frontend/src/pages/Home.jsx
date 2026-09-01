@@ -381,7 +381,7 @@ export default function Home() {
       return <ApiKeyLeftPage />
     }
     if (p === 'archive-boss') {
-      return <BossOverviewLeftPage scheduler={scheduler} />
+      return <BossOverviewLeftPage scheduler={scheduler} characterName={selectedCharacter} />
     }
     if (p === 'boss-daily') {
       return <BossSelectionPage pageKind="daily" scheduler={scheduler} />
