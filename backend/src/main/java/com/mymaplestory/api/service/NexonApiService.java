@@ -3,6 +3,8 @@ package com.mymaplestory.api.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymaplestory.api.config.NexonApiProperties;
 import com.mymaplestory.api.dto.BossContentItem;
+import com.mymaplestory.api.dto.CashItemEquipmentItem;
+import com.mymaplestory.api.dto.CashItemEquipmentResponse;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterListResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
@@ -14,6 +16,8 @@ import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.LevelPoint;
 import com.mymaplestory.api.dto.NexonAccountListResponse;
+import com.mymaplestory.api.dto.NexonCashItemEquipmentItem;
+import com.mymaplestory.api.dto.NexonCashItemEquipmentResponse;
 import com.mymaplestory.api.dto.NexonCharacterStatResponse;
 import com.mymaplestory.api.dto.NexonErrorResponse;
 import com.mymaplestory.api.dto.NexonEquipmentItem;
@@ -467,6 +471,49 @@ public class NexonApiService {
     private List<EquipmentItem> toEquipmentItems(List<NexonEquipmentItem> items) {
         if (items == null) return List.of();
         return items.stream().map(EquipmentItem::from).toList();
+    }
+
+    /**
+     * 장착 캐시 장비(코디) 조회. 경로: /character/cashitem-equipment
+     * (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14)
+     * item-equipment와 동일하게 프리셋(1/2/3)이 한 번의 호출에 다 같이 내려온다.
+     */
+    public CashItemEquipmentResponse getCashItemEquipment(String characterName, String requestApiKey) {
+        String apiKey = resolveApiKey(requestApiKey);
+        String ocid = getOcid(characterName, requestApiKey);
+        try {
+            NexonCashItemEquipmentResponse raw = nexonRestClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/character/cashitem-equipment")
+                            .queryParam("ocid", ocid)
+                            .build())
+                    .header(NEXON_AUTH_HEADER, apiKey)
+                    .retrieve()
+                    .body(NexonCashItemEquipmentResponse.class);
+
+            if (raw == null) {
+                throw new NexonApiException("넥슨 API가 빈 응답을 반환했습니다 (cashitem-equipment).");
+            }
+
+            return new CashItemEquipmentResponse(
+                    raw.characterClass(),
+                    raw.presetNo(),
+                    toCashItemEquipmentItems(raw.cashItemEquipmentBase()),
+                    toCashItemEquipmentItems(raw.cashItemEquipmentPreset1()),
+                    toCashItemEquipmentItems(raw.cashItemEquipmentPreset2()),
+                    toCashItemEquipmentItems(raw.cashItemEquipmentPreset3())
+            );
+        } catch (RestClientResponseException e) {
+            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
+                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
+            }
+            throw new NexonApiException("넥슨 API 조회 실패 (cashitem-equipment): " + e.getStatusCode(), e);
+        }
+    }
+
+    private List<CashItemEquipmentItem> toCashItemEquipmentItems(List<NexonCashItemEquipmentItem> items) {
+        if (items == null) return List.of();
+        return items.stream().map(CashItemEquipmentItem::from).toList();
     }
 
     /**

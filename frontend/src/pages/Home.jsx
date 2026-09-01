@@ -10,6 +10,7 @@ import { useCharacterStat } from '../hooks/useCharacterStat.js'
 import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
 import { useEquipment } from '../hooks/useEquipment.js'
+import { useCashItemEquipment } from '../hooks/useCashItemEquipment.js'
 import { useUnion } from '../hooks/useUnion.js'
 import { BossSelectionProvider } from '../context/BossSelectionContext.jsx'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
@@ -37,6 +38,7 @@ import '../css/notice-ticker.css'
 const CATEGORIES = [
   { key: 'boss', label: '보스' },
   { key: 'loot', label: '장비' },
+  { key: 'cash', label: '캐시' },
   { key: 'level', label: '레벨' },
   { key: 'stat', label: '능력치' },
   { key: 'union', label: '유니온' },
@@ -129,6 +131,11 @@ export default function Home() {
     page === 'archive-loot' && hasSelectedCharacter,
     selectedCharacter
   )
+  // 캐시: "캐시" 카테고리를 선택했을 때만 조회 (item-equipment와 별도 엔드포인트).
+  const { cashItem, loading: cashItemLoading, error: cashItemError } = useCashItemEquipment(
+    page === 'archive-cash' && hasSelectedCharacter,
+    selectedCharacter
+  )
   // 유니온: "유니온" 카테고리 개요 + 4개 상세 페이지 전부에서 필요해서 조건에 같이 포함한다.
   const {
     union,
@@ -153,6 +160,10 @@ export default function Home() {
   // 상태를 여기(Home.jsx)에서 들고 있어야 양쪽이 같은 선택을 보게 된다.
   const [selectedEquipmentPreset, setSelectedEquipmentPreset] = useState(null)
   const [selectedEquipmentSlot, setSelectedEquipmentSlot] = useState(null)
+
+  // 캐시 - 코디 프리셋 버튼만 있고 상세 패널이 따로 없어서(단일 페이지), 프리셋
+  // 선택 상태만 들고 있으면 된다.
+  const [selectedCashPreset, setSelectedCashPreset] = useState(null)
 
   // MenuButton의 "홈으로" 클릭을 처리한다. 이미 "/" 위에 있을 때는 라우트가
   // 안 바뀌어서 아무 반응이 없었던 버그 수정 - state로 전달된 타임스탬프를 감지해서
@@ -313,6 +324,11 @@ export default function Home() {
           equipmentError={equipmentError}
           selectedPreset={selectedEquipmentPreset}
           selectedSlot={selectedEquipmentSlot}
+          cashItem={cashItem}
+          cashItemLoading={cashItemLoading}
+          cashItemError={cashItemError}
+          selectedCashPreset={selectedCashPreset}
+          onSelectCashPreset={setSelectedCashPreset}
           union={union}
           unionRaider={unionRaider}
           unionArtifact={unionArtifact}

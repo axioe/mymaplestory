@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import EquipmentDetailPanel from './equipment/EquipmentPage.jsx'
+import CashItemPanel from './cash/CashItemPage.jsx'
 import CharacterStatPanel from './CharacterStatPanel.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
@@ -15,6 +16,7 @@ import '../../css/home-scheduler.css'
 import '../../css/home-union.css'
 import '../../css/home-event.css'
 import '../../css/home-stat.css'
+import '../../css/home-cash.css'
 
 const EVENT_PAGE_SIZE = 12 // 3열 x 4행
 
@@ -119,6 +121,11 @@ export default function ArchivePage({
   equipmentError,
   selectedPreset,
   selectedSlot,
+  cashItem,
+  cashItemLoading,
+  cashItemError,
+  selectedCashPreset,
+  onSelectCashPreset,
   union,
   unionRaider,
   unionArtifact,
@@ -281,6 +288,17 @@ export default function ArchivePage({
 
           {!equipmentLoading && !equipmentError && equipment && (
             <EquipmentDetailPanel equipment={equipment} selectedPreset={selectedPreset} selectedSlot={selectedSlot} />
+          )}
+        </div>
+      ) : active === 'cash' ? (
+        <div className="home__level-content home__level-content--stats">
+          <h2 className="display home__select-title">캐시 아이템</h2>
+
+          {cashItemLoading && <p>불러오는 중...</p>}
+          {cashItemError && <p className="home__apikey-error">{cashItemError}</p>}
+
+          {!cashItemLoading && !cashItemError && cashItem && (
+            <CashItemPanel cashItem={cashItem} selectedPreset={selectedCashPreset} onSelectPreset={onSelectCashPreset} />
           )}
         </div>
       ) : active === 'union' ? (

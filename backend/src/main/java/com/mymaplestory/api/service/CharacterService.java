@@ -1,5 +1,6 @@
 package com.mymaplestory.api.service;
 
+import com.mymaplestory.api.dto.CashItemEquipmentResponse;
 import com.mymaplestory.api.dto.CharacterBasicDto;
 import com.mymaplestory.api.dto.CharacterCardResponse;
 import com.mymaplestory.api.dto.CharacterPopularityDto;
@@ -59,6 +60,13 @@ public class CharacterService {
      */
     public EquipmentPresetResponse getItemEquipment(String characterName, String apiKey) {
         return nexonApiService.getItemEquipment(characterName, apiKey);
+    }
+
+    /**
+     * 아카이브 - 캐시 카테고리용 장착 캐시 장비(코디, 프리셋 1/2/3 포함).
+     */
+    public CashItemEquipmentResponse getCashItemEquipment(String characterName, String apiKey) {
+        return nexonApiService.getCashItemEquipment(characterName, apiKey);
     }
 
     /**
