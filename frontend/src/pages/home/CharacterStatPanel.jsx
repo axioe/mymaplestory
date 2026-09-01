@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import MergedStatList from '../../components/MergedStatList.jsx'
+import { mergeUnionStatLines } from '../../utils/mergeUnionStats.js'
+import '../../css/home-stat.css'
 
 /**
  * 넥슨이 내려주는 수십 개의 스탯 중, 실제로 캐릭터 파워를 가늠할 때 가장 먼저
@@ -33,8 +36,31 @@ function formatStatValue(value) {
   return /^\d+$/.test(value) ? Number(value).toLocaleString('ko-KR') : value
 }
 
-export default function CharacterStatPanel({ characterStat }) {
+/**
+ * 세트효과 응답(SetEffectItem[])에서, 지금 착용 개수(totalSetCount) 기준으로
+ * "이미 적용된" 효과만 골라내고, 다음 단계 효과가 있으면 몇 개 더 모아야
+ * 하는지도 같이 계산한다. 한 조각도 안 맞춰서 활성화된 효과가 없는 세트는
+ * (착용 중이라도) 보여줄 게 없으므로 걸러낸다.
+ */
+function resolveActiveSets(setEffect) {
+  const items = setEffect?.setEffects ?? []
+  return items
+    .map((item) => {
+      const infos = item.setEffectInfo ?? []
+      const activeInfos = infos
+        .filter((i) => i.setCount <= item.totalSetCount)
+        .sort((a, b) => a.setCount - b.setCount)
+      const nextInfo = infos
+        .filter((i) => i.setCount > item.totalSetCount)
+        .sort((a, b) => a.setCount - b.setCount)[0]
+      return { setName: item.setName, totalSetCount: item.totalSetCount, activeInfos, nextInfo }
+    })
+    .filter((item) => item.activeInfos.length > 0)
+}
+
+export default function CharacterStatPanel({ characterStat, setEffect, setEffectLoading, setEffectError }) {
   const [expanded, setExpanded] = useState(false)
+  const [showSetEffect, setShowSetEffect] = useState(false)
   const stats = characterStat?.stats ?? []
 
   if (stats.length === 0) {
@@ -46,6 +72,7 @@ export default function CharacterStatPanel({ characterStat }) {
     .filter(Boolean)
   const headlineNames = new Set(headline.map((s) => s.name))
   const rest = stats.filter((s) => !headlineNames.has(s.name))
+  const activeSets = resolveActiveSets(setEffect)
 
   return (
     <div className="home__stat-panel">
@@ -74,6 +101,36 @@ export default function CharacterStatPanel({ characterStat }) {
                 <div key={s.name} className="home__stat-more-row">
                   <span className="home__stat-more-row-name">{s.name}</span>
                   <span className="home__stat-more-row-value">{formatStatValue(s.value)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 세트효과는 슬롯 하나가 아니라 지금 착용 중인 전체 장비 조합에서 나오는
+          보너스라서, 장비 카테고리가 아니라 여기(능력치)에서 보여준다. 기본은
+          접혀있고, 위 "전체 스탯 보기"와 같은 캐럿 토글 스타일로 통일한다. */}
+      {setEffectLoading && <p className="home__select-hint">세트효과 불러오는 중...</p>}
+      {setEffectError && <p className="home__apikey-error">{setEffectError}</p>}
+      {!setEffectLoading && !setEffectError && activeSets.length > 0 && (
+        <div className="home__stat-more">
+          <button type="button" className="home__stat-more-toggle" onClick={() => setShowSetEffect((v) => !v)}>
+            <span className={'home__stat-more-caret' + (showSetEffect ? ' home__stat-more-caret--open' : '')}>▸</span>
+            세트옵션 보기
+          </button>
+          {showSetEffect && (
+            <div className="home__stat-seteffect">
+              {activeSets.map((item) => (
+                <div key={item.setName} className="home__stat-seteffect-item">
+                  <p className="home__stat-seteffect-name">
+                    {item.setName}
+                    <span className="home__stat-seteffect-count">{item.totalSetCount}세트</span>
+                  </p>
+                  <MergedStatList lines={mergeUnionStatLines(item.activeInfos.map((i) => i.setOption))} />
+                  {item.nextInfo && (
+                    <p className="home__stat-seteffect-next">{item.nextInfo.setCount}세트 달성 시 효과 추가</p>
+                  )}
                 </div>
               ))}
             </div>

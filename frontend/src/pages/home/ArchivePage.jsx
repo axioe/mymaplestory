@@ -186,7 +186,12 @@ export default function ArchivePage({
           {characterStatError && <p className="home__apikey-error">{characterStatError}</p>}
 
           {!characterStatLoading && !characterStatError && characterStat && (
-            <CharacterStatPanel characterStat={characterStat} />
+            <CharacterStatPanel
+              characterStat={characterStat}
+              setEffect={setEffect}
+              setEffectLoading={setEffectLoading}
+              setEffectError={setEffectError}
+            />
           )}
         </div>
       ) : active === 'event' ? (
@@ -283,14 +288,7 @@ export default function ArchivePage({
           {equipmentError && <p className="home__apikey-error">{equipmentError}</p>}
 
           {!equipmentLoading && !equipmentError && equipment && (
-            <EquipmentDetailPanel
-              equipment={equipment}
-              selectedPreset={selectedPreset}
-              selectedSlot={selectedSlot}
-              setEffect={setEffect}
-              setEffectLoading={setEffectLoading}
-              setEffectError={setEffectError}
-            />
+            <EquipmentDetailPanel equipment={equipment} selectedPreset={selectedPreset} selectedSlot={selectedSlot} />
           )}
         </div>
       ) : active === 'union' ? (
