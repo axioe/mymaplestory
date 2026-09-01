@@ -223,7 +223,14 @@
 .char-card__stats {
   display: flex;
   align-items: center;
-  gap: 1.4rem;
+  justify-content: center;
+  /* "함께한 기간" 통계가 추가되면서 항목이 2개(인기도/길드)에서 최대 3개로
+     늘었다 - 기존 gap(1.4rem)을 3개에 그대로 쓰면 카드 폭을 넘어서 오른쪽
+     끝(함께한 기간 숫자)이 테두리에 잘려 보였다. 세 자리 숫자(일수)도
+     들어가야 하니 줄과 최소폭을 같이 줄여서 항상 한 줄에 들어오게 한다. */
+  gap: 0.9rem;
+  row-gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .char-card__stat {
@@ -231,7 +238,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.2rem;
-  min-width: 64px;
+  min-width: 56px;
 }
 
 .char-card__stat-label {

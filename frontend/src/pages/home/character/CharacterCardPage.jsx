@@ -16,6 +16,7 @@ function mapToCardProps(cardData) {
     popularity: cardData.popularity,
     guildName: cardData.guildName,
     imageUrl: cardData.characterImage,
+    dateCreate: cardData.dateCreate,
   }
 }
 
