@@ -24,6 +24,7 @@ import CategorySelector from './home/CategorySelector.jsx'
 import SchedulerDetailPage from './home/scheduler/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage } from './home/boss/BossDetailPage.jsx'
 import BossOverviewLeftPage from './home/boss/BossOverviewLeftPage.jsx'
+import QuickSwitchWidget from './home/character/QuickSwitchWidget.jsx'
 import { EquipmentSelectionPage } from './home/equipment/EquipmentPage.jsx'
 import UnionDetailPage from './home/union/UnionPage.jsx'
 import UnionInfoPage from './home/union/UnionInfoPage.jsx'
@@ -214,6 +215,17 @@ export default function Home() {
   const handleBackToSelect = () => {
     clearSelectedCharacter()
     jumpTo('select')
+  }
+
+  // 우측 상단 "캐릭터 전환" 위젯(QuickSwitchWidget) - 서버/캐릭터 선택 단계를
+  // 다시 거치지 않고 바로 다른 캐릭터의 카드로 점프한다. handleSelectCharacter와
+  // 달리 world 상태를 안 건드리고(어차피 select 페이지를 안 거치니까 필요
+  // 없음), 애니메이션 없이 즉시 이동한다(jumpTo) - "빠른 전환"이라는 의도에
+  // 맞게, 다른 캐릭터로 바뀌는데 표지->API키 같은 넘김 연출이 끼면 오히려
+  // 더 느리게 느껴진다.
+  const handleQuickSwitch = (character) => {
+    selectCharacter(character.characterName)
+    jumpTo('card')
   }
 
   // 카테고리 버튼(보스/장비/레벨/유니온/이벤트/스케줄러)을 누르면 실제 책 페이지로 넘어간다.
@@ -407,6 +419,17 @@ export default function Home() {
   return (
     <BossSelectionProvider characterName={selectedCharacter}>
       <section className="home">
+        {/* 캐릭터가 하나라도 선택된 뒤로는(카드/아카이브 어디서든) 서버 선택부터
+            다시 거치지 않고 바로 다른 캐릭터로 전환할 수 있게 우측 상단에
+            고정 버튼을 띄운다. */}
+        {hasSelectedCharacter && (
+          <QuickSwitchWidget
+            apiKey={apiKey}
+            currentCharacterName={selectedCharacter}
+            onSwitch={handleQuickSwitch}
+          />
+        )}
+
         {/* 책 바로 위 - 아카이브 계열 페이지를 보고 있을 때만 뜨는 공지사항 티커.
             책 안에 두면 다른 콘텐츠(북마크, 스케줄러 목록 등)와 겹쳐 보이는
             문제가 있어서 밖으로 뺐고, 책과 같은 그룹으로 묶어서 화면 가운데

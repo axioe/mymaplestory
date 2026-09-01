@@ -1,0 +1,86 @@
+/* 우측 상단 고정 "캐릭터 전환" 버튼 - 홈 버튼(56px)/다크모드 토글(52px)과
+   나란히, 그 왼쪽에 이어 붙인다(각 요소 폭 + 0.75rem 간격을 그대로 누적). */
+.quick-switch__trigger {
+  position: fixed;
+  top: 1.5rem;
+  right: calc(1.5rem + 56px + 0.75rem + 52px + 0.75rem);
+  z-index: 50;
+  width: 40px;
+  height: 40px;
+  margin-top: 8px; /* 56px 홈 버튼과 세로 중앙이 맞도록 */
+  border-radius: 50%;
+  border: 2px solid var(--color-line);
+  background: var(--color-page);
+  box-shadow: 0 6px 14px rgba(78, 52, 46, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.quick-switch__trigger:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.quick-switch__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quick-switch__world {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.quick-switch__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.quick-switch__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.quick-switch__item:hover:not(:disabled) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-page);
+}
+
+.quick-switch__item:hover:not(:disabled) .quick-switch__item-meta {
+  color: var(--color-page);
+}
+
+.quick-switch__item--current {
+  border-color: var(--color-accent);
+  cursor: default;
+  opacity: 0.7;
+}
+
+.quick-switch__item-meta {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
