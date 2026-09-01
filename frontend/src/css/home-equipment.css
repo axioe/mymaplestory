@@ -203,12 +203,35 @@
   color: #4f9152;
 }
 
-/* 적용 세트효과 - 특정 장비를 선택하지 않아도 항상 보이는, 상세 패널 맨 위
-   섹션이다. 아래(선택한 장비 상세)와 시각적으로 구분되도록 점선으로 나눈다. */
+/* 세트옵션 토글 - 기본으로는 선택한 장비 자체의 옵션만 보이게 하고, 세트효과는
+   이 버튼을 눌러야 펼쳐지도록 상세 패널 맨 아래에 둔다. 위(장비 옵션)와
+   시각적으로 구분되도록 점선으로 나눈다. */
+.home__equipment-seteffect-toggle-wrap {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--color-line);
+  text-align: left;
+}
+
+.home__equipment-seteffect-toggle {
+  background: transparent;
+  border: 1.5px solid var(--color-line);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.home__equipment-seteffect-toggle:hover {
+  background: var(--color-accent);
+  color: var(--color-page);
+  border-color: var(--color-accent);
+}
+
 .home__equipment-seteffect {
-  margin-bottom: 0.6rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px dashed var(--color-line);
+  margin-top: 0.6rem;
 }
 
 .home__equipment-seteffect-item {

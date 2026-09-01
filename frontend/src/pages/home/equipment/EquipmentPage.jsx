@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import MergedStatList from '../../../components/MergedStatList.jsx'
+import { mergeUnionStatLines } from '../../../utils/mergeUnionStats.js'
 // 예전엔 CSS를 직접 import하지 않고, ArchivePage가 home-archive.css를 먼저
 // 불러온 덕에 전역으로 이미 로드돼있는 걸 그냥 얻어 쓰고 있었다 - 어느 파일이
 // 실제로 이 스타일에 의존하는지 알기 어려워서, 이제 명시적으로 가져온다.
@@ -185,6 +187,7 @@ export default function EquipmentDetailPanel({
   setEffectLoading,
   setEffectError,
 }) {
+  const [showSetEffect, setShowSetEffect] = useState(false)
   const effectivePreset = resolveEffectivePreset(equipment, selectedPreset)
   const items = getPresetItems(equipment, effectivePreset)
   const bySlot = new Map(items.map((item) => [item.slot, item]))
@@ -193,30 +196,6 @@ export default function EquipmentDetailPanel({
 
   return (
     <div className="home__equipment-detail home__equipment-detail--standalone">
-      {/* 특정 장비를 고르지 않아도 항상 보여준다 - 세트효과는 슬롯 하나가 아니라
-          지금 착용 중인 전체 장비 조합에서 나오는 보너스라서다. */}
-      {setEffectLoading && <p className="home__select-hint">세트효과 불러오는 중...</p>}
-      {setEffectError && <p className="home__apikey-error">{setEffectError}</p>}
-      {!setEffectLoading && !setEffectError && activeSets.length > 0 && (
-        <div className="home__equipment-seteffect">
-          <p className="home__equipment-potential-label">적용 세트효과</p>
-          {activeSets.map((item) => (
-            <div key={item.setName} className="home__equipment-seteffect-item">
-              <p className="home__equipment-seteffect-name">
-                {item.setName}
-                <span className="home__equipment-seteffect-count">{item.totalSetCount}세트</span>
-              </p>
-              <MergedStatList lines={item.activeInfos.map((i) => i.setOption)} />
-              {item.nextInfo && (
-                <p className="home__equipment-seteffect-next">
-                  {item.nextInfo.setCount}세트 달성 시 효과 추가
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
       {!selectedItem ? (
         <p className="home__select-hint">왼쪽 페이지에서 장비를 눌러서 스텟과 잠재능력을 확인해보세요.</p>
       ) : (
@@ -234,7 +213,7 @@ export default function EquipmentDetailPanel({
           {selectedItem.statLines?.length > 0 && (
             <div className="home__equipment-potential">
               <p className="home__equipment-potential-label">스텟</p>
-              <MergedStatList lines={selectedItem.statLines} />
+              <MergedStatList lines={mergeUnionStatLines(selectedItem.statLines)} />
             </div>
           )}
           {selectedItem.potentialLines?.length > 0 && (
@@ -242,7 +221,7 @@ export default function EquipmentDetailPanel({
               <p className={'home__equipment-potential-label' + potentialGradeClass(selectedItem.potentialGrade)}>
                 잠재능력 ({selectedItem.potentialGrade || '-'})
               </p>
-              <MergedStatList lines={selectedItem.potentialLines} />
+              <MergedStatList lines={mergeUnionStatLines(selectedItem.potentialLines)} />
             </div>
           )}
           {selectedItem.additionalPotentialLines?.length > 0 && (
@@ -254,10 +233,46 @@ export default function EquipmentDetailPanel({
               >
                 에디셔널 잠재능력 ({selectedItem.additionalPotentialGrade || '-'})
               </p>
-              <MergedStatList lines={selectedItem.additionalPotentialLines} />
+              <MergedStatList lines={mergeUnionStatLines(selectedItem.additionalPotentialLines)} />
             </div>
           )}
         </>
+      )}
+
+      {/* 세트효과는 슬롯 하나가 아니라 지금 착용 중인 전체 장비 조합에서 나오는
+          보너스라서, 특정 장비를 고르지 않아도 로딩/에러 상태는 보여준다.
+          다만 내용 자체는 장비 옵션과 섞여 보이지 않도록 버튼 뒤에 숨겨둔다. */}
+      {setEffectLoading && <p className="home__select-hint">세트효과 불러오는 중...</p>}
+      {setEffectError && <p className="home__apikey-error">{setEffectError}</p>}
+      {!setEffectLoading && !setEffectError && activeSets.length > 0 && (
+        <div className="home__equipment-seteffect-toggle-wrap">
+          <button
+            type="button"
+            className="home__equipment-seteffect-toggle"
+            onClick={() => setShowSetEffect((v) => !v)}
+          >
+            세트옵션 {showSetEffect ? '숨기기' : '보기'}
+          </button>
+          {showSetEffect && (
+            <div className="home__equipment-seteffect">
+              <p className="home__equipment-potential-label">적용 세트효과</p>
+              {activeSets.map((item) => (
+                <div key={item.setName} className="home__equipment-seteffect-item">
+                  <p className="home__equipment-seteffect-name">
+                    {item.setName}
+                    <span className="home__equipment-seteffect-count">{item.totalSetCount}세트</span>
+                  </p>
+                  <MergedStatList lines={mergeUnionStatLines(item.activeInfos.map((i) => i.setOption))} />
+                  {item.nextInfo && (
+                    <p className="home__equipment-seteffect-next">
+                      {item.nextInfo.setCount}세트 달성 시 효과 추가
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
