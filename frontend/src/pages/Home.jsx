@@ -20,6 +20,7 @@ import ApiKeyLeftPage from './home/apikey/ApiKeyLeftPage.jsx'
 import LevelChartLeftPage from './home/level/LevelChartLeftPage.jsx'
 import CharacterSelectPage, { CharacterWorldDetailPage } from './home/character/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/character/CharacterCardPage.jsx'
+import CharacterCardLeftPage from './home/character/CharacterCardLeftPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
 import CategorySelector from './home/CategorySelector.jsx'
 import SchedulerDetailPage from './home/scheduler/SchedulerDetailPage.jsx'
@@ -27,7 +28,7 @@ import BossDetailPage, { BossSelectionPage } from './home/boss/BossDetailPage.js
 import BossOverviewLeftPage from './home/boss/BossOverviewLeftPage.jsx'
 import QuickSwitchWidget from './home/character/QuickSwitchWidget.jsx'
 import EquipmentDetailPanel, { EquipmentSelectionPage } from './home/equipment/EquipmentPage.jsx'
-import CashItemPanel from './home/equipment/CashItemPage.jsx'
+import CashItemPanel, { CashItemSelectionPage } from './home/equipment/CashItemPage.jsx'
 import UnionDetailPage from './home/union/UnionPage.jsx'
 import UnionInfoPage from './home/union/UnionInfoPage.jsx'
 import UnionRaiderStateLeftPage from './home/union/UnionRaiderStateLeftPage.jsx'
@@ -296,10 +297,6 @@ export default function Home() {
           onGoArchive={() => flipTo('archive-boss')}
           onBackToSelect={handleBackToSelect}
           onReset={handleReset}
-          characterName={selectedCharacter}
-          scheduler={scheduler}
-          onGoDaily={() => flipTo('scheduler-daily')}
-          onGoBossWeekly={() => flipTo('boss-weekly')}
         />
       )
     }
@@ -380,7 +377,6 @@ export default function Home() {
         <CashItemPanel
           cashItem={cashItem}
           selectedPreset={selectedCashPreset}
-          onSelectPreset={setSelectedCashPreset}
           onBack={() => flipTo('archive-loot')}
         />
       )
@@ -405,6 +401,16 @@ export default function Home() {
   function renderLeftPageContent(p) {
     if (p === 'apikey') {
       return <ApiKeyLeftPage />
+    }
+    if (p === 'card') {
+      return (
+        <CharacterCardLeftPage
+          characterName={selectedCharacter}
+          scheduler={scheduler}
+          onGoDaily={() => flipTo('scheduler-daily')}
+          onGoBossWeekly={() => flipTo('boss-weekly')}
+        />
+      )
     }
     if (p === 'archive-level') {
       return (
@@ -433,6 +439,16 @@ export default function Home() {
           onSelectPreset={setSelectedEquipmentPreset}
           selectedSlot={selectedEquipmentSlot}
           onSelectSlot={setSelectedEquipmentSlot}
+        />
+      )
+    }
+    if (p === 'loot-cash') {
+      return (
+        <CashItemSelectionPage
+          cashItem={cashItem}
+          characterImage={cardData?.characterImage}
+          selectedPreset={selectedCashPreset}
+          onSelectPreset={setSelectedCashPreset}
         />
       )
     }

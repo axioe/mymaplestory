@@ -10,14 +10,15 @@ const APP_FIELDS = [
   { label: '애플리케이션 타입', value: '서비스 단계' },
   { label: '대표 언어', value: '한국어' },
   { label: '출시할 서비스명', value: 'MY MAPLESTORY' },
+  { label: '개발 환경', value: 'WEB' },
+  { label: 'URL 정보', value: 'http://3.39.17.151' },
+  { label: '태그', value: '캐릭터 정보, 유틸리티' },
   {
     label: '서비스 소개',
     value:
       '넥슨 Open API를 활용해 내 캐릭터 정보(레벨/장비/보스 클리어 현황 등)를 조회하고 관리할 수 있는 개인 캐릭터 관리 도구입니다.',
+    fullWidth: true,
   },
-  { label: '개발 환경', value: 'WEB' },
-  { label: 'URL 정보', value: 'http://3.39.17.151' },
-  { label: '태그', value: '캐릭터 정보, 유틸리티' },
 ]
 
 /**
@@ -26,7 +27,7 @@ const APP_FIELDS = [
  * 브라우저(또는 http로 접속한 경우)에서는 조용히 실패하므로, 그 경우엔
  * 사용자가 텍스트를 직접 드래그해서 복사할 수 있게 값 자체는 항상 그대로 보여준다.
  */
-function CopyField({ label, value }) {
+function CopyField({ label, value, fullWidth }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -40,7 +41,7 @@ function CopyField({ label, value }) {
   }
 
   return (
-    <div className="apikey-guide__field">
+    <div className={'apikey-guide__field' + (fullWidth ? ' apikey-guide__field--full' : '')}>
       <span className="apikey-guide__field-label">{label}</span>
       <div className="apikey-guide__field-row">
         <span className="apikey-guide__field-value">{value}</span>
@@ -106,7 +107,7 @@ export default function ApiKeyGuideModal({ open, onClose }) {
           </ol>
           <div className="apikey-guide__fields">
             {APP_FIELDS.map((field) => (
-              <CopyField key={field.label} label={field.label} value={field.value} />
+              <CopyField key={field.label} label={field.label} value={field.value} fullWidth={field.fullWidth} />
             ))}
           </div>
           <ol className="apikey-guide__steps apikey-guide__steps--continued">

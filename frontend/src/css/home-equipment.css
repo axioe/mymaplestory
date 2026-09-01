@@ -204,57 +204,90 @@
 }
 
 /* 캐시(코디) - "코디 확인" 버튼으로 들어오는 CashItemPage.jsx 전용 스타일.
-   장비의 하위 기능이라 별도 파일로 안 두고 여기 같이 둔다. */
-.home__cash-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.6rem;
-  width: 100%;
-  max-width: 320px;
+   장비의 하위 기능이라 별도 파일로 안 두고 여기 같이 둔다. 인게임 "코디
+   프리셋" 창처럼 왼쪽=캐릭터 미리보기, 오른쪽=목록으로 나눈다. */
+
+/* 왼쪽 페이지의 캐릭터 미리보기 - 장비 그리드 안의 char 칸(6칸 그리드 중
+   하나)과 달리 이 페이지는 그리드가 없는 단독 페이지라 별도 박스로 크게 둔다. */
+.home__cash-character {
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--color-canvas);
+  border: 1.5px solid var(--color-line);
+  overflow: hidden;
 }
 
-.home__cash-card {
+.home__cash-character img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(2.2);
+}
+
+/* 오른쪽 페이지의 목록 - 카드 그리드 대신 가로로 긴 한 줄짜리 행으로 바꿔서
+   아이콘과 이름이 나란히 보이게 한다. */
+.home__cash-list {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.home__cash-list-item {
+  display: flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.6rem 0.5rem;
+  gap: 0.7rem;
+  padding: 0.5rem 0.8rem;
   border: 1.5px solid var(--color-line);
   border-radius: 10px;
   background: transparent;
-  text-align: center;
+  text-align: left;
 }
 
-.home__cash-card-icon {
-  width: 44px;
-  height: 44px;
+.home__cash-list-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.home__cash-card-icon img {
+.home__cash-list-icon img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.home__cash-card-name {
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1.3;
+.home__cash-list-info {
+  flex: 1;
+  min-width: 0;
 }
 
-.home__cash-card-part {
+.home__cash-list-name {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home__cash-list-part {
+  margin: 0.1rem 0 0;
+  font-size: 0.65rem;
   color: var(--color-ink-muted);
 }
 
-.home__cash-card-expire {
+.home__cash-list-expire {
+  flex-shrink: 0;
   margin: 0;
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   color: var(--color-accent-2);
 }
 

@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 import CharacterSummaryCard from '../../../components/CharacterSummaryCard.jsx'
-import TodoReminderBanner from './TodoReminderBanner.jsx'
 import { downloadNodeAsJpeg } from '../../../utils/downloadImage.js'
 import '../../../css/home-shared.css'
 import '../../../css/home-card.css'
@@ -27,10 +26,6 @@ export default function CharacterCardPage({
   onGoArchive,
   onBackToSelect,
   onReset,
-  characterName,
-  scheduler,
-  onGoDaily,
-  onGoBossWeekly,
 }) {
   const character = mapToCardProps(cardData)
   const captureRef = useRef(null)
@@ -70,13 +65,6 @@ export default function CharacterCardPage({
           <div ref={captureRef} className="home__card-capture">
             <CharacterSummaryCard character={character} />
           </div>
-
-          <TodoReminderBanner
-            characterName={characterName}
-            scheduler={scheduler}
-            onGoDaily={onGoDaily}
-            onGoBossWeekly={onGoBossWeekly}
-          />
 
           <div className="home__card-actions home__card-capture-exclude">
             <button onClick={handleDownload} className="home__card-download" disabled={downloading}>

@@ -172,15 +172,21 @@
   text-decoration: underline;
 }
 
-/* 넥슨 애플리케이션 등록 폼에 붙여넣을 값 목록 - 라벨/값/복사 버튼 한 줄씩 */
+/* 넥슨 애플리케이션 등록 폼에 붙여넣을 값 목록 - 짧은 값은 2열로 나란히,
+   내용이 긴 "서비스 소개"만 한 줄 전체를 차지한다(--full). 모달 너비를
+   넓히면서(480px -> 640px) 생긴 여유를 살려 세로 길이를 줄였다. */
 .apikey-guide__fields {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 0.7rem;
   margin: 0.3rem 0;
   padding: 0.7rem 0.8rem;
   border: 1.5px dashed var(--color-line);
   border-radius: 10px;
+}
+
+.apikey-guide__field--full {
+  grid-column: 1 / -1;
 }
 
 .apikey-guide__field-label {
