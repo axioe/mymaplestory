@@ -15,13 +15,29 @@ const MOCK_CHARACTER = {
   guildName: '밍밍',
   imageUrl: null,
   expRate: '42.17',
+  dateCreate: '2018-08-07T00:00+09:00',
+}
+
+/**
+ * 넥슨이 내려주는 character_date_create(ISO 8601, 예: "2018-08-07T00:00+09:00")로
+ * "함께한 지 며칠째"를 계산한다. 형식이 다르거나 없으면(옛날 캐릭터는 이 필드
+ * 자체가 없는 경우가 있다고 함) 조용히 null을 돌려주고, 호출부에서 그 항목을
+ * 아예 안 보여준다.
+ */
+function daysSince(dateStr) {
+  if (!dateStr) return null
+  const created = new Date(dateStr)
+  if (Number.isNaN(created.getTime())) return null
+  const diffMs = Date.now() - created.getTime()
+  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)))
 }
 
 export default function CharacterSummaryCard({ character = MOCK_CHARACTER, bare = false }) {
-  const { nickname, worldName, level, jobName, popularity, guildName, imageUrl, expRate } = character
+  const { nickname, worldName, level, jobName, popularity, guildName, imageUrl, expRate, dateCreate } = character
   const expPercent = expRate != null && !Number.isNaN(Number(expRate))
     ? Math.min(100, Math.max(0, Number(expRate)))
     : null
+  const daysTogether = daysSince(dateCreate)
 
   return (
     <div className={bare ? 'char-card char-card--bare' : 'char-card'}>
@@ -79,6 +95,15 @@ export default function CharacterSummaryCard({ character = MOCK_CHARACTER, bare 
           <span className="char-card__stat-label">길드</span>
           <span className="char-card__stat-value">{guildName || '없음'}</span>
         </div>
+        {daysTogether != null && (
+          <>
+            <div className="char-card__stat-divider" />
+            <div className="char-card__stat">
+              <span className="char-card__stat-label">함께한 기간</span>
+              <span className="char-card__stat-value">{daysTogether}일째</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

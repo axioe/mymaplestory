@@ -13,7 +13,8 @@ public record CharacterCardResponse(
         String expRate,
         String characterImage,
         Integer popularity,
-        String guildName
+        String guildName,
+        String dateCreate
 ) {
     public static CharacterCardResponse of(CharacterBasicDto basic, CharacterPopularityDto popularity) {
         return new CharacterCardResponse(
@@ -24,7 +25,8 @@ public record CharacterCardResponse(
                 basic.characterExpRate(),
                 basic.characterImage(),
                 popularity != null ? popularity.popularity() : null,
-                basic.characterGuildName()
+                basic.characterGuildName(),
+                basic.characterDateCreate()
         );
     }
 }
