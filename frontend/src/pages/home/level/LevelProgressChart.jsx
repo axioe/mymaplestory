@@ -1,5 +1,5 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import '../../css/home-archive-shared.css'
+import '../../../css/home-archive-shared.css'
 
 /**
  * date를 "MM/DD"로 줄여서 x축에 보여준다 - history의 date는 백엔드가
