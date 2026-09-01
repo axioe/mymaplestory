@@ -22,7 +22,6 @@ import com.mymaplestory.api.dto.NexonItemEquipmentResponse;
 import com.mymaplestory.api.dto.NexonNoticeItem;
 import com.mymaplestory.api.dto.NexonNoticeListResponse;
 import com.mymaplestory.api.dto.NexonSchedulerResponse;
-import com.mymaplestory.api.dto.NexonSetEffectResponse;
 import com.mymaplestory.api.dto.NexonUnionArtifactResponse;
 import com.mymaplestory.api.dto.NexonUnionChampionResponse;
 import com.mymaplestory.api.dto.NexonUnionRaiderResponse;
@@ -30,8 +29,6 @@ import com.mymaplestory.api.dto.NexonUnionResponse;
 import com.mymaplestory.api.dto.NoticeItem;
 import com.mymaplestory.api.dto.OcidResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
-import com.mymaplestory.api.dto.SetEffectItem;
-import com.mymaplestory.api.dto.SetEffectResponse;
 import com.mymaplestory.api.dto.UnionArtifactResponse;
 import com.mymaplestory.api.dto.UnionChampionResponse;
 import com.mymaplestory.api.dto.UnionRaiderResponse;
@@ -470,35 +467,6 @@ public class NexonApiService {
     private List<EquipmentItem> toEquipmentItems(List<NexonEquipmentItem> items) {
         if (items == null) return List.of();
         return items.stream().map(EquipmentItem::from).toList();
-    }
-
-    /**
-     * 적용 세트효과 조회. 경로: /character/set-effect
-     * (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14)
-     */
-    public SetEffectResponse getSetEffect(String characterName, String requestApiKey) {
-        String apiKey = resolveApiKey(requestApiKey);
-        String ocid = getOcid(characterName, requestApiKey);
-        try {
-            NexonSetEffectResponse raw = nexonRestClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/character/set-effect")
-                            .queryParam("ocid", ocid)
-                            .build())
-                    .header(NEXON_AUTH_HEADER, apiKey)
-                    .retrieve()
-                    .body(NexonSetEffectResponse.class);
-
-            List<SetEffectItem> items = raw == null || raw.setEffect() == null
-                    ? List.of()
-                    : raw.setEffect().stream().map(SetEffectItem::from).toList();
-            return new SetEffectResponse(items);
-        } catch (RestClientResponseException e) {
-            if (INVALID_KEY_ERROR_CODE.equals(extractErrorCode(e)) || e.getStatusCode().value() == 401) {
-                throw new InvalidApiKeyException("유효하지 않은 넥슨 API 키입니다.");
-            }
-            throw new NexonApiException("넥슨 API 조회 실패 (set-effect): " + e.getStatusCode(), e);
-        }
     }
 
     /**

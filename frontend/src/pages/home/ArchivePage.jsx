@@ -117,9 +117,6 @@ export default function ArchivePage({
   equipment,
   equipmentLoading,
   equipmentError,
-  setEffect,
-  setEffectLoading,
-  setEffectError,
   selectedPreset,
   selectedSlot,
   union,
@@ -186,12 +183,7 @@ export default function ArchivePage({
           {characterStatError && <p className="home__apikey-error">{characterStatError}</p>}
 
           {!characterStatLoading && !characterStatError && characterStat && (
-            <CharacterStatPanel
-              characterStat={characterStat}
-              setEffect={setEffect}
-              setEffectLoading={setEffectLoading}
-              setEffectError={setEffectError}
-            />
+            <CharacterStatPanel characterStat={characterStat} />
           )}
         </div>
       ) : active === 'event' ? (

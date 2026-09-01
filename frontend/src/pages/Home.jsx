@@ -10,7 +10,6 @@ import { useCharacterStat } from '../hooks/useCharacterStat.js'
 import { useNotices } from '../hooks/useNotices.js'
 import { useScheduler } from '../hooks/useScheduler.js'
 import { useEquipment } from '../hooks/useEquipment.js'
-import { useSetEffect } from '../hooks/useSetEffect.js'
 import { useUnion } from '../hooks/useUnion.js'
 import { BossSelectionProvider } from '../context/BossSelectionContext.jsx'
 import BookFlipStage from '../components/book/BookFlipStage.jsx'
@@ -128,14 +127,6 @@ export default function Home() {
   // 장비: "장비" 카테고리를 선택했을 때만 조회
   const { equipment, loading: equipmentLoading, error: equipmentError } = useEquipment(
     page === 'archive-loot' && hasSelectedCharacter,
-    selectedCharacter
-  )
-  // 세트효과: 능력치 카테고리에서 같이 보여준다 (item-equipment와 별도 엔드포인트).
-  // 착용 장비 하나가 아니라 전체 조합에서 나오는 효과라서, 개별 장비 옵션을
-  // 보여주는 장비 카테고리보다 캐릭터 전체 능력을 보여주는 능력치 카테고리 쪽이
-  // 더 자연스럽다는 요청에 따라 옮겼다.
-  const { setEffect, loading: setEffectLoading, error: setEffectError } = useSetEffect(
-    page === 'archive-stat' && hasSelectedCharacter,
     selectedCharacter
   )
   // 유니온: "유니온" 카테고리 개요 + 4개 상세 페이지 전부에서 필요해서 조건에 같이 포함한다.
@@ -320,9 +311,6 @@ export default function Home() {
           equipment={equipment}
           equipmentLoading={equipmentLoading}
           equipmentError={equipmentError}
-          setEffect={setEffect}
-          setEffectLoading={setEffectLoading}
-          setEffectError={setEffectError}
           selectedPreset={selectedEquipmentPreset}
           selectedSlot={selectedEquipmentSlot}
           union={union}

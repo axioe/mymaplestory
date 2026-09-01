@@ -57,11 +57,6 @@ export async function fetchEquipment(characterName) {
   return data
 }
 
-export async function fetchSetEffect(characterName) {
-  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/set-effect`)
-  return data
-}
-
 export async function fetchUnion(characterName) {
   const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/union`)
   return data
