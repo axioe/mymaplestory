@@ -6,6 +6,65 @@
   bottom: calc(1rem - 15px);
 }
 
+/* 보스 처치 현황(왼쪽 페이지)의 "내가 선택한 보스 중..." 개별 목록 -
+   넥슨 공식 합계 카드(home__level-summary) 바로 아래에 이어 붙는다. */
+.home__boss-clear-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.home__boss-clear-list-title {
+  margin: 0.2rem 0 0.1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+}
+
+.home__boss-clear-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.home__boss-clear-list-item--done {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.home__boss-clear-list-mark {
+  flex-shrink: 0;
+  width: 1.1em;
+  color: var(--color-ink-muted);
+}
+
+.home__boss-clear-list-item--done .home__boss-clear-list-mark {
+  color: var(--color-accent);
+}
+
+.home__boss-clear-list-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.home__boss-clear-list-diff {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  color: var(--color-ink-muted);
+}
+
 /* 보스 목록만 내부 스크롤(휠) 대신 페이지네이션으로 넘겨보게 한다 - 공용
    .home__scheduler-list(스케줄러 콘텐츠 목록과 공유)의 max-height/overflow를
    여기서 무효화한다. 한 페이지 분량(6개)만 보여주므로 스크롤이 필요 없다. */
