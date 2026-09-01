@@ -96,6 +96,10 @@ export function useBossSelection(characterName) {
   return {
     loading,
     selectedCount,
+    // TodoReminderBanner가 "이번 주 선택한 보스 중 몇 마리를 아직 안 잡았는지"
+    // 계산하려면 개별 bossName이 필요해서, 파생 카운트(weeklySelectedCount)와
+    // 별개로 목록 자체도 내보낸다.
+    weeklySelections: list.filter((s) => s.cycle === 'weekly'),
     weeklySelectedCount,
     isWeeklyAtLimit,
     isAtLimitFor,

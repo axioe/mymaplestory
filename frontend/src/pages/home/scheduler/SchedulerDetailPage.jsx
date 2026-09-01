@@ -1,31 +1,9 @@
 import { useState } from 'react'
 import { useSkipTracker } from '../../../hooks/useSkipTracker.js'
+import { QUEST_STATE_LABEL, QUEST_STATE_CLASS, isEpicDungeonItem, isCleared } from '../../../utils/schedulerHelpers.js'
 import '../../../css/home-shared.css'
 import '../../../css/home-archive-shared.css'
 import '../../../css/home-scheduler.css'
-
-// quest_state: "0"=미수락, "1"=진행 중(수락함), "2"=완료
-const QUEST_STATE_LABEL = { '0': '미수락', '1': '진행 중', '2': '완료' }
-const QUEST_STATE_CLASS = {
-  '0': '',
-  '1': ' home__scheduler-item-badge--progress',
-  '2': ' home__scheduler-item-badge--done',
-}
-
-/**
- * "[에픽던전] ~~~" 또는 "[에픽 던전] ~~~"처럼 대괄호/띄어쓰기가 붙는 경우가 섞여
- * 있어서, 비교 전에 공백을 다 지우고 나서 판별한다.
- */
-function isEpicDungeonItem(item) {
-  const normalized = (item.contentName ?? '').replace(/\s/g, '')
-  return item.type !== 'quest' && normalized.includes('에픽던전')
-}
-
-function isCleared(item) {
-  const now = item.nowCount ?? 0
-  const max = item.maxCount ?? 0
-  return max > 0 && now >= max
-}
 
 const EPIC_DUNGEON_WEEKLY_LIMIT = 2
 
