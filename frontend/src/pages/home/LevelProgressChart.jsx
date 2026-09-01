@@ -27,7 +27,9 @@ function LevelTooltip({ active, payload, label }) {
 
 /**
  * 레벨 진척도 차트 - NexonApiService.getLevelHistory()가 레벨업 날짜를 찾으려고
- * 하루씩 거슬러 조회한 날짜별 (날짜, 레벨, 경험치%) 기록을 그대로 선 그래프로 보여준다.
+ * 하루씩 거슬러 조회한 날짜별 (날짜, 레벨, 경험치%) 기록을, 경험치% 기준으로
+ * 선 그래프로 보여준다(레벨 숫자보다 날짜 사이 변화가 더 잘 보여서). 레벨
+ * 자체는 툴팁에서 여전히 같이 확인할 수 있다.
  *
  * 넥슨 API가 실제로 조회를 허용하는 과거 기간이 짧아서(며칠 정도로 추정),
  * history가 2개 미만이면 선을 그릴 수 없으므로 아예 렌더링하지 않는다 - 호출부
@@ -48,18 +50,18 @@ export default function LevelProgressChart({ history }) {
             tickLine={false}
           />
           <YAxis
-            dataKey="level"
-            width={34}
-            allowDecimals={false}
-            domain={['dataMin - 1', 'dataMax + 1']}
+            dataKey="expRate"
+            width={38}
+            domain={[0, 100]}
             tick={{ fontSize: 10, fill: 'var(--color-ink)' }}
             axisLine={false}
             tickLine={false}
+            tickFormatter={(v) => `${v}%`}
           />
           <Tooltip content={<LevelTooltip />} />
           <Line
             type="monotone"
-            dataKey="level"
+            dataKey="expRate"
             stroke="var(--color-accent)"
             strokeWidth={2}
             dot={{ r: 3, fill: 'var(--color-accent)', strokeWidth: 0 }}

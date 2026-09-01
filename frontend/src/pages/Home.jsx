@@ -17,6 +17,7 @@ import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/apikey/ApiKeyPage.jsx'
 import ApiKeyLeftPage from './home/apikey/ApiKeyLeftPage.jsx'
+import LevelChartLeftPage from './home/LevelChartLeftPage.jsx'
 import CharacterSelectPage, { CharacterWorldDetailPage } from './home/character/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/character/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
@@ -379,6 +380,15 @@ export default function Home() {
   function renderLeftPageContent(p) {
     if (p === 'apikey') {
       return <ApiKeyLeftPage />
+    }
+    if (p === 'archive-level') {
+      return (
+        <LevelChartLeftPage
+          levelHistory={levelHistory}
+          levelHistoryLoading={levelHistoryLoading}
+          levelHistoryError={levelHistoryError}
+        />
+      )
     }
     if (p === 'archive-boss') {
       return <BossOverviewLeftPage scheduler={scheduler} characterName={selectedCharacter} />
