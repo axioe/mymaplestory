@@ -33,6 +33,16 @@
   padding-right: 1.6rem;
 }
 
+/* 레벨 카테고리 왼쪽 페이지(차트 + 일자별 증가량) - 다른 왼쪽 페이지들(보스
+   목록, 장비 그리드 등)과 달리 내용이 위쪽에 붙어있으면 아래가 휑하게 비어
+   보인다. 이 조합에서만 세로 가운데 정렬로 바꾼다 - 공용 --left 클래스
+   자체를 바꾸면 목록형 왼쪽 페이지들의 스크롤 앵커링이 흐트러지므로 별도
+   조합으로 좁혀서 준다. */
+.home__level-content--chart {
+  padding-top: 1.6rem;
+  justify-content: center;
+}
+
 /* 보스 통계 페이지 - 선택한 보스가 많아지면 내용이 길어질 수 있어서
    제목/통계를 위쪽에 붙여 하단의 "← 보스로" 버튼과 안 겹치게 한다. */
 .home__level-content--stats {
@@ -111,6 +121,7 @@
 .home__level-chart {
   width: calc(100% + 1.6rem);
   margin: -0.4rem -0.8rem 0;
+  flex-shrink: 0;
 }
 
 .home__level-chart-tooltip {
@@ -147,6 +158,64 @@
   line-height: 1.4;
   color: var(--color-ink-muted);
   text-align: left;
+}
+
+/* 레벨 진척도 왼쪽 페이지 - 차트 아래에 일자별 경험치% 증가량을 장부(원장)
+   스타일 목록으로 보여준다. 최근 날짜가 맨 위로 오도록 역순 정렬.
+   자체 스크롤(overflow-y)을 주지 않는다 - flex column 안에서 overflow가
+   있는 항목은 flex-shrink 계산 시 내용 크기 밑으로도 짜부라들 수 있는데,
+   차트+목록을 합친 높이가 페이지보다 살짝 길어지는 경우 이 목록만 한두 줄
+   높이로 눌려버리는 문제가 있었다. 대신 부모(.home__level-content)가 이미
+   전체 페이지 스크롤을 허용하므로 넘치면 페이지 전체가 스크롤되게 둔다. */
+.home__level-delta-list {
+  width: 100%;
+  max-width: 320px;
+  flex-shrink: 0;
+  padding: 0.2rem;
+  text-align: left;
+}
+
+.home__level-delta-title {
+  margin: 0.6rem 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  text-align: center;
+}
+
+.home__level-delta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed var(--color-line);
+}
+
+.home__level-delta-row:last-child {
+  border-bottom: none;
+}
+
+.home__level-delta-date {
+  font-size: 0.74rem;
+  color: var(--color-ink-muted);
+}
+
+.home__level-delta-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.home__level-delta-value--up {
+  color: var(--color-accent);
+}
+
+.home__level-delta-value--down {
+  color: var(--color-ink-muted);
+}
+
+.home__level-delta-value--levelup {
+  color: var(--color-accent-2);
 }
 
 /* 아직 연동 안 된 카테고리(보스/장비/스토리) placeholder */
