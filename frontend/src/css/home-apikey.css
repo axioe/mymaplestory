@@ -108,18 +108,139 @@
   opacity: 0.8;
 }
 
-/* ApiKeyGuideModal 내용 */
+/* ApiKeyGuideModal 내용 - mapleaudit.com/guide의 "번호 매긴 단계 + 등록 폼에
+   붙여넣을 값을 복사 버튼으로 제공" 방식을 참고했다. */
+.apikey-guide__intro {
+  margin: 0 0 0.8rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.apikey-guide__warning {
+  margin: 0 0 1.2rem;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid var(--color-accent-2);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-accent-2) 12%, transparent);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.apikey-guide__step {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1.3rem;
+}
+
+.apikey-guide__step-num {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  opacity: 0.5;
+  line-height: 1.3;
+}
+
+.apikey-guide__step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.apikey-guide__step-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
 .apikey-guide__steps {
-  margin: 0 0 1rem;
+  margin: 0 0 0.6rem;
   padding-left: 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.apikey-guide__steps--continued {
+  margin-top: 0.7rem;
+  margin-bottom: 0;
 }
 
 .apikey-guide__steps a {
   color: var(--color-accent);
   text-decoration: underline;
+}
+
+/* 넥슨 애플리케이션 등록 폼에 붙여넣을 값 목록 - 라벨/값/복사 버튼 한 줄씩 */
+.apikey-guide__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.3rem 0;
+  padding: 0.7rem 0.8rem;
+  border: 1.5px dashed var(--color-line);
+  border-radius: 10px;
+}
+
+.apikey-guide__field-label {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-ink-muted);
+}
+
+.apikey-guide__field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.apikey-guide__field-value {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.apikey-guide__field-copy {
+  flex-shrink: 0;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.apikey-guide__field-copy:hover {
+  background: var(--color-accent);
+  color: var(--color-page);
+}
+
+.apikey-guide__faq {
+  margin: 1rem 0;
+  padding-top: 0.9rem;
+  border-top: 1px dashed var(--color-line);
+}
+
+.apikey-guide__faq-q {
+  margin: 0 0 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.apikey-guide__faq-a {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
 }
 
 .apikey-guide__note {
