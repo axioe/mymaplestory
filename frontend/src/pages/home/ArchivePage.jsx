@@ -117,9 +117,6 @@ export default function ArchivePage({
   equipment,
   equipmentLoading,
   equipmentError,
-  setEffect,
-  setEffectLoading,
-  setEffectError,
   selectedPreset,
   selectedSlot,
   union,
@@ -283,14 +280,7 @@ export default function ArchivePage({
           {equipmentError && <p className="home__apikey-error">{equipmentError}</p>}
 
           {!equipmentLoading && !equipmentError && equipment && (
-            <EquipmentDetailPanel
-              equipment={equipment}
-              selectedPreset={selectedPreset}
-              selectedSlot={selectedSlot}
-              setEffect={setEffect}
-              setEffectLoading={setEffectLoading}
-              setEffectError={setEffectError}
-            />
+            <EquipmentDetailPanel equipment={equipment} selectedPreset={selectedPreset} selectedSlot={selectedSlot} />
           )}
         </div>
       ) : active === 'union' ? (

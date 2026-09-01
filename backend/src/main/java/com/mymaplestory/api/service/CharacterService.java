@@ -7,7 +7,6 @@ import com.mymaplestory.api.dto.CharacterStatResponse;
 import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
-import com.mymaplestory.api.dto.SetEffectResponse;
 import com.mymaplestory.api.dto.UnionArtifactResponse;
 import com.mymaplestory.api.dto.UnionChampionResponse;
 import com.mymaplestory.api.dto.UnionRaiderResponse;
@@ -60,13 +59,6 @@ public class CharacterService {
      */
     public EquipmentPresetResponse getItemEquipment(String characterName, String apiKey) {
         return nexonApiService.getItemEquipment(characterName, apiKey);
-    }
-
-    /**
-     * 아카이브 - 전리품 카테고리용 적용 세트효과.
-     */
-    public SetEffectResponse getSetEffect(String characterName, String apiKey) {
-        return nexonApiService.getSetEffect(characterName, apiKey);
     }
 
     /**

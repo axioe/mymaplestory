@@ -5,7 +5,6 @@ import com.mymaplestory.api.dto.CharacterStatResponse;
 import com.mymaplestory.api.dto.EquipmentPresetResponse;
 import com.mymaplestory.api.dto.LevelHistoryResponse;
 import com.mymaplestory.api.dto.SchedulerResponse;
-import com.mymaplestory.api.dto.SetEffectResponse;
 import com.mymaplestory.api.dto.UnionArtifactResponse;
 import com.mymaplestory.api.dto.UnionChampionResponse;
 import com.mymaplestory.api.dto.UnionRaiderResponse;
@@ -94,18 +93,6 @@ public class CharacterController {
             @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
     ) {
         return characterService.getItemEquipment(characterName, apiKey);
-    }
-
-    /**
-     * 예: GET /api/characters/체리톡톡/set-effect
-     * 적용 세트효과 조회 (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14).
-     */
-    @GetMapping("/{characterName}/set-effect")
-    public SetEffectResponse getSetEffect(
-            @PathVariable String characterName,
-            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
-    ) {
-        return characterService.getSetEffect(characterName, apiKey);
     }
 
     /**
