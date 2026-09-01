@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import '../../css/home-stat.css'
+import '../../../css/home-stat.css'
 
 /**
  * 넥슨이 내려주는 수십 개의 스탯 중, 실제로 캐릭터 파워를 가늠할 때 가장 먼저

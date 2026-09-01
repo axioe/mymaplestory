@@ -1,5 +1,5 @@
 import LevelProgressChart from './LevelProgressChart.jsx'
-import '../../css/home-archive-shared.css'
+import '../../../css/home-archive-shared.css'
 
 /**
  * history(날짜/레벨/경험치% 오름차순 배열)에서 하루 전 기록과 비교한

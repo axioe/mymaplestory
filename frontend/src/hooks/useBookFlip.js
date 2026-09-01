@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 
+/**
+ * 각 아카이브 개요(archive-*)와 그 상세 페이지들(boss-daily/weekly,
+ * loot-equipment/cash, union-raider/artifact/champion)을 서로 바로 옆에
+ * 묶어뒀다 - 카테고리별로 관련 페이지를 한데 모아두는 게 읽기 편해서다.
+ * (참고: 예전엔 이 순서를 지키지 않으면 페이지 이동이 실패했었다 - flipTo가
+ * pageFlip.flip()을 써서 거리가 멀면 엉뚱한 곳에 멈추는 라이브러리 버그가
+ * 있었는데, 지금은 flipTo가 항상 turnToPage를 쓰도록 바꿔서 더 이상 순서와
+ * 무관하게 정확히 이동한다 - 아래 attemptFlip 주석 참고. 그래도 카테고리별로
+ * 묶어두는 편이 여전히 읽기 좋아서 이 순서는 유지한다.)
+ */
 export const PAGE_ORDER = [
   'start',
   'apikey',
@@ -7,20 +17,21 @@ export const PAGE_ORDER = [
   'select-detail',
   'card',
   'archive-boss',
+  'boss-daily',
+  'boss-weekly',
   'archive-loot',
-  'archive-cash',
+  'loot-equipment',
+  'loot-cash',
   'archive-level',
   'archive-stat',
   'archive-union',
+  'union-raider',
+  'union-artifact',
+  'union-champion',
   'archive-event',
   'archive-scheduler',
   'scheduler-daily',
   'scheduler-weekly',
-  'boss-daily',
-  'boss-weekly',
-  'union-raider',
-  'union-artifact',
-  'union-champion',
 ]
 
 /**
@@ -29,16 +40,11 @@ export const PAGE_ORDER = [
  * -> 화면이 넓어서 두 페이지가 나란히(스프레드) 보일 때도
  *    표지는 혼자, 이후로는 항상 "왼쪽 = 공백, 오른쪽 = 실제 콘텐츠" 조합만 나온다.
  *
- * 실제 렌더링되는 페이지 인덱스:
+ * 실제 렌더링되는 페이지 인덱스 (0-based, PAGE_ORDER의 각 항목마다 공백+콘텐츠 2장씩):
  *   0 = start(표지, 단독)
- *   1 = 공백, 2 = apikey
- *   3 = 공백, 4 = select
- *   5 = 공백, 6 = card
- *   7 = 공백, 8 = archive
- *   9 = 공백, 10 = scheduler-daily
- *   11 = 공백, 12 = scheduler-weekly
- *   13 = 공백, 14 = boss-daily
- *   15 = 공백, 16 = boss-weekly (지역 구분 없이 주간+월간 보스 전체를 한 페이지로 통합)
+ *   1 = 공백, 2 = PAGE_ORDER[1]
+ *   3 = 공백, 4 = PAGE_ORDER[2]
+ *   ... (이후 PAGE_ORDER[i] -> 플립 인덱스 2i, 앞의 공백은 2i-1)
  */
 const contentToFlipIndex = (contentIndex) => (contentIndex === 0 ? 0 : contentIndex * 2)
 
@@ -138,12 +144,17 @@ export function useBookFlip(initialPage) {
    * 안 됐으면 조금 기다렸다가 다시 시도한다 - 최대 1초(100ms x 10회) 정도면
    * 충분하고, 그 이후로는 이미 여러 번 써서 안정적으로 준비되어 있다.
    *
-   * flip() 호출 이후의 "제대로 도착했는지" 확인/보정은 여기서 하지 않는다 -
-   * 아래 watchdog(useEffect)이 page가 바뀔 때마다, 그리고 그 뒤로도 계속
-   * 주기적으로 확인해서 어긋나면 알아서 되돌린다. flip() 직후 한두 번만
-   * 확인하는 방식으로는, react-pageflip이 우리와 무관한 다른 리렌더링(다른
-   * 훅의 데이터 도착 등) 때문에 한참 뒤(수 초 후)에도 페이지 컬렉션을 다시
-   * 로드하면서 가끔 엉뚱한 곳으로 튀는 경우까지는 못 잡았다.
+   * pageFlip.flip(targetIndex)는 신뢰할 수 없는 걸 실측으로 확인했다 -
+   * 문서/예전 주석의 "몇 장 떨어져 있든 한 번에 점프한다"는 설명과 달리,
+   * 목표가 가까울 때도(바로 인접한 한 칸조차) 요청한 것과 다른 위치에
+   * 도착하는 경우가 재현됐다(예: loot-equipment를 요청했는데 그 옆
+   * loot-cash에 도착). 얼마나 벗어나는지도 상황마다 달라서(한 칸 못
+   * 미치기도, 한 칸 넘어가기도) 어느 한 방향으로만 보정하는 방식으로는
+   * 막을 수 없었다. 반면 turnToPage()는 애니메이션은 없지만 거리·방향과
+   * 무관하게 항상 정확히 도착하는 걸 확인했다. 그래서 프로그래밍 방식
+   * 이동(flipTo)은 전부 turnToPage로 통일한다 - 페이지 넘김 애니메이션은
+   * 포기하지만("책장이 넘어가는" 느낌은 못 살리지만), 엉뚱한 페이지에
+   * 도착하는 것보다는 훨씬 낫다.
    */
   const attemptFlip = (next, nextIndex, retryCount) => {
     if (nextIndex < 0) return
@@ -157,9 +168,7 @@ export function useBookFlip(initialPage) {
       return
     }
 
-    // 목표 페이지가 몇 장 떨어져 있든 flip()은 한 번만 호출한다 - 예전에
-    // 한 장씩 순서대로 여러 번 호출했더니 오히려 너무 부산스럽고 부담스러웠다.
-    pageFlip.flip(contentToFlipIndex(nextIndex))
+    pageFlip.turnToPage(contentToFlipIndex(nextIndex))
   }
 
   const jumpTo = (next) => {

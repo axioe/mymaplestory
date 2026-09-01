@@ -17,7 +17,7 @@ import BookFlipStage from '../components/book/BookFlipStage.jsx'
 import StartPage from './home/StartPage.jsx'
 import ApiKeyPage from './home/apikey/ApiKeyPage.jsx'
 import ApiKeyLeftPage from './home/apikey/ApiKeyLeftPage.jsx'
-import LevelChartLeftPage from './home/LevelChartLeftPage.jsx'
+import LevelChartLeftPage from './home/level/LevelChartLeftPage.jsx'
 import CharacterSelectPage, { CharacterWorldDetailPage } from './home/character/CharacterSelectPage.jsx'
 import CharacterCardPage from './home/character/CharacterCardPage.jsx'
 import ArchivePage from './home/ArchivePage.jsx'
@@ -26,7 +26,8 @@ import SchedulerDetailPage from './home/scheduler/SchedulerDetailPage.jsx'
 import BossDetailPage, { BossSelectionPage } from './home/boss/BossDetailPage.jsx'
 import BossOverviewLeftPage from './home/boss/BossOverviewLeftPage.jsx'
 import QuickSwitchWidget from './home/character/QuickSwitchWidget.jsx'
-import { EquipmentSelectionPage } from './home/equipment/EquipmentPage.jsx'
+import EquipmentDetailPanel, { EquipmentSelectionPage } from './home/equipment/EquipmentPage.jsx'
+import CashItemPanel from './home/equipment/CashItemPage.jsx'
 import UnionDetailPage from './home/union/UnionPage.jsx'
 import UnionInfoPage from './home/union/UnionInfoPage.jsx'
 import UnionRaiderStateLeftPage from './home/union/UnionRaiderStateLeftPage.jsx'
@@ -38,7 +39,6 @@ import '../css/notice-ticker.css'
 const CATEGORIES = [
   { key: 'boss', label: '보스' },
   { key: 'loot', label: '장비' },
-  { key: 'cash', label: '캐시' },
   { key: 'level', label: '레벨' },
   { key: 'stat', label: '능력치' },
   { key: 'union', label: '유니온' },
@@ -96,7 +96,7 @@ export default function Home() {
     // 저장된 예전 selectedCharacter 값 때문에 백그라운드에서 몰래 카드 조회가
     // 나가서(그 시점엔 키가 없어 API_KEY_REQUIRED로 실패) 버그가 있었다.
     // 실제로 카드/아카이브 화면을 보고 있을 때만 조회하도록 조건을 추가했다.
-    hasSelectedCharacter && (page === 'card' || page.startsWith('archive-')),
+    hasSelectedCharacter && (page === 'card' || page.startsWith('archive-') || page.startsWith('loot-')),
     selectedCharacter
   )
   const { levelHistory, loading: levelHistoryLoading, error: levelHistoryError } = useLevelHistory(
@@ -126,14 +126,15 @@ export default function Home() {
       hasSelectedCharacter,
     selectedCharacter
   )
-  // 장비: "장비" 카테고리를 선택했을 때만 조회
+  // 장비: "장비 확인" 버튼으로 들어온 상세 페이지에서만 조회 (개요 페이지는
+  // 버튼 2개뿐이라 장비 데이터가 필요 없다).
   const { equipment, loading: equipmentLoading, error: equipmentError } = useEquipment(
-    page === 'archive-loot' && hasSelectedCharacter,
+    page === 'loot-equipment' && hasSelectedCharacter,
     selectedCharacter
   )
-  // 캐시: "캐시" 카테고리를 선택했을 때만 조회 (item-equipment와 별도 엔드포인트).
+  // 캐시: "코디 확인" 버튼으로 들어온 상세 페이지에서만 조회 (item-equipment와 별도 엔드포인트).
   const { cashItem, loading: cashItemLoading, error: cashItemError } = useCashItemEquipment(
-    page === 'archive-cash' && hasSelectedCharacter,
+    page === 'loot-cash' && hasSelectedCharacter,
     selectedCharacter
   )
   // 유니온: "유니온" 카테고리 개요 + 4개 상세 페이지 전부에서 필요해서 조건에 같이 포함한다.
@@ -249,6 +250,11 @@ export default function Home() {
   // 유니온 개요에서 정보/공격대/아티팩트/챔피언 버튼을 누르면 진짜 책 페이지로 넘어간다.
   const handleGoUnionDetail = (kind) => flipTo(`union-${kind}`)
 
+  // 장비 개요에서 "장비 확인"/"코디 확인" 버튼을 누르면 진짜 책 페이지로 넘어간다.
+  // 예전엔 "캐시"가 왼쪽 카테고리 목록에 독립된 항목으로 있었는데, 카테고리
+  // 목록이 너무 길어져서 "장비" 하위로 옮기고 이 두 버튼으로 갈라지게 바꿨다.
+  const handleGoLootDetail = (kind) => flipTo(`loot-${kind}`)
+
   function renderPageContent(p) {
     if (p === 'start') return <StartPage onStart={handleStart} disabled={false} />
     if (p === 'apikey') {
@@ -319,16 +325,7 @@ export default function Home() {
           schedulerError={schedulerError}
           onGoSchedulerDetail={handleGoSchedulerDetail}
           onGoBossDetail={handleGoBossDetail}
-          equipment={equipment}
-          equipmentLoading={equipmentLoading}
-          equipmentError={equipmentError}
-          selectedPreset={selectedEquipmentPreset}
-          selectedSlot={selectedEquipmentSlot}
-          cashItem={cashItem}
-          cashItemLoading={cashItemLoading}
-          cashItemError={cashItemError}
-          selectedCashPreset={selectedCashPreset}
-          onSelectCashPreset={setSelectedCashPreset}
+          onGoLootDetail={handleGoLootDetail}
           union={union}
           unionRaider={unionRaider}
           unionArtifact={unionArtifact}
@@ -368,6 +365,26 @@ export default function Home() {
         />
       )
     }
+    if (p === 'loot-equipment') {
+      return (
+        <EquipmentDetailPanel
+          equipment={equipment}
+          selectedPreset={selectedEquipmentPreset}
+          selectedSlot={selectedEquipmentSlot}
+          onBack={() => flipTo('archive-loot')}
+        />
+      )
+    }
+    if (p === 'loot-cash') {
+      return (
+        <CashItemPanel
+          cashItem={cashItem}
+          selectedPreset={selectedCashPreset}
+          onSelectPreset={setSelectedCashPreset}
+          onBack={() => flipTo('archive-loot')}
+        />
+      )
+    }
     if (p === 'union-raider' || p === 'union-artifact' || p === 'union-champion') {
       const kind = p.replace('union-', '')
       return (
@@ -383,7 +400,8 @@ export default function Home() {
     return null
   }
 
-  // boss-daily / boss-weekly의 짝(왼쪽) 페이지에는 보스 선택 목록을 넣는다.
+  // boss-daily / boss-weekly의 짝(왼쪽) 페이지에는 보스 선택 목록을,
+  // loot-equipment의 짝(왼쪽) 페이지에는 장비 그리드를 넣는다.
   function renderLeftPageContent(p) {
     if (p === 'apikey') {
       return <ApiKeyLeftPage />
@@ -406,7 +424,7 @@ export default function Home() {
     if (p === 'boss-weekly') {
       return <BossSelectionPage pageKind="weekly" scheduler={scheduler} characterName={selectedCharacter} />
     }
-    if (p === 'archive-loot') {
+    if (p === 'loot-equipment') {
       return (
         <EquipmentSelectionPage
           equipment={equipment}

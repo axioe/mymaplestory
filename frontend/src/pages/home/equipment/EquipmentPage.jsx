@@ -131,9 +131,10 @@ export function EquipmentSelectionPage({ equipment, characterImage, selectedPres
 }
 
 /**
- * 오른쪽 페이지 - 왼쪽에서 고른 장비의 스텟/잠재능력. 이 페이지 자체는
- * 아카이브의 "장비" 카테고리 콘텐츠라서, ArchivePage 안에서 그대로
- * 호출된다(별도의 책 페이지가 아니라 archive 페이지 오른쪽 내용물).
+ * 오른쪽 페이지 - 왼쪽(EquipmentSelectionPage)에서 고른 장비의 스텟/잠재능력.
+ * 장비 개요("장비" 카테고리)에서 "장비 확인" 버튼을 누르면 진짜 책 페이지로
+ * 넘어와서(loot-equipment) 여기로 들어온다 - boss-daily/scheduler-daily와
+ * 같은 방식이라 onBack으로 "← 장비로" 뒤로가기 버튼을 같이 보여준다.
  */
 /**
  * 메이플스토리 잠재능력/아이템 테두리 등급 색상 관례를 그대로 따른다 -
@@ -156,56 +157,62 @@ function potentialGradeClass(grade) {
   }
 }
 
-export default function EquipmentDetailPanel({ equipment, selectedPreset, selectedSlot }) {
+export default function EquipmentDetailPanel({ equipment, selectedPreset, selectedSlot, onBack }) {
   const effectivePreset = resolveEffectivePreset(equipment, selectedPreset)
   const items = getPresetItems(equipment, effectivePreset)
   const bySlot = new Map(items.map((item) => [item.slot, item]))
   const selectedItem = selectedSlot ? bySlot.get(selectedSlot) : null
 
   return (
-    <div className="home__equipment-detail home__equipment-detail--standalone">
-      {!selectedItem ? (
-        <p className="home__select-hint">왼쪽 페이지에서 장비를 눌러서 스텟과 잠재능력을 확인해보세요.</p>
-      ) : (
-        <>
-          <p className="home__equipment-detail-name">
-            {selectedItem.itemName}
-            {selectedItem.starforce && Number(selectedItem.starforce) > 0 && (
-              <span className="home__equipment-starforce">★{selectedItem.starforce}</span>
-            )}
-            <span className="home__equipment-detail-slot home__equipment-detail-slot--inline">
-              {selectedItem.slot}
-            </span>
-          </p>
+    <>
+      <div className="home__equipment-detail home__equipment-detail--standalone">
+        {!selectedItem ? (
+          <p className="home__select-hint">왼쪽 페이지에서 장비를 눌러서 스텟과 잠재능력을 확인해보세요.</p>
+        ) : (
+          <>
+            <p className="home__equipment-detail-name">
+              {selectedItem.itemName}
+              {selectedItem.starforce && Number(selectedItem.starforce) > 0 && (
+                <span className="home__equipment-starforce">★{selectedItem.starforce}</span>
+              )}
+              <span className="home__equipment-detail-slot home__equipment-detail-slot--inline">
+                {selectedItem.slot}
+              </span>
+            </p>
 
-          {selectedItem.statLines?.length > 0 && (
-            <div className="home__equipment-potential">
-              <p className="home__equipment-potential-label">스텟</p>
-              <MergedStatList lines={mergeUnionStatLines(selectedItem.statLines)} />
-            </div>
-          )}
-          {selectedItem.potentialLines?.length > 0 && (
-            <div className="home__equipment-potential">
-              <p className={'home__equipment-potential-label' + potentialGradeClass(selectedItem.potentialGrade)}>
-                잠재능력 ({selectedItem.potentialGrade || '-'})
-              </p>
-              <MergedStatList lines={mergeUnionStatLines(selectedItem.potentialLines)} />
-            </div>
-          )}
-          {selectedItem.additionalPotentialLines?.length > 0 && (
-            <div className="home__equipment-potential">
-              <p
-                className={
-                  'home__equipment-potential-label' + potentialGradeClass(selectedItem.additionalPotentialGrade)
-                }
-              >
-                에디셔널 잠재능력 ({selectedItem.additionalPotentialGrade || '-'})
-              </p>
-              <MergedStatList lines={mergeUnionStatLines(selectedItem.additionalPotentialLines)} />
-            </div>
-          )}
-        </>
-      )}
-    </div>
+            {selectedItem.statLines?.length > 0 && (
+              <div className="home__equipment-potential">
+                <p className="home__equipment-potential-label">스텟</p>
+                <MergedStatList lines={mergeUnionStatLines(selectedItem.statLines)} />
+              </div>
+            )}
+            {selectedItem.potentialLines?.length > 0 && (
+              <div className="home__equipment-potential">
+                <p className={'home__equipment-potential-label' + potentialGradeClass(selectedItem.potentialGrade)}>
+                  잠재능력 ({selectedItem.potentialGrade || '-'})
+                </p>
+                <MergedStatList lines={mergeUnionStatLines(selectedItem.potentialLines)} />
+              </div>
+            )}
+            {selectedItem.additionalPotentialLines?.length > 0 && (
+              <div className="home__equipment-potential">
+                <p
+                  className={
+                    'home__equipment-potential-label' + potentialGradeClass(selectedItem.additionalPotentialGrade)
+                  }
+                >
+                  에디셔널 잠재능력 ({selectedItem.additionalPotentialGrade || '-'})
+                </p>
+                <MergedStatList lines={mergeUnionStatLines(selectedItem.additionalPotentialLines)} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      <button onClick={onBack} className="home__archive-back home__archive-back--standalone">
+        ← 장비로
+      </button>
+    </>
   )
 }

@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
-import EquipmentDetailPanel from './equipment/EquipmentPage.jsx'
-import CashItemPanel from './cash/CashItemPage.jsx'
-import CharacterStatPanel from './CharacterStatPanel.jsx'
+import CharacterStatPanel from './stat/CharacterStatPanel.jsx'
 import { resolveBossCycle, getValidBossContents } from '../../utils/bossHelpers.js'
 import { useBossSelectionContext } from '../../context/BossSelectionContext.jsx'
 import '../../css/home-shared.css'
@@ -16,7 +14,6 @@ import '../../css/home-scheduler.css'
 import '../../css/home-union.css'
 import '../../css/home-event.css'
 import '../../css/home-stat.css'
-import '../../css/home-cash.css'
 
 const EVENT_PAGE_SIZE = 12 // 3열 x 4행
 
@@ -91,11 +88,11 @@ function EventNoticeGrid({ notices }) {
  *
  * 공지사항 티커는 여기 없다 - 화면 상단에 별도로 떠 있도록 Home.jsx에서 렌더링한다.
  *
- * 스케줄러와 보스는 여기서는 "개요"(요약 + 버튼)만 보여준다. 버튼을 누르면
- * (일일/주간 콘텐츠, 일일/주간 보스 - 월간 보스는 주간 보스 페이지에 통합됨) 전부 진짜 책 페이지로 실제 책장
- * 넘김이 일어난다 - onGoSchedulerDetail/onGoBossDetail이 Home.jsx의 flipTo를
- * 그대로 호출한다. 두 카테고리가 완전히 같은 방식이라 한 책이 자연스럽게
- * 이어지는 느낌을 준다.
+ * 스케줄러/보스/장비는 여기서는 "개요"(요약 또는 안내 + 버튼)만 보여준다.
+ * 버튼을 누르면(일일/주간 콘텐츠, 일일/주간 보스, 장비 확인/코디 확인) 전부
+ * 진짜 책 페이지로 실제 책장 넘김이 일어난다 - onGoSchedulerDetail/
+ * onGoBossDetail/onGoLootDetail이 Home.jsx의 flipTo를 그대로 호출한다. 세
+ * 카테고리가 완전히 같은 방식이라 한 책이 자연스럽게 이어지는 느낌을 준다.
  */
 export default function ArchivePage({
   categories,
@@ -116,16 +113,7 @@ export default function ArchivePage({
   schedulerError,
   onGoSchedulerDetail,
   onGoBossDetail,
-  equipment,
-  equipmentLoading,
-  equipmentError,
-  selectedPreset,
-  selectedSlot,
-  cashItem,
-  cashItemLoading,
-  cashItemError,
-  selectedCashPreset,
-  onSelectCashPreset,
+  onGoLootDetail,
   union,
   unionRaider,
   unionArtifact,
@@ -282,24 +270,25 @@ export default function ArchivePage({
           )}
         </div>
       ) : active === 'loot' ? (
-        <div className="home__level-content home__level-content--stats">
-          {equipmentLoading && <p>불러오는 중...</p>}
-          {equipmentError && <p className="home__apikey-error">{equipmentError}</p>}
+        <div className="home__level-content">
+          <h2 className="display home__select-title">장비</h2>
 
-          {!equipmentLoading && !equipmentError && equipment && (
-            <EquipmentDetailPanel equipment={equipment} selectedPreset={selectedPreset} selectedSlot={selectedSlot} />
-          )}
-        </div>
-      ) : active === 'cash' ? (
-        <div className="home__level-content home__level-content--stats">
-          <h2 className="display home__select-title">캐시 아이템</h2>
-
-          {cashItemLoading && <p>불러오는 중...</p>}
-          {cashItemError && <p className="home__apikey-error">{cashItemError}</p>}
-
-          {!cashItemLoading && !cashItemError && cashItem && (
-            <CashItemPanel cashItem={cashItem} selectedPreset={selectedCashPreset} onSelectPreset={onSelectCashPreset} />
-          )}
+          <div className="home__scheduler-nav">
+            <button
+              type="button"
+              onClick={() => onGoLootDetail('equipment')}
+              className="home__scheduler-nav-button home__scheduler-nav-button--equipment"
+            >
+              장비 확인
+            </button>
+            <button
+              type="button"
+              onClick={() => onGoLootDetail('cash')}
+              className="home__scheduler-nav-button home__scheduler-nav-button--equipment"
+            >
+              코디 확인
+            </button>
+          </div>
         </div>
       ) : active === 'union' ? (
         <div className="home__level-content">
