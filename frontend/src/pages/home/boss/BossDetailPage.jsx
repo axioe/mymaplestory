@@ -13,7 +13,7 @@ import '../../../css/home-shared.css'
 import '../../../css/home-archive-shared.css'
 import '../../../css/home-boss.css'
 
-const BOSS_GROUPS_PER_PAGE = 6
+const BOSS_GROUPS_PER_PAGE = 4
 
 /**
  * 보스 목록 - 같은 보스 이름 아래 난이도별로 묶어서, 난이도는 라디오 버튼처럼
@@ -22,9 +22,12 @@ const BOSS_GROUPS_PER_PAGE = 6
  * 나눠서 받으므로(가격/인원수) 그 기준으로 계산해서 보여준다.
  *
  * 주간 보스는 여러 지역 보스가 한 목록에 다 섞여 있어서 항목이 많다. 예전엔
- * 마우스 휠로 내려서 봐야 했는데(내부 스크롤), 6개씩 페이지로 끊어서 보여주고
- * 하단에 이전/다음 버튼을 두는 방식으로 바꿨다. 월간 보스(검은 마법사 등)
- * 그룹은 여전히 맨 뒤로 보내고, 그 경계가 있는 페이지에서만 구분선을 보여준다.
+ * 마우스 휠로 내려서 봐야 했는데(내부 스크롤), 페이지로 끊어서 보여주고
+ * 하단에 이전/다음 버튼을 두는 방식으로 바꿨다. 한 번에 4개씩만 보여줘서
+ * 스크롤 없이 한눈에 들어오게 한다(예전엔 6개였는데, 한 페이지 안에서도
+ * 목록이 길어져 아래쪽이 페이지 밖으로 밀려나 보이는 문제가 있었다). 월간
+ * 보스(검은 마법사 등) 그룹은 여전히 맨 뒤로 보내고, 그 경계가 있는
+ * 페이지에서만 구분선을 보여준다.
  */
 function BossGroupList({
   items,
@@ -298,10 +301,15 @@ function selectionSummaryText(pageKind, bossSelection) {
  * 왼쪽 페이지 - 보스 선택 목록. BookFlipStage의 renderLeftPageContent가
  * boss-daily / boss-weekly 페이지의 "짝(왼쪽) 페이지"에 이 내용을
  * 얹어준다 (다른 페이지들처럼 빈 페이지로 두지 않고).
+ *
+ * 제목({label})과 선택 현황 문구(selectionSummaryText)는 일부러 안 넣는다 -
+ * 바로 옆(오른쪽) 페이지의 "{label} 통계"에 똑같은 제목과 문구가 이미 있어서
+ * 스프레드 하나에 같은 문구가 두 번 겹쳐 보였다. 왼쪽은 목록 자체에 공간을
+ * 더 내주고, 제목/현황은 오른쪽 통계 페이지가 대표해서 보여주게 했다.
  */
 export function BossSelectionPage({ pageKind, scheduler, characterName }) {
   const bossSelection = useBossSelectionContext()
-  const { items, label } = resolvePageItemsAndLabel(pageKind, scheduler)
+  const { items } = resolvePageItemsAndLabel(pageKind, scheduler)
   // 완료 체크는 주간 보스에서만 의미가 있다(넥슨 초기화 주기와 맞물린 개념이라
   // 매일 초기화되는 일일 보스에는 적용하지 않는다) - characterName이 없는
   // (=일일 페이지) 호출부에서는 훅이 빈 상태로 동작해 아무 영향이 없다.
@@ -309,8 +317,6 @@ export function BossSelectionPage({ pageKind, scheduler, characterName }) {
 
   return (
     <div className="home__level-content home__level-content--left">
-      <h2 className="display home__select-title">{label}</h2>
-      <p className="home__select-hint">{selectionSummaryText(pageKind, bossSelection)}</p>
       <BossGroupList
         items={items}
         isSelected={bossSelection.isSelected}
