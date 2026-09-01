@@ -57,6 +57,11 @@ export async function fetchEquipment(characterName) {
   return data
 }
 
+export async function fetchCashItemEquipment(characterName) {
+  const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/cash-item-equipment`)
+  return data
+}
+
 export async function fetchUnion(characterName) {
   const { data } = await apiClient.get(`/characters/${encodeURIComponent(characterName)}/union`)
   return data

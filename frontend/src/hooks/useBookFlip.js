@@ -8,6 +8,7 @@ export const PAGE_ORDER = [
   'card',
   'archive-boss',
   'archive-loot',
+  'archive-cash',
   'archive-level',
   'archive-stat',
   'archive-union',

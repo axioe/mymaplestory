@@ -1,5 +1,6 @@
 package com.mymaplestory.api.controller;
 
+import com.mymaplestory.api.dto.CashItemEquipmentResponse;
 import com.mymaplestory.api.dto.CharacterCardResponse;
 import com.mymaplestory.api.dto.CharacterStatResponse;
 import com.mymaplestory.api.dto.EquipmentPresetResponse;
@@ -93,6 +94,19 @@ public class CharacterController {
             @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
     ) {
         return characterService.getItemEquipment(characterName, apiKey);
+    }
+
+    /**
+     * 예: GET /api/characters/체리톡톡/cash-item-equipment
+     * 장착 캐시 장비(코디) 조회 (문서: https://openapi.nexon.com/ko/game/maplestory/?id=14).
+     * 프리셋 1/2/3이 한 번에 다 내려온다.
+     */
+    @GetMapping("/{characterName}/cash-item-equipment")
+    public CashItemEquipmentResponse getCashItemEquipment(
+            @PathVariable String characterName,
+            @RequestHeader(value = "x-nxopen-api-key", required = false) String apiKey
+    ) {
+        return characterService.getCashItemEquipment(characterName, apiKey);
     }
 
     /**
