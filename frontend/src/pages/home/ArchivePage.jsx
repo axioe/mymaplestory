@@ -307,7 +307,7 @@ export default function ArchivePage({
               <p className="home__select-hint">
                 Lv.{union.unionLevel} · {union.unionGrade}
               </p>
-              <div className="home__scheduler-nav">
+              <div className="home__scheduler-nav home__scheduler-nav--union">
                 <button
                   type="button"
                   onClick={() => onGoUnionDetail('raider')}
@@ -329,7 +329,7 @@ export default function ArchivePage({
                   onClick={() => onGoUnionDetail('champion')}
                   className="home__scheduler-nav-button home__scheduler-nav-button--union"
                 >
-                  유니온 챔피언
+                  챔피언
                   <span className="home__scheduler-nav-count">{unionChampion?.champions?.length ?? 0}</span>
                 </button>
               </div>

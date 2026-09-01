@@ -35,6 +35,22 @@
   background: transparent;
 }
 
+/* 유니온 개요는 다른 카테고리(스케줄러/보스)와 달리 버튼이 2개가 아니라
+   3개다 - 공용 .home__scheduler-nav-button의 가로 패딩(1.6rem)을 그대로
+   쓰면 "유니온 챔피언"처럼 긴 라벨이 좁은 칸 안에서 세 줄로 쪼개져 보였다.
+   버튼 3개가 한 줄에 다 들어오도록 이 조합에서만 패딩/글자 크기를 줄인다. */
+.home__scheduler-nav--union {
+  gap: 0.5rem;
+}
+
+.home__scheduler-nav--union .home__scheduler-nav-button {
+  padding: 0.85rem 0.5rem;
+  font-size: 0.82rem;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
 /* 아티팩트 - 크리스탈을 3열 격자의 직사각형 카드로 배치 */
 .home__union-crystal-grid {
   display: grid;

@@ -229,7 +229,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.9rem 1.6rem;
+  padding: 0.9rem 1rem;
   border-radius: 14px;
   border: 2px solid var(--color-line);
   /* 이 버튼을 쓰는 모든 곳(스케줄러/보스/장비/유니온/서버 선택)이 투명
@@ -239,6 +239,24 @@
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
+}
+
+/* .home__scheduler-nav(고정 2~3개짜리 가로 버튼 줄 - 일일/주간 콘텐츠,
+   일일/주간 보스, 공격대/아티팩트/챔피언 등) 안에서만 flex:1을 준다 - 예전엔
+   버튼이 라벨 크기만큼만 차지해서, 컨테이너 안에 남는 여백이 있어도 안 써서
+   "일일 콘텐츠"처럼 살짝 긴 라벨은 좁은 고정 폭 안에서 음절 중간이 잘리며
+   두 줄로 쪼개져 보였다("콘텐" / "츠"). flex:1로 남는 폭을 버튼끼리 나눠
+   갖게 해서 라벨이 한 줄에 들어올 여유를 준다.
+   base 클래스가 아니라 여기 이 조합에만 주는 이유: 같은 버튼 클래스를
+   .home__select-world-list/.home__select-list(서버/캐릭터 선택 - 개수가
+   정해져 있지 않고 줄바꿈되는 "칩" 목록)도 같이 쓰는데, 거기에 flex:1을
+   주면(flex-basis: 0%라 라벨 길이와 무관하게 무조건 균등폭으로 찌그러뜨림)
+   오히려 "스카니아"처럼 조금만 길어도 억지로 좁아지며 잘려 보이는 반대
+   문제가 생겼다. 그 목록들은 원래처럼 라벨 크기에 맞게 자연스럽게 늘어나고
+   줄바꿈되는 편이 낫다. */
+.home__scheduler-nav > .home__scheduler-nav-button {
+  flex: 1;
+  min-width: 0;
 }
 
 .home__scheduler-nav-button:hover {
