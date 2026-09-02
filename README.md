@@ -1,80 +1,160 @@
 # My Maplestory
 
-넥슨 메이플스토리 오픈 API 기반, 내 캐릭터 정보와 성장 기록을 "책"처럼 넘겨보는 개인 프로젝트.
+넥슨 메이플스토리 오픈 API를 기반으로 내 캐릭터의 성장 기록을 관리하는 개인 프로젝트입니다.
+화면 전체가 "책"으로 되어 있고, 실제 종이책처럼 페이지를 넘기며 보스/장비/레벨/유니온/이벤트/스케줄러
+정보를 확인할 수 있습니다.
 
-- Backend: Spring Boot 3 (Java 17)
-- Frontend: React 18 + Vite + React Router
-- 외부 API: 넥슨 메이플스토리 오픈 API (openapi.nexon.com)
+- **배포 주소**: http://3.39.17.151 (AWS EC2, 넥슨 오픈 API 키 발급 후 바로 이용 가능)
+- **개발 기간**: 2026.07 ~ (진행 중, 1인 개발)
+- **개발 방식**: [Claude Code](https://claude.com/claude-code)(Anthropic의 AI 코딩 에이전트)와의
+  페어 프로그래밍으로 기획-구현-배포 전 과정을 진행 — 아래 [AI 협업 방식](#ai-협업-방식-claude-code) 참고
 
-## 핵심 컨셉 (중요 - 로그인/회원가입 없음)
-
-이 서비스는 **자체 로그인/회원가입 기능이 없습니다.** 넥슨 오픈 API 자체가 로그인(OAuth)이 아니라
-공개 게임 데이터 조회용 API이기 때문에, 대신 이렇게 동작합니다:
-
-1. 사용자가 자신의 **넥슨 오픈 API 키**와 **대표 캐릭터 닉네임**을 입력
-2. 프론트가 백엔드에 `POST /api/auth/validate-key`로 키 유효성부터 확인
-3. 유효하면 책장이 넘어가는 애니메이션과 함께 **캐릭터 카드 화면**으로 전환되고,
-   이후 모든 조회 요청에는 `X-Nexon-Api-Key` 헤더로 이 키가 자동으로 실려서 백엔드로 전달됨
-4. 키/닉네임은 브라우저(`localStorage`)에만 저장됨 — 서버 DB에 저장하지 않음
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F?logo=springboot&logoColor=white)
+![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-EC2-FF9900?logo=amazonaws&logoColor=white)
 
 ---
 
-## 1. 사전 준비
+## 핵심 컨셉 — 로그인/회원가입 없음
 
-- JDK 17+
-- Maven (또는 IntelliJ 내장 Maven)
-- Node.js 18+
-- 넥슨 오픈 API 키 (https://openapi.nexon.com 에서 발급)
-- (선택) 로컬 MySQL — 현재 코드는 JPA 엔티티가 없어서 DB 연결 없이도 백엔드가 동작합니다.
-  `application.yml`의 datasource 설정은 추후 히스토리 저장 기능을 붙일 때를 대비해 남겨뒀습니다.
-  당장 DB를 안 붙이고 싶다면 `backend/src/main/resources/application.yml`에서 `spring.datasource`,
-  `spring.jpa` 블록과 `pom.xml`의 `spring-boot-starter-data-jpa` / `mysql-connector-j`를 지워도 됩니다.
+넥슨 오픈 API는 OAuth 로그인이 아니라 **공개 게임 데이터 조회용 API**입니다. 그래서 이 서비스도
+별도의 계정 시스템 없이, 사용자가 본인의 **넥슨 오픈 API 키**를 직접 입력하는 방식으로 동작합니다.
 
-## 2. 백엔드 실행
+1. 사용자가 openapi.nexon.com에서 발급받은 API 키를 입력 (앱 안에 단계별 발급 가이드 내장)
+2. 프론트가 `POST /api/auth/validate-key`로 키 유효성부터 확인
+3. 통과하면 책장이 넘어가며 캐릭터 선택 → 캐릭터 카드 화면으로 전환
+4. 이후 모든 조회 요청에는 `x-nxopen-api-key` 헤더로 이 키가 자동으로 실림
+5. **키는 브라우저(localStorage)에만 저장** — 서버 DB에는 절대 저장하지 않음
 
-### 2-1. (DB를 계속 쓸 경우) MySQL 준비
+## 주요 기능
 
-```sql
+| 카테고리 | 내용 |
+|---|---|
+| **캐릭터 카드** | 프로필(레벨/직업/인기도/길드/함께한 기간), 카드 이미지 JPG 다운로드, 우측 상단 캐릭터 빠른 전환 위젯 |
+| **오늘의 할 일** | 일일 콘텐츠 미완료 개수·주간 보스 미처치 마리 수를 캐릭터 카드 옆(왼쪽 페이지)에서 바로 알려주는 리마인더 |
+| **보스** | 일일/주간 보스 선택 + 인원수별 결정석 가격 자동 계산, 주간 처치 현황(넥슨 공식 기록 + 직접 체크한 개별 목록) |
+| **장비** | 인게임 장비창과 동일한 배치의 장비 그리드, 슬롯 클릭 시 스텟/잠재능력/에디셔널 잠재능력 표시, 프리셋 1/2/3 전환 |
+| **캐시 아이템(코디)** | 캐릭터 미리보기 + 프리셋별 장착 캐시 아이템 목록 |
+| **레벨** | 레벨업 히스토리, 경험치% 변화 차트, 일자별 증가량 |
+| **유니온** | 유니온 레벨/등급, 공격대원 효과, 아티팩트 크리스탈, 유니온 챔피언 카드 |
+| **이벤트** | 진행 중인 넥슨 공식 이벤트 목록 |
+| **스케줄러** | 넥슨 스케줄러 API 연동 일일/주간 콘텐츠 진행 현황, 완료 항목 스킵 처리 |
+| **다크모드** | 전체 화면 라이트/다크 테마 전환 |
+
+보스 선택, 스킵 체크, 주간 보스 완료 체크는 넥슨 API가 제공하지 않는 개인화 정보라 자체 MySQL
+DB(`boss_selections`, `skip_records`, `boss_clear_records`)에 캐릭터별로 저장합니다.
+
+## 기술 스택
+
+**Frontend**
+- React 18 + Vite, React Router
+- [react-pageflip](https://github.com/Nodlik/react-pageflip) — 실제 책장 넘기는 페이지 전환 구현
+- Recharts — 레벨/경험치 차트
+- Axios (API 키 자동 첨부 인터셉터)
+- html-to-image — 캐릭터 카드 JPG 저장
+
+**Backend**
+- Spring Boot 3.3.2 (Java 17), Spring Data JPA, Spring Validation
+- MySQL 8
+- 넥슨 오픈 API(openapi.nexon.com) 연동 — 캐릭터 정보/장비/캐시아이템/유니온/스케줄러/공지 등 10여 개 엔드포인트
+
+**인프라 / 배포**
+- AWS EC2 (Ubuntu 24.04, 서울 리전) + Elastic IP
+- Docker + Docker Compose (mysql / backend / frontend 3-container 구성)
+- Nginx — 프론트 정적 파일 서빙 + `/api` 요청을 backend 컨테이너로 리버스 프록시 (같은 origin이라 CORS 이슈 없음)
+
+## 시스템 구조
+
+```
+브라우저
+  │  (넥슨 API 키는 localStorage에만 저장, 요청마다 x-nxopen-api-key 헤더로 전달)
+  ▼
+Nginx (frontend 컨테이너, :80)
+  ├─ 정적 파일(React 빌드 산출물) 서빙
+  └─ /api/**  ──▶  Spring Boot (backend 컨테이너, :8080)
+                     ├─ 넥슨 오픈 API 프록시/가공
+                     └─ MySQL (mysql 컨테이너, :3306) — 보스 선택/스킵/완료 체크 저장
+```
+
+## AI 협업 방식 (Claude Code)
+
+이 프로젝트는 기능 구현부터 배포·운영까지 [Claude Code](https://claude.com/claude-code)를
+페어 프로그래머 겸 운영 담당으로 활용해 진행했습니다.
+
+- **기능 구현**: 요구사항을 대화로 전달하면 프론트/백엔드 코드를 함께 작성 — 예) 캐릭터 카드의
+  "오늘의 할 일" 리마인더를 오른쪽 카드에서 왼쪽 페이지로 재배치, 보스 목록 페이지네이션 개수 조정,
+  캐시 아이템 화면을 인게임 UI 참고 이미지에 맞춰 왼쪽(캐릭터 미리보기)/오른쪽(목록) 구조로 재설계
+- **레이아웃/UX 개선**: 스크린샷을 보고 배경 이미지와 겹치는 버튼 위치 조정, 가이드 모달 레이아웃을
+  2열 그리드로 재구성해 세로 스크롤 단축
+- **기능 정리**: 사용성이 낮다고 판단된 "능력치" 카테고리를 프론트엔드·백엔드(엔드포인트/DTO/서비스
+  로직) 전 영역에서 안전하게 제거
+- **인프라 구축**: SSH 키(.ppk → OpenSSH .pem) 변환 안내부터, EC2에 Docker/Docker Compose 설치,
+  `git pull` → `docker compose up -d --build` 재배포까지 전 과정을 직접 수행
+- **버그 진단**: "페이지 넘김 애니메이션이 안 보인다"는 리포트를 받고 `react-pageflip` 라이브러리
+  소스 코드를 직접 분석해, 과거에 "엉뚱한 페이지로 건너뛰는" 버그 때문에 애니메이션을 의도적으로
+  꺼둔 상태였다는 이력을 확인. 애니메이션 복구를 두 가지 방식으로 직접 시도·프로덕션 빌드로
+  재현 테스트까지 해본 뒤, 실제로 동일한 버그가 재현되는 것을 확인하고 안정성을 우선해 되돌리는
+  판단까지 수행 — 기능 추가뿐 아니라 "무엇을 하지 않을지"까지 근거를 갖고 결정
+- **배포 검증**: 매 배포 후 실제 브라우저로 접속해 화면 렌더링·콘솔 에러·API 동작을 직접 확인
+
+## 프로젝트 구조
+
+```
+mymaplestory/
+├── docker-compose.yml          # mysql + backend + frontend
+├── backend/
+│   └── src/main/java/com/mymaplestory/api/
+│       ├── controller/         # ApiKeyController, CharacterController, NoticeController, UserPreferenceController
+│       ├── service/            # NexonApiService(넥슨 API 연동), CharacterService, UserPreferenceService
+│       ├── dto/                # 파싱용(Nexon*, snake_case) / 응답용(camelCase) DTO 분리
+│       ├── entity/              # BossSelectionEntity, SkipRecordEntity, BossClearRecordEntity
+│       ├── repository/         # Spring Data JPA
+│       ├── config/             # CORS, Security, 넥슨 API RestClient 설정
+│       └── exception/          # 전역 예외 처리
+└── frontend/
+    └── src/
+        ├── pages/home/
+        │   ├── apikey/         # API 키 입력 + 발급 가이드
+        │   ├── character/      # 캐릭터 선택/카드/빠른 전환/오늘의 할 일
+        │   ├── boss/           # 보스 선택/처치 현황
+        │   ├── equipment/      # 장비, 캐시 아이템(코디)
+        │   ├── level/          # 레벨/경험치 차트
+        │   ├── union/          # 유니온 공격대/아티팩트/챔피언
+        │   └── scheduler/      # 일일/주간 콘텐츠
+        ├── components/book/    # BookFlipStage.jsx — react-pageflip 래퍼
+        ├── context/            # BossSelectionContext (보스 선택 상태 전역 관리)
+        ├── hooks/              # 카테고리별 API 조회 훅
+        ├── api/client.js       # axios + API 키 자동 첨부 인터셉터
+        └── css/                # 기능별로 분리된 스타일시트
+```
+
+## 로컬 개발 환경 실행
+
+### 1. 사전 준비
+- JDK 17+, Node.js 18+
+- MySQL 8 (로컬 또는 Docker)
+- 넥슨 오픈 API 키 (https://openapi.nexon.com)
+
+### 2. 백엔드
+
+```bash
 CREATE DATABASE mymaplestory CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 2-2. 환경변수 설정
-
-```bash
-export DB_USERNAME=root
-export DB_PASSWORD=your_mysql_password
-# NEXON_API_KEY는 "서버 기본 키"(로컬 개발 편의용) - 없어도 됨.
-# 실제 서비스에서는 프론트가 보내는 X-Nexon-Api-Key 헤더를 우선 사용합니다.
-export NEXON_API_KEY=
-```
-
-### 2-3. 실행
-
 ```bash
 cd backend
+export DB_USERNAME=root
+export DB_PASSWORD=your_mysql_password
 ./mvnw spring-boot:run
-# 또는 IntelliJ에서 MyMaplestoryApplication 실행
 ```
 
 - 기본 포트: `http://localhost:8080`
-- API 문서(Swagger UI): `http://localhost:8080/swagger-ui.html`
 
-### 2-4. 엔드포인트
-
-| Method | Path                              | 헤더                        | 설명                          |
-|--------|-----------------------------------|-----------------------------|-------------------------------|
-| POST   | `/api/auth/validate-key`          | `X-Nexon-Api-Key` (필수)    | 키 유효성 확인. 성공 시 `{"valid":true}`, 실패 시 401 |
-| GET    | `/api/characters/{name}/card`     | `X-Nexon-Api-Key` (필수)    | 캐릭터 카드(닉네임/서버/레벨/직업/인기도/길드) |
-
-두 엔드포인트 모두 `X-Nexon-Api-Key` 헤더가 없으면, 서버에 `NEXON_API_KEY` 환경변수가 설정된 경우에 한해 그 값으로 대체 시도합니다. 둘 다 없으면 400을 반환합니다.
-
-동작 확인:
-```bash
-curl -X POST -H "X-Nexon-Api-Key: 실제키" http://localhost:8080/api/auth/validate-key
-curl -H "X-Nexon-Api-Key: 실제키" http://localhost:8080/api/characters/캐릭터명/card
-```
-
-## 3. 프론트엔드 실행
+### 3. 프론트엔드
 
 ```bash
 cd frontend
@@ -82,54 +162,28 @@ npm install
 npm run dev
 ```
 
-- 기본 포트: `http://localhost:5173`
-- `vite.config.js`에 `/api` 프록시가 설정되어 있어 백엔드(8080)로 자동 전달됩니다.
-- 메이플 폰트(`Maplestory Light.ttf`, `Maplestory Bold.ttf`)는 `src/assets/fonts/`에 이미 넣어두신 상태라 별도 설정 없이 바로 적용됩니다.
+- 기본 포트: `http://localhost:5173`, `/api` 요청은 `vite.config.js`의 프록시로 백엔드에 자동 전달됩니다.
 
-## 4. 화면 흐름
+### 4. Docker Compose로 한 번에 실행 (배포와 동일한 구성)
 
-1. **첫 화면**: 열린 책 모양 위에 넥슨 API 키 + 대표 캐릭터 닉네임 입력
-2. 확인 클릭 → `validate-key` 통과 시 책장이 오른쪽에서 왼쪽으로 천천히 넘어가는 애니메이션(1.8초)
-3. **캐릭터 카드 화면**: 실제 `/api/characters/{name}/card` 응답으로 채워진 카드(이미지 중앙, 닉네임, 서버, 레벨, 직업, 인기도, 길드)
-4. 화살표 클릭 → 책 + 카테고리(보스/전리품/레벨/스토리) 패널 화면 (카테고리별 히스토리는 아직 자리만 잡아둔 상태)
-
-## 5. 프로젝트 구조
-
-```
-backend/
-  src/main/java/com/mymaplestory/api/
-    config/       CORS, Security, 넥슨 API RestClient 설정
-    controller/   ApiKeyController(키 검증), CharacterController(캐릭터 카드)
-    service/      NexonApiService(넥슨 API 연동), CharacterService
-    dto/          요청/응답 객체
-    exception/    전역 예외 처리 (키 없음/유효하지 않음/넥슨 API 오류)
-
-frontend/
-  src/
-    pages/        Home(입력→플립→카드→아카이브 전체 흐름), CharacterCard(개별 캐릭터 검색용, 별도 라우트)
-    components/   Book(책 SVG), CharacterSummaryCard(카드 UI), CategoryPanel, MapleLeafIcon 등
-    api/          client.js (axios + API 키 자동 첨부 인터셉터)
-    css/          global.css(색상 토큰/폰트), components.css(컴포넌트별 스타일)
-    ApiKeyContext.jsx   API 키 + 캐릭터 닉네임 상태 관리 (로그인 대체)
-    ThemeContext.jsx    다크모드 상태 관리
+```bash
+cp .env.example .env   # MYSQL_ROOT_PASSWORD / DB_USERNAME / DB_PASSWORD / NEXON_API_KEY 채우기
+docker compose up -d --build
 ```
 
-## 6. 색상 팔레트 ("모험 일지" 컨셉)
+- `http://localhost` 접속
 
-| 이름 | 값 | 변수 |
+## 디자인
+
+책 페이지 배경 이미지 위에 실제 UI를 얹는 "모험 일지" 컨셉입니다. 라이트/다크 테마별 이미지를 모두
+준비했고, 배지류(스타포스 표시, 잠재능력 등급 색 등)는 메이플스토리 인게임 관례를 그대로 따랐습니다.
+
+| 이름 | 라이트 | 다크 |
 |---|---|---|
-| 배경 | `#F8F4EC` | `--color-canvas` |
-| 종이 | `#FEF9F1` | `--color-page` |
-| 다크 브라운 | `#4E342E` | `--color-ink` / `--color-line` |
-| 단풍 | `#E76F51` | `--color-accent` |
-| 금색 | `#D4A017` | `--color-accent-2` |
-| 브라운 | `#B85E3C` | `--color-accent-soft` |
+| 배경 | `#F8F4EC` | `#211714` |
+| 종이 | `#FEF9F1` | `#2F2420` |
+| 잉크(글씨) | `#4E342E` | `#F5ECDF` |
+| 포인트(코랄) | `#E76F51` | `#EF8368` |
+| 보조(금색) | `#D4A017` | `#E3B840` |
 
-`frontend/src/css/global.css`에 정의되어 있고, 대부분의 컴포넌트가 이 토큰을 참조하므로 여기서만 바꾸면 전체에 반영됩니다.
-
-## 7. 남은 작업 제안
-
-1. **길드명 필드 검증**: `CharacterBasicDto`의 `character_guild_name` 필드명은 넥슨 공식 문서로 재확인이 필요합니다(오프라인 환경에서 작성됨). 실제 키로 확인 후 필드명이 다르면 `CharacterBasicDto.java` / `NexonApiService`에서 맞춰주세요.
-2. **아카이브 실데이터 연동**: 카테고리(보스/전리품/레벨/스토리)별 히스토리는 넥슨 API가 실시간 스냅샷만 제공하므로, 매일 배치로 캐릭터 정보를 저장하는 스케줄러 + 별도 엔티티/DB 설계가 필요합니다 (지금은 DB 연결을 뗀 상태라, 이 기능을 붙일 때 다시 MySQL 설정을 켜시면 됩니다).
-3. **프로필 이미지 캡쳐 기능**: 프론트엔드에서 `html-to-image` 또는 `html2canvas` 라이브러리 검토.
-4. **모바일 반응형 점검**: 기본 반응형만 고려된 상태라 실제 기기에서 레이아웃 확인 필요.
+폰트는 Maplestory체를 사용합니다.
